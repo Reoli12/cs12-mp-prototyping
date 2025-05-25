@@ -41,8 +41,8 @@ def draw():
 
 def is_out_of_bounds(egg: Egg) -> bool:
     return (   egg.leftmost_point < 0 
-            or egg.rightmost_point < 0
             or egg.rightmost_point > SCREEN_WIDTH
+            or egg.topmost_point < 0
             or egg.bottom_point > SCREEN_HEIGHT )
 
 def return_to_within_bounds(egg: Egg):
@@ -53,10 +53,8 @@ def return_to_within_bounds(egg: Egg):
     if egg.rightmost_point > SCREEN_WIDTH:
         egg.center_position.x = SCREEN_WIDTH - (egg.width / 2)
     if egg.bottom_point > SCREEN_HEIGHT:
-        print('below bottom bound')
         egg.center_position.y = SCREEN_HEIGHT - (egg.height / 2)
     if egg.topmost_point < 0:
-        print('above top bound')
         egg.center_position.y = egg.height / 2
 
 
