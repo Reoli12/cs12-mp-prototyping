@@ -9,7 +9,7 @@ EGG_HEIGHT = 20
 EGG_WID = 10
 EGG_HP = 10
 
-EGG = Egg(EGG_HEIGHT, EGG_WID, EGG_HP, EGG_HP, Point(SCREEN_HEIGHT // 2, SCREEN_WIDTH // 2))
+EGG = Egg(EGG_HEIGHT, EGG_WID, EGG_HP, EGG_HP, Point(SCREEN_HEIGHT / 2, SCREEN_WIDTH / 2))
 
 def update():
     if pyxel.btn(pyxel.KEY_W):
@@ -36,8 +36,13 @@ def draw():
         EGG.center_position.y - EGG.height / 2,
         EGG_WID,
         EGG_HEIGHT,
-        5
+        1
     )
+
+    pyxel.text( EGG.center_position.x - EGG.width / 2,
+                EGG.center_position.y + EGG.height,
+                f'{EGG.current_hp}/{EGG.total_hp}',
+                1)
 
 def is_out_of_bounds(egg: Egg) -> bool:
     return (   egg.leftmost_point < 0 
