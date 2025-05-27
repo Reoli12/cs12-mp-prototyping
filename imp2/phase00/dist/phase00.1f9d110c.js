@@ -679,7 +679,8 @@ const playerEgg = (0, _projectTypes.Egg).make({
     height: 20,
     width: 10,
     total_hp: 20,
-    current_hp: 20
+    current_hp: 20,
+    color: "white"
 });
 const initModel = (0, _projectTypes.Model).make({
     playerEgg: playerEgg,
@@ -730,16 +731,25 @@ const view = (model)=>(0, _effect.pipe)(model, ({ playerEgg, eggnemies })=>[
                 height: 300,
                 color: "black"
             }),
-            viewEgg(model.playerEgg, "white"),
-            ...(0, _effect.Array).map(model.eggnemies, (eggnemy)=>viewEgg(eggnemy, "grey"))
+            ...viewEgg(playerEgg, "white"),
+            ...(0, _effect.pipe)((0, _effect.Array).map(eggnemies, (eggnemy)=>viewEgg(eggnemy, "grey")), (0, _effect.Array).flatten)
         ]);
-const viewEgg = (egg, color)=>_canvas.SolidRectangle.make({
-        x: egg.centerCoords.x - egg.width / 2,
-        y: egg.centerCoords.y - egg.height / 2,
-        width: egg.width,
-        height: egg.height,
-        color: color
-    });
+const viewEgg = (egg, color)=>[
+        _canvas.SolidRectangle.make({
+            x: egg.centerCoords.x - egg.width / 2,
+            y: egg.centerCoords.y - egg.height / 2,
+            width: egg.width,
+            height: egg.height,
+            color: color
+        }),
+        _canvas.Text.make({
+            x: egg.centerCoords.x - egg.width,
+            y: getSideBoundary(egg, "bottom") + 10,
+            text: `${egg.current_hp}/${egg.total_hp}`,
+            color: egg.color,
+            fontSize: 12
+        })
+    ];
 const root = document.getElementById("root");
 (0, _src.startSimple)(root, initModel, update, (0, _canvas.canvasView)(300, 300, 30, "canvas", view)) // startSimple
 ;
@@ -762,7 +772,8 @@ const Egg = (0, _effect.Schema).Struct({
     height: (0, _effect.Schema).Number,
     width: (0, _effect.Schema).Number,
     total_hp: (0, _effect.Schema).Number,
-    current_hp: (0, _effect.Schema).Number
+    current_hp: (0, _effect.Schema).Number,
+    color: (0, _effect.Schema).String
 });
 const Model = (0, _effect.Schema).Struct({
     playerEgg: Egg,

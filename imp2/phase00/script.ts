@@ -12,7 +12,8 @@ const playerEgg = Egg.make({
     height: 20,
     width: 10,
     total_hp: 20,
-    current_hp: 20
+    current_hp: 20,
+    color: "white",
 })
 
 const initModel = Model.make({
@@ -91,19 +92,32 @@ const view = (model: Model) =>
                 height: 300,
                 color: "black"
             }),
-            viewEgg(model.playerEgg, "white"),
-            ...Array.map(model.eggnemies, (eggnemy) => viewEgg(eggnemy, "grey"))
-        ]
+            ...viewEgg(playerEgg, "white"),
+            ...pipe(
+                Array.map(eggnemies, (eggnemy) => viewEgg(eggnemy, "grey")),
+                Array.flatten
+            ),
+        ],
+
     )
 
 const viewEgg = (egg: Egg, color: string) => 
-    Canvas.SolidRectangle.make({
-                x: egg.centerCoords.x - (egg.width / 2),
-                y: egg.centerCoords.y - (egg.height / 2),
-                width: egg.width,
-                height: egg.height,
-                color: color,
-    })
+    [
+        Canvas.SolidRectangle.make({
+                    x: egg.centerCoords.x - (egg.width / 2),
+                    y: egg.centerCoords.y - (egg.height / 2),
+                    width: egg.width,
+                    height: egg.height,
+                    color: color,
+        }),
+        Canvas.Text.make({
+            x: egg.centerCoords.x - egg.width,
+            y: getSideBoundary(egg, "bottom") + 10,
+            text: `${egg.current_hp}/${egg.total_hp}`,
+            color: egg.color,
+            fontSize: 12,
+        })
+    ]
 
 const root = document.getElementById("root")!
 

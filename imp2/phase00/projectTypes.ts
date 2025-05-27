@@ -19,7 +19,8 @@ export const Egg = S.Struct({
     height: S.Number,
     width: S.Number,
     total_hp: S.Number,
-    current_hp: S.Number
+    current_hp: S.Number,
+    color: S.String
 })
 export type Egg = typeof Egg.Type
 
