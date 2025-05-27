@@ -1,7 +1,8 @@
 import { Model, Egg, Point } from "./projectTypes"
-import { Array, Schema as S, Match } from "effect"
-import { Cmd, startModelCmd } from "cs12242-mvu/src"
+import { Array, Schema as S, Match, pipe } from "effect"
+import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
+import * as Canvas from "cs12242-mvu/src/canvas"
 
 const playerEgg = Egg.make({
     centerCoords: Point.make({
@@ -21,7 +22,8 @@ const initModel = Model.make({
     currentFrame: 0,
 })
 
-const update = (msg: CanvasMsg, model: Model) => 
+type Msg = typeof CanvasMsg.Type // update strictly only takes in Msg
+const update = (msg: Msg, model: Model): Model => 
     Match.value(msg).pipe(
         Match.tag("Canvas.MsgKeyDown", ({ key }) => Model.make({
             ...model,
@@ -33,7 +35,8 @@ const update = (msg: CanvasMsg, model: Model) =>
         Match.tag('Canvas.MsgTick', () => Model.make({
             ...model,
             currentFrame: (model.currentFrame + 1) % model.fps
-        }))
+        })),
+        Match.orElse(() => model)
     )
 
 const stepOnce = (key: string, pointFrom: Point, stepLength: number): Point =>
@@ -43,5 +46,47 @@ const stepOnce = (key: string, pointFrom: Point, stepLength: number): Point =>
             pointFrom.x,
         y:  key == "s"? pointFrom.y + stepLength :
             key == "w"? pointFrom.y - stepLength :
-            pointFrom.x,
+            pointFrom.y,
     })
+
+const view = (model: Model) => 
+    pipe(
+        model,
+        ({ playerEgg, eggnemies }) => [
+            Canvas.SolidRectangle.make({
+                x: 0,
+                y: 0, 
+                width: 300,
+                height: 300,
+                color: "black"
+            }),
+            Canvas.SolidRectangle.make({
+                x: playerEgg.centerCoords.x,
+                y: playerEgg.centerCoords.y,
+                width: playerEgg.width,
+                height: playerEgg.height,
+                color: "white",
+            }),
+            ...Array.map(model.eggnemies, (eggnemy) => viewEgg(eggnemy, "white"))
+        ]
+    )
+
+const viewEgg = (egg: Egg, color: string) => 
+    Canvas.SolidRectangle.make({
+                x: egg.centerCoords.x,
+                y: egg.centerCoords.y,
+                width: egg.width,
+                height: egg.height,
+                color: color,
+    })
+
+const root = document.getElementById("root")!
+
+startSimple(root, initModel, update, canvasView(
+    300, 
+    300,
+    30, 
+    "canvas",
+    view,
+))
+// startSimple
