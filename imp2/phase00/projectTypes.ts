@@ -1,5 +1,13 @@
 import { Schema as S } from 'effect'
 
+export const EggSides = S.Union(
+    S.Literal("top"),
+    S.Literal("bottom"),
+    S.Literal("left"),
+    S.Literal("right"),
+)
+export type EggSides = typeof EggSides.Type
+
 export const Point = S.Struct({
     x: S.Number,
     y: S.Number,
@@ -19,7 +27,10 @@ export const Model = S.Struct({
     playerEgg: Egg,
     eggnemies: S.Array(Egg),
     fps: S.Int,
-    currentFrame: S.Int
+    currentFrame: S.Int,
+    worldHeight: S.Number,
+    worldWidth: S.Number,
+
     })
 export type Model = typeof Model.Type
 
