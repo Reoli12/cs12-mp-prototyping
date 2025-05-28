@@ -674,11 +674,10 @@ var _src = require("cs12242-mvu/src");
 var _canvas = require("cs12242-mvu/src/canvas");
 var _settingsJson = require("./settings.json");
 var _settingsJsonDefault = parcelHelpers.interopDefault(_settingsJson);
-const [PlayerEgg, Eggnemy] = (0, _projectTypes.Egg).members;
 const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Match).tag("Canvas.MsgKeyDown", ({ key })=>// pipe(console.log(model), () => false)? model :
-        model.isOver ? model : (0, _projectTypes.Model).make({
+        model.isOver ? model : key == 'l' || key == 'L' ? modelDefeatedEggnemies(model) : (0, _projectTypes.Model).make({
             ...model,
-            playerEgg: PlayerEgg.make({
+            playerEgg: (0, _projectTypes.PlayerEgg).make({
                 ...model.playerEgg,
                 centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3)
             })
@@ -689,30 +688,36 @@ const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Matc
             // with collision
             ...model,
             currentFrame: (model.currentFrame + 1) % model.fps,
-            playerEgg: PlayerEgg.make({
+            playerEgg: (0, _projectTypes.PlayerEgg).make({
                 ...model.playerEgg,
                 centerCoords: handleBoundsBehavior(model.playerEgg, model.worldWidth, model.worldHeight),
-                current_hp: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>model.playerEgg.current_hp - 1), (0, _effect.Match).tag("Some", (frameCountSinceLastDamaged)=>// if more than one frame has passed since last dmg, decrement 1
+                current_hp: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>model.playerEgg.current_hp), (0, _effect.Match).tag("Some", (frameCountSinceLastDamaged)=>// if more than one frame has passed since last dmg, decrement 1
                     frameCountSinceLastDamaged.value < model.fps ? model.playerEgg.current_hp : model.playerEgg.current_hp - 1), (0, _effect.Match).exhaustive),
                 frameCountSinceLastDamaged: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>(0, _effect.Option).some(model.fps)), (0, _effect.Match).tag("Some", (frameCount)=>frameCount.value < model.fps ? (0, _effect.Option).some(frameCount.value + 1) : (0, _effect.Option).some(0)), (0, _effect.Match).exhaustive)
             }),
-            eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>Eggnemy.make({
+            eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>(0, _projectTypes.Eggnemy).make({
                     ...eggnemy,
                     centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
                 }))
         }) : (0, _projectTypes.Model).make({
             // no collision 
             ...model,
-            playerEgg: PlayerEgg.make({
+            playerEgg: (0, _projectTypes.PlayerEgg).make({
                 ...model.playerEgg,
                 centerCoords: handleBoundsBehavior(model.playerEgg, model.worldWidth, model.worldHeight),
                 frameCountSinceLastDamaged: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>(0, _effect.Option).none()), (0, _effect.Match).tag("Some", (frameCount)=>frameCount.value < model.fps ? (0, _effect.Option).some(frameCount.value + 1) : (0, _effect.Option).none()), (0, _effect.Match).exhaustive)
             }),
-            eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>Eggnemy.make({
+            eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>(0, _projectTypes.Eggnemy).make({
                     ...eggnemy,
                     centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
                 }))
         })), (0, _effect.Match).orElse(()=>model));
+const modelDefeatedEggnemies = (model)=>(0, _projectTypes.Model).make({
+        ...model,
+        eggnemies: (0, _effect.Array).filter(model.eggnemies, (eggnemy)=>withinPlayerRange(model.playerEgg, eggnemy))
+    });
+const withinPlayerRange = (player, eggnemy)=>// no specific definition as to what range was given
+    player.attackRange ** 2 >= (player.centerCoords.x - eggnemy.centerCoords.x) ** 2 + (player.centerCoords.y - eggnemy.centerCoords.y) ** 2;
 const handleBoundsBehavior = (egg, width, height)=>!isInBounds(egg, width, height) ? returnToBounds(egg, width, height) : egg.centerCoords;
 const absDifference = (a, b)=>Math.abs(a - b);
 const isInContact = (egg1, egg2)=>absDifference(egg1.centerCoords.x, egg2.centerCoords.x) < (egg1.width + egg2.width) / 2 && absDifference(egg1.centerCoords.y, egg2.centerCoords.y) < (egg1.height + egg2.height) / 2;
@@ -778,7 +783,7 @@ const getNewEggnemyCoords = (eggnemyCoords, playerEggCoords, eggnemySpeed)=>(0, 
 function main() {
     const root = document.getElementById("root");
     const settings = (0, _settingsJsonDefault.default);
-    const playerEgg = PlayerEgg.make({
+    const playerEgg = (0, _projectTypes.PlayerEgg).make({
         centerCoords: (0, _projectTypes.Point).make({
             x: settings.width / 2,
             y: settings.height / 2
@@ -789,11 +794,12 @@ function main() {
         current_hp: 20,
         color: "white",
         speed: settings.playerEggSpeed,
+        attackRange: settings.playerEggRange,
         frameCountSinceLastDamaged: (0, _effect.Option).none()
     });
     const initModel = (0, _projectTypes.Model).make({
         playerEgg: playerEgg,
-        eggnemies: (0, _effect.Array).make(Eggnemy.make({
+        eggnemies: (0, _effect.Array).make((0, _projectTypes.Eggnemy).make({
             centerCoords: (0, _projectTypes.Point).make({
                 x: 20,
                 y: 20

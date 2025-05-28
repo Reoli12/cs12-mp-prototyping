@@ -1,11 +1,9 @@
-import { Model, Egg, Point, Settings, EggSides } from "./projectTypes"
+import { Model, Egg, Point, Settings, EggSides,PlayerEgg, Eggnemy } from "./projectTypes"
 import { Array, Schema as S, Match, Option, pipe } from "effect"
 import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
 import * as Canvas from "cs12242-mvu/src/canvas"
 import data from "./settings.json" 
-
-const [PlayerEgg, Eggnemy] = Egg.members
 
 type Msg = typeof CanvasMsg.Type // update strictly only takes in Msg
 const update = (msg: Msg, model: Model): Model => 
@@ -13,6 +11,8 @@ const update = (msg: Msg, model: Model): Model =>
         Match.tag("Canvas.MsgKeyDown", ({ key }) =>
             // pipe(console.log(model), () => false)? model :
             model.isOver? model : 
+            (key == 'l' || key == 'L') ? 
+            modelDefeatedEggnemies(model) :
             Model.make({
             ...model,
             playerEgg: PlayerEgg.make({
@@ -37,7 +37,9 @@ const update = (msg: Msg, model: Model): Model =>
                                                         model.worldHeight
                     ),
                     current_hp: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
-                        Match.tag("None", () => model.playerEgg.current_hp - 1),
+                        Match.tag("None", () => model.playerEgg.current_hp),
+                            // if we decrement immediately after a new collision, the next tick will
+                            // decrement as well, leading to a double decrement
                         Match.tag("Some", (frameCountSinceLastDamaged) => (
                             // if more than one frame has passed since last dmg, decrement 1
                             frameCountSinceLastDamaged.value < model.fps? 
@@ -85,6 +87,19 @@ const update = (msg: Msg, model: Model): Model =>
         ),
         Match.orElse(() => model)
     )
+
+const modelDefeatedEggnemies = (model: Model): Model => 
+    Model.make({
+        ...model,
+        eggnemies: Array.filter(model.eggnemies, 
+            (eggnemy) => withinPlayerRange(model.playerEgg, eggnemy))
+    }) 
+
+const withinPlayerRange = (player: PlayerEgg, eggnemy: Eggnemy): boolean =>
+    // no specific definition as to what range was given
+    (player.attackRange ** 2) >= 
+    (player.centerCoords.x - eggnemy.centerCoords.x) ** 2 + 
+    (player.centerCoords.y - eggnemy.centerCoords.y) ** 2 
 
 const handleBoundsBehavior = (egg: Egg, width: number, height: number): Point =>
     !isInBounds(egg, width, height) ? 
@@ -207,6 +222,7 @@ function main() {
         current_hp: 20,
         color: "white",
         speed: settings.playerEggSpeed,
+        attackRange: settings.playerEggRange,
         frameCountSinceLastDamaged: Option.none()
     })
 
@@ -219,7 +235,21 @@ function main() {
                 width: settings.eggnemyWidth,
                 color: "gray",
                 speed: settings.eggnemySpeed,
-            })
+            }),
+            // Eggnemy.make({
+            //     centerCoords: Point.make({x: 100, y: 250}),
+            //     height: settings.eggnemyHeight,
+            //     width: settings.eggnemyWidth,
+            //     color: "gray",
+            //     speed: settings.eggnemySpeed,
+            // }),
+            // Eggnemy.make({
+            //     centerCoords: Point.make({x: 200, y: 200}),
+            //     height: settings.eggnemyHeight,
+            //     width: settings.eggnemyWidth,
+            //     color: "gray",
+            //     speed: settings.eggnemySpeed,
+            // }),
         ),
         worldHeight: settings.height,
         worldWidth: settings.width,
