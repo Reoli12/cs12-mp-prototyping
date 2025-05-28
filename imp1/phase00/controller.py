@@ -19,7 +19,9 @@ class Controller:
     def draw(self):
         self._view.clear_screen()
 
-        self._view.draw_egg()
+        if not self._model.is_game_over:
+            self._view.draw_egg()
+        
         self._view.text_player_health()
 
         eggnemies = self._model.eggnemies

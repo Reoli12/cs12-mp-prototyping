@@ -67,16 +67,17 @@ class Model:
             x_distance_to_player = self._player_egg.center_position.x - eggnemy.center_position.x
             y_distance_to_player = self._player_egg.center_position.y - eggnemy.center_position.y
             
-            '''#follows player
-            if x_distance_to_player < 0: #right of player
-                eggnemy.center_position.x -= 1 
-            elif x_distance_to_player > 0: #left
-                eggnemy.center_position.x += 1
+            #follows player
+            if not self._is_game_over:
+                if x_distance_to_player < 0: #right of player
+                    eggnemy.center_position.x -= 1 
+                elif x_distance_to_player > 0: #left
+                    eggnemy.center_position.x += 1
 
-            if y_distance_to_player < 0: #down
-                eggnemy.center_position.y -= 1 
-            elif y_distance_to_player > 0: #up
-                eggnemy.center_position.y += 1'''
+                if y_distance_to_player < 0: #down
+                    eggnemy.center_position.y -= 1 
+                elif y_distance_to_player > 0: #up
+                    eggnemy.center_position.y += 1
 
 
         if len(self._eggnemies) <= self._eggnemy_count - 1:
@@ -117,10 +118,10 @@ class Model:
         eggnemy_bottom = eggnemy_y + eggnemy_height / 2
         eggnemy_top = eggnemy_y - eggnemy_height / 2
 
-        return (left_bounds < eggnemy_right or 
-                right_bounds > eggnemy_left or
-                top_bounds < eggnemy_bottom or
-                bottom_bounds > eggnemy_top)
+        return not (left_bounds > eggnemy_right or 
+                right_bounds < eggnemy_left or
+                top_bounds > eggnemy_bottom or
+                bottom_bounds < eggnemy_top)
 
     def is_out_of_bounds(self) -> bool:
         return (   

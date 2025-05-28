@@ -4,7 +4,8 @@ from project_types import UpdateHandler, DrawHandler, PlayerEgg, Eggnemy
 class View:
     def __init__(self, player_egg: PlayerEgg, window_width: int, window_height: int):
         self._player_egg = player_egg
-        self._player_color = 1
+        self._player_color = 7
+        self._eggnemy_color = 13
 
         self._window_width = window_width
         self._window_height = window_height
@@ -53,7 +54,7 @@ class View:
         y_pos - eggnemy_height / 2,
         eggnemy_width,
         eggnemy_height,
-        self._player_color
+        self._eggnemy_color
     )
 
 
