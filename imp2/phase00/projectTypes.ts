@@ -46,3 +46,4 @@ const Settings = S.Struct({
     EggnemyWidth: S.Number,
     EggnemyHeight: S.Number
 })
+export type Settings = typeof Settings.Type

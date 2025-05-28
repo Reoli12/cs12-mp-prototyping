@@ -667,29 +667,13 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 }
 
 },{}],"iaKGF":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _projectTypes = require("./projectTypes");
 var _effect = require("effect");
 var _src = require("cs12242-mvu/src");
 var _canvas = require("cs12242-mvu/src/canvas");
-const playerEgg = (0, _projectTypes.Egg).make({
-    centerCoords: (0, _projectTypes.Point).make({
-        x: 0,
-        y: 0
-    }),
-    height: 20,
-    width: 10,
-    total_hp: 20,
-    current_hp: 20,
-    color: "white"
-});
-const initModel = (0, _projectTypes.Model).make({
-    playerEgg: playerEgg,
-    eggnemies: (0, _effect.Array).empty(),
-    worldHeight: 300,
-    worldWidth: 300,
-    fps: 60,
-    currentFrame: 0
-});
+var _settingsJson = require("./settings.json");
+var _settingsJsonDefault = parcelHelpers.interopDefault(_settingsJson);
 const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Match).tag("Canvas.MsgKeyDown", ({ key })=>(0, _projectTypes.Model).make({
             ...model,
             playerEgg: (0, _projectTypes.Egg).make({
@@ -750,11 +734,48 @@ const viewEgg = (egg, color)=>[
             fontSize: 12
         })
     ];
-const root = document.getElementById("root");
-(0, _src.startSimple)(root, initModel, update, (0, _canvas.canvasView)(300, 300, 30, "canvas", view)) // startSimple
-;
+// async function getSettings(filename: string) {
+//         try {    
+//             const settingsUnparsed = await fetch(filename)
+//                 console.log(settingsUnparsed)
+//             const settingsParsed = await settingsUnparsed.json()
+//                 console.log("settings fetched:")
+//                 console.log(JSON.stringify(settingsParsed, null, 4))
+//             return settingsParsed
+//         } catch(err) {
+//             console.log(err)
+//             throw err
+//         }
+//     }
+async function main() {
+    const root = document.getElementById("root");
+    // const settings = await getSettings("settings.json") as Settings
+    const settings = (0, _settingsJsonDefault.default);
+    const playerEgg = (0, _projectTypes.Egg).make({
+        centerCoords: (0, _projectTypes.Point).make({
+            x: 0,
+            y: 0
+        }),
+        height: 20,
+        width: 10,
+        total_hp: 20,
+        current_hp: 20,
+        color: "white"
+    });
+    const initModel = (0, _projectTypes.Model).make({
+        playerEgg: playerEgg,
+        eggnemies: (0, _effect.Array).empty(),
+        worldHeight: settings.height,
+        worldWidth: settings.width,
+        fps: settings.fps,
+        currentFrame: 0
+    });
+    (0, _src.startSimple)(root, initModel, update, (0, _canvas.canvasView)(settings.width, settings.height, settings.fps, "canvas", view));
+// startSimple
+}
+main();
 
-},{"./projectTypes":"dlszl","effect":"1QzRN","cs12242-mvu/src":"6exBX","cs12242-mvu/src/canvas":"2VoQc"}],"dlszl":[function(require,module,exports,__globalThis) {
+},{"./projectTypes":"dlszl","effect":"1QzRN","cs12242-mvu/src":"6exBX","cs12242-mvu/src/canvas":"2VoQc","./settings.json":"e136u","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"dlszl":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "EggSides", ()=>EggSides);
@@ -56824,6 +56845,9 @@ const canvasView = (width, height, fps, canvasId, view)=>(model, dispatch)=>(0, 
                 }
             }, [])), (0, _effect.Effect).runSync);
 
-},{".":"6exBX","effect":"1QzRN","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}]},["9cak8","iaKGF"], "iaKGF", "parcelRequire94c2", {})
+},{".":"6exBX","effect":"1QzRN","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"e136u":[function(require,module,exports,__globalThis) {
+module.exports = JSON.parse("{\"fps\":30,\"width\":300,\"height\":300,\"playerEggHp\":20,\"playerEggWidth\":10,\"playerEggHeight\":20,\"EggnemyCount\":5,\"EggnemyWidth\":5,\"EggnemyHeight\":5}");
+
+},{}]},["9cak8","iaKGF"], "iaKGF", "parcelRequire94c2", {})
 
 //# sourceMappingURL=phase00.1f9d110c.js.map

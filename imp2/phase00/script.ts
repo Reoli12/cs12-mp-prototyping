@@ -1,29 +1,9 @@
-import { Model, Egg, EggSides, Point } from "./projectTypes"
+import { Model, Egg, EggSides, Point, Settings } from "./projectTypes"
 import { Array, Schema as S, Match, pipe } from "effect"
 import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
 import * as Canvas from "cs12242-mvu/src/canvas"
-
-const playerEgg = Egg.make({
-    centerCoords: Point.make({
-        x: 0,
-        y: 0,
-    }),
-    height: 20,
-    width: 10,
-    total_hp: 20,
-    current_hp: 20,
-    color: "white",
-})
-
-const initModel = Model.make({
-    playerEgg: playerEgg,
-    eggnemies: Array.empty(),
-    worldHeight: 300,
-    worldWidth: 300,
-    fps: 60,
-    currentFrame: 0,
-})
+import data from "./settings.json" 
 
 type Msg = typeof CanvasMsg.Type // update strictly only takes in Msg
 const update = (msg: Msg, model: Model): Model => 
@@ -119,13 +99,56 @@ const viewEgg = (egg: Egg, color: string) =>
         })
     ]
 
-const root = document.getElementById("root")!
 
-startSimple(root, initModel, update, canvasView(
-    300, 
-    300,
-    30, 
-    "canvas",
-    view,
-))
-// startSimple
+// async function getSettings(filename: string) {
+//         try {    
+//             const settingsUnparsed = await fetch(filename)
+//                 console.log(settingsUnparsed)
+//             const settingsParsed = await settingsUnparsed.json()
+//                 console.log("settings fetched:")
+//                 console.log(JSON.stringify(settingsParsed, null, 4))
+//             return settingsParsed
+//         } catch(err) {
+//             console.log(err)
+//             throw err
+//         }
+//     }
+
+async function main() {
+    const root = document.getElementById("root")!
+
+    // const settings = await getSettings("settings.json") as Settings
+    const settings = data as Settings
+
+    const playerEgg = Egg.make({
+        centerCoords: Point.make({
+            x: 0,
+            y: 0,
+        }),
+        height: 20,
+        width: 10,
+        total_hp: 20,
+        current_hp: 20,
+        color: "white",
+    })
+
+    const initModel = Model.make({
+        playerEgg: playerEgg,
+        eggnemies: Array.empty(),
+        worldHeight: settings.height,
+        worldWidth: settings.width,
+        fps: settings.fps,
+        currentFrame: 0,
+    })
+
+    startSimple(root, initModel, update, canvasView(
+        settings.width, 
+        settings.height,
+        settings.fps, 
+        "canvas",
+        view,
+    ))
+    // startSimple
+}
+
+main()
