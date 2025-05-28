@@ -44,16 +44,16 @@ class View:
     
     #Inputs
     def is_w_pressed(self):
-        return pyxel.btn(pyxel.KEY_W)
+        return pyxel.btn(pyxel.KEY_W) or pyxel.btn(pyxel.KEY_UP)
     
     def is_a_pressed(self):
-        return pyxel.btn(pyxel.KEY_A)
+        return pyxel.btn(pyxel.KEY_A) or pyxel.btn(pyxel.KEY_LEFT)
     
     def is_s_pressed(self):
-        return pyxel.btn(pyxel.KEY_S)
+        return pyxel.btn(pyxel.KEY_S) or pyxel.btn(pyxel.KEY_DOWN)
     
     def is_d_pressed(self):
-        return pyxel.btn(pyxel.KEY_D)
+        return pyxel.btn(pyxel.KEY_D) or pyxel.btn(pyxel.KEY_RIGHT)
     
     def start(self, update_handler: UpdateHandler, draw_handler: DrawHandler):
         pyxel.init(self._window_width, self._window_height)
