@@ -32,21 +32,16 @@ const update = (msg: Msg, model: Model): Model =>
                 currentFrame: (model.currentFrame + 1) % model.fps,
                 playerEgg: PlayerEgg.make({
                     ...model.playerEgg,
-                    centerCoords:   !isInBounds(model.playerEgg, 
-                                                model.worldWidth, model.worldHeight) ? 
-                                    returnToBounds( model.playerEgg, 
-                                                    model.worldWidth, model.worldHeight)! :
-                                    model.playerEgg.centerCoords,
+                    centerCoords:   handleBoundsBehavior( model.playerEgg,
+                                                        model.worldWidth,
+                                                        model.worldHeight
+                    ),
                     current_hp: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
                         Match.tag("None", () => model.playerEgg.current_hp - 1),
                         Match.tag("Some", (frameCountSinceLastDamaged) => (
                             // if more than one frame has passed since last dmg, decrement 1
                             frameCountSinceLastDamaged.value < model.fps? 
-                            pipe(
-                                () => console.log(frameCountSinceLastDamaged.value, model.fps),
-                                () => model.playerEgg.current_hp,
-                            )
-                            : model.playerEgg.current_hp - 1
+                            model.playerEgg.current_hp : model.playerEgg.current_hp - 1
                         )),
                         Match.exhaustive,
                     ),
@@ -68,12 +63,10 @@ const update = (msg: Msg, model: Model): Model =>
                 ...model,
                 playerEgg: PlayerEgg.make({
                     ...model.playerEgg,
-                    centerCoords:   !isInBounds(model.playerEgg, 
-                                                model.worldWidth, model.worldHeight) ? 
-                                    returnToBounds( model.playerEgg, 
-                                                    model.worldWidth, model.worldHeight)! :
-                                    model.playerEgg.centerCoords,
-                                    // violates DRY, fix later
+                    centerCoords: handleBoundsBehavior( model.playerEgg,
+                                                        model.worldWidth,
+                                                        model.worldHeight
+                    ),
                     frameCountSinceLastDamaged: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
                         Match.tag("None", () => Option.none()),
                         Match.tag("Some", (frameCount) => 
@@ -83,15 +76,20 @@ const update = (msg: Msg, model: Model): Model =>
                     Match.exhaustive
                 )
                 }),
-                eggnemies: Array.map(model.eggnemies, (eggnemy) => Eggnemy.make({
-                ...eggnemy,
-                centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
-            })),
+                    eggnemies: Array.map(model.eggnemies, (eggnemy) => Eggnemy.make({
+                        ...eggnemy,
+                        centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
+                })),
                 
             }),
         ),
         Match.orElse(() => model)
     )
+
+const handleBoundsBehavior = (egg: Egg, width: number, height: number): Point =>
+    !isInBounds(egg, width, height) ? 
+    returnToBounds( egg, width, height)! :
+    egg.centerCoords
 
 const absDifference = (a: number, b: number): number =>
     Math.abs(a - b)

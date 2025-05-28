@@ -691,9 +691,9 @@ const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Matc
             currentFrame: (model.currentFrame + 1) % model.fps,
             playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
-                centerCoords: !isInBounds(model.playerEgg, model.worldWidth, model.worldHeight) ? returnToBounds(model.playerEgg, model.worldWidth, model.worldHeight) : model.playerEgg.centerCoords,
+                centerCoords: handleBoundsBehavior(model.playerEgg, model.worldWidth, model.worldHeight),
                 current_hp: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>model.playerEgg.current_hp - 1), (0, _effect.Match).tag("Some", (frameCountSinceLastDamaged)=>// if more than one frame has passed since last dmg, decrement 1
-                    frameCountSinceLastDamaged.value < model.fps ? (0, _effect.pipe)(()=>console.log(frameCountSinceLastDamaged.value, model.fps), ()=>model.playerEgg.current_hp) : model.playerEgg.current_hp - 1), (0, _effect.Match).exhaustive),
+                    frameCountSinceLastDamaged.value < model.fps ? model.playerEgg.current_hp : model.playerEgg.current_hp - 1), (0, _effect.Match).exhaustive),
                 frameCountSinceLastDamaged: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>(0, _effect.Option).some(model.fps)), (0, _effect.Match).tag("Some", (frameCount)=>frameCount.value < model.fps ? (0, _effect.Option).some(frameCount.value + 1) : (0, _effect.Option).some(0)), (0, _effect.Match).exhaustive)
             }),
             eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>Eggnemy.make({
@@ -705,8 +705,7 @@ const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Matc
             ...model,
             playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
-                centerCoords: !isInBounds(model.playerEgg, model.worldWidth, model.worldHeight) ? returnToBounds(model.playerEgg, model.worldWidth, model.worldHeight) : model.playerEgg.centerCoords,
-                // violates DRY, fix later
+                centerCoords: handleBoundsBehavior(model.playerEgg, model.worldWidth, model.worldHeight),
                 frameCountSinceLastDamaged: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>(0, _effect.Option).none()), (0, _effect.Match).tag("Some", (frameCount)=>frameCount.value < model.fps ? (0, _effect.Option).some(frameCount.value + 1) : (0, _effect.Option).none()), (0, _effect.Match).exhaustive)
             }),
             eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>Eggnemy.make({
@@ -714,6 +713,7 @@ const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Matc
                     centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
                 }))
         })), (0, _effect.Match).orElse(()=>model));
+const handleBoundsBehavior = (egg, width, height)=>!isInBounds(egg, width, height) ? returnToBounds(egg, width, height) : egg.centerCoords;
 const absDifference = (a, b)=>Math.abs(a - b);
 const isInContact = (egg1, egg2)=>absDifference(egg1.centerCoords.x, egg2.centerCoords.x) < (egg1.width + egg2.width) / 2 && absDifference(egg1.centerCoords.y, egg2.centerCoords.y) < (egg1.height + egg2.height) / 2;
 const isInBounds = (egg, width, height)=>getSideBoundary(egg, "left") < 0 || getSideBoundary(egg, "right") > width || getSideBoundary(egg, "top") < 0 || getSideBoundary(egg, "bottom") > height ? false : true;
