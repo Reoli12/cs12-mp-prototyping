@@ -1,4 +1,4 @@
-import { Model, Egg, Point, Settings, EggSides} from "./projectTypes"
+import { Model, Egg, Point, Settings, EggSides } from "./projectTypes"
 import { Array, Schema as S, Match, pipe } from "effect"
 import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
@@ -26,7 +26,10 @@ const update = (msg: Msg, model: Model): Model =>
                                             model.worldWidth, model.worldHeight) ? 
                                 returnToBounds( model.playerEgg, 
                                                 model.worldWidth, model.worldHeight)! :
-                                model.playerEgg.centerCoords
+                                model.playerEgg.centerCoords,
+                current_hp: Array.some(model.eggnemies, (eggnemy) => 
+                            isInContact(model.playerEgg, eggnemy)) ? 
+                            model.playerEgg.current_hp - 1 : model.playerEgg.current_hp,
             }),
             eggnemies: Array.map(model.eggnemies, (eggnemy) => Eggnemy.make({
                 ...eggnemy,
@@ -37,6 +40,13 @@ const update = (msg: Msg, model: Model): Model =>
         Match.orElse(() => model)
     )
 
+const absDifference = (a: number, b: number): number =>
+    Math.abs(a - b)
+
+const isInContact = (egg1: Egg, egg2: Egg): boolean => 
+    absDifference(egg1.centerCoords.x, egg2.centerCoords.x) < (egg1.width + egg2.width) / 2 &&
+    absDifference(egg1.centerCoords.y, egg2.centerCoords.y) < (egg1.height + egg2.height) / 2
+    
 const isInBounds = (egg: Egg, width: number, height: number) => 
     getSideBoundary(egg, "left") < 0 ||
     getSideBoundary(egg, "right") > width ||
