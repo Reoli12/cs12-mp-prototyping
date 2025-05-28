@@ -678,7 +678,7 @@ const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Matc
             ...model,
             playerEgg: (0, _projectTypes.Egg).make({
                 ...model.playerEgg,
-                centerCoords: stepOnce(key, model.playerEgg.centerCoords, 1)
+                centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3)
             })
         })), (0, _effect.Match).tag('Canvas.MsgTick', ()=>(0, _projectTypes.Model).make({
             ...model,
@@ -686,10 +686,15 @@ const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Matc
             playerEgg: (0, _projectTypes.Egg).make({
                 ...model.playerEgg,
                 centerCoords: !isInBounds(model.playerEgg, model.worldWidth, model.worldHeight) ? returnToBounds(model.playerEgg, model.worldWidth, model.worldHeight) : model.playerEgg.centerCoords
-            })
+            }),
+            eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>(0, _projectTypes.Egg).make({
+                    ...eggnemy,
+                    centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
+                }))
         })), (0, _effect.Match).orElse(()=>model));
 const isInBounds = (egg, width, height)=>getSideBoundary(egg, "left") < 0 || getSideBoundary(egg, "right") > width || getSideBoundary(egg, "top") < 0 || getSideBoundary(egg, "bottom") > height ? false : true;
-const returnToBounds = (egg, width, height)=>getSideBoundary(egg, "left") < 0 ? (0, _projectTypes.Point).make({
+const returnToBounds = (egg, width, height)=>// maybe better to use tagged structs
+    getSideBoundary(egg, "left") < 0 ? (0, _projectTypes.Point).make({
         ...egg.centerCoords,
         x: egg.width / 2
     }) : getSideBoundary(egg, "right") > width ? (0, _projectTypes.Point).make({
@@ -734,27 +739,17 @@ const viewEgg = (egg, color)=>[
             fontSize: 12
         })
     ];
-// async function getSettings(filename: string) {
-//         try {    
-//             const settingsUnparsed = await fetch(filename)
-//                 console.log(settingsUnparsed)
-//             const settingsParsed = await settingsUnparsed.json()
-//                 console.log("settings fetched:")
-//                 console.log(JSON.stringify(settingsParsed, null, 4))
-//             return settingsParsed
-//         } catch(err) {
-//             console.log(err)
-//             throw err
-//         }
-//     }
-async function main() {
+const getNewEggnemyCoords = (eggnemyCoords, playerEggCoords, eggnemySpeed)=>(0, _projectTypes.Point).make({
+        x: eggnemyCoords.x < playerEggCoords.x ? eggnemyCoords.x + eggnemySpeed : eggnemyCoords.x > playerEggCoords.x ? eggnemyCoords.x - eggnemySpeed : eggnemyCoords.x,
+        y: eggnemyCoords.y < playerEggCoords.y ? eggnemyCoords.y + eggnemySpeed : eggnemyCoords.y > playerEggCoords.y ? eggnemyCoords.y - eggnemySpeed : eggnemyCoords.y
+    });
+function main() {
     const root = document.getElementById("root");
-    // const settings = await getSettings("settings.json") as Settings
     const settings = (0, _settingsJsonDefault.default);
     const playerEgg = (0, _projectTypes.Egg).make({
         centerCoords: (0, _projectTypes.Point).make({
-            x: 0,
-            y: 0
+            x: settings.width / 2,
+            y: settings.height / 2
         }),
         height: 20,
         width: 10,
@@ -764,7 +759,17 @@ async function main() {
     });
     const initModel = (0, _projectTypes.Model).make({
         playerEgg: playerEgg,
-        eggnemies: (0, _effect.Array).empty(),
+        eggnemies: (0, _effect.Array).make((0, _projectTypes.Egg).make({
+            centerCoords: (0, _projectTypes.Point).make({
+                x: 20,
+                y: 20
+            }),
+            height: settings.EggnemyHeight,
+            width: settings.EggnemyWidth,
+            total_hp: 5,
+            current_hp: 5,
+            color: "gray"
+        })),
         worldHeight: settings.height,
         worldWidth: settings.width,
         fps: settings.fps,

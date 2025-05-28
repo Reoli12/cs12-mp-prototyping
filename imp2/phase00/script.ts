@@ -12,7 +12,7 @@ const update = (msg: Msg, model: Model): Model =>
             ...model,
             playerEgg: Egg.make({
                 ...model.playerEgg,
-                centerCoords: stepOnce(key, model.playerEgg.centerCoords, 1)
+                centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3)
             })
         })),
         Match.tag('Canvas.MsgTick', () => Model.make({
@@ -25,7 +25,11 @@ const update = (msg: Msg, model: Model): Model =>
                                 returnToBounds( model.playerEgg, 
                                                 model.worldWidth, model.worldHeight)! :
                                 model.playerEgg.centerCoords
-            })
+            }),
+            eggnemies: Array.map(model.eggnemies, (eggnemy) => Egg.make({
+                ...eggnemy,
+                centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
+            }))
 
         })),
         Match.orElse(() => model)
@@ -39,6 +43,7 @@ const isInBounds = (egg: Egg, width: number, height: number) =>
     false : true
 
 const returnToBounds = (egg: Egg, width: number, height: number): Point | null =>
+    // maybe better to use tagged structs
     getSideBoundary(egg, "left") < 0 ? Point.make({...egg.centerCoords, x: egg.width / 2}) :
     getSideBoundary(egg, "right") > width ? Point.make({...egg.centerCoords, x: width - egg.width / 2}) :
     getSideBoundary(egg, "top") < 0 ? Point.make({...egg.centerCoords, y: egg.height / 2}) :
@@ -99,31 +104,26 @@ const viewEgg = (egg: Egg, color: string) =>
         })
     ]
 
+const getNewEggnemyCoords = (eggnemyCoords: Point, playerEggCoords: Point, eggnemySpeed: number): Point => 
+    Point.make({
+        x:  eggnemyCoords.x < playerEggCoords.x? eggnemyCoords.x + eggnemySpeed :
+            eggnemyCoords.x > playerEggCoords.x? eggnemyCoords.x - eggnemySpeed :
+            eggnemyCoords.x,
+        y:  eggnemyCoords.y < playerEggCoords.y? eggnemyCoords.y + eggnemySpeed :
+            eggnemyCoords.y > playerEggCoords.y? eggnemyCoords.y - eggnemySpeed :
+            eggnemyCoords.y,
+    })
 
-// async function getSettings(filename: string) {
-//         try {    
-//             const settingsUnparsed = await fetch(filename)
-//                 console.log(settingsUnparsed)
-//             const settingsParsed = await settingsUnparsed.json()
-//                 console.log("settings fetched:")
-//                 console.log(JSON.stringify(settingsParsed, null, 4))
-//             return settingsParsed
-//         } catch(err) {
-//             console.log(err)
-//             throw err
-//         }
-//     }
 
-async function main() {
+function main() {
     const root = document.getElementById("root")!
 
-    // const settings = await getSettings("settings.json") as Settings
     const settings = data as Settings
 
     const playerEgg = Egg.make({
         centerCoords: Point.make({
-            x: 0,
-            y: 0,
+            x: settings.width / 2,
+            y: settings.height / 2,
         }),
         height: 20,
         width: 10,
@@ -134,7 +134,16 @@ async function main() {
 
     const initModel = Model.make({
         playerEgg: playerEgg,
-        eggnemies: Array.empty(),
+        eggnemies: Array.make(
+            Egg.make({
+                centerCoords: Point.make({x: 20, y: 20}),
+                height: settings.EggnemyHeight,
+                width: settings.EggnemyWidth,
+                total_hp: 5,
+                current_hp: 5,
+                color: "gray"
+            })
+        ),
         worldHeight: settings.height,
         worldWidth: settings.width,
         fps: settings.fps,
