@@ -755,11 +755,12 @@ function main() {
         width: 10,
         total_hp: 20,
         current_hp: 20,
-        color: "white"
+        color: "white",
+        speed: settings.PlayerEggSpeed
     });
     const initModel = (0, _projectTypes.Model).make({
         playerEgg: playerEgg,
-        eggnemies: (0, _effect.Array).make((0, _projectTypes.Egg).make({
+        eggnemies: (0, _effect.Array).make((0, _projectTypes.Eggnemy).make({
             centerCoords: (0, _projectTypes.Point).make({
                 x: 20,
                 y: 20
@@ -768,7 +769,8 @@ function main() {
             width: settings.EggnemyWidth,
             total_hp: 5,
             current_hp: 5,
-            color: "gray"
+            color: "gray",
+            speed: settings.EggnemySpeed
         })),
         worldHeight: settings.height,
         worldWidth: settings.width,
@@ -786,6 +788,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "EggSides", ()=>EggSides);
 parcelHelpers.export(exports, "Point", ()=>Point);
 parcelHelpers.export(exports, "Egg", ()=>Egg);
+parcelHelpers.export(exports, "Eggnemy", ()=>Eggnemy);
 parcelHelpers.export(exports, "Model", ()=>Model);
 var _effect = require("effect");
 const EggSides = (0, _effect.Schema).Union((0, _effect.Schema).Literal("top"), (0, _effect.Schema).Literal("bottom"), (0, _effect.Schema).Literal("left"), (0, _effect.Schema).Literal("right"));
@@ -799,11 +802,23 @@ const Egg = (0, _effect.Schema).Struct({
     width: (0, _effect.Schema).Number,
     total_hp: (0, _effect.Schema).Number,
     current_hp: (0, _effect.Schema).Number,
-    color: (0, _effect.Schema).String
+    color: (0, _effect.Schema).String,
+    speed: (0, _effect.Schema).Number
+});
+const Eggnemy = (0, _effect.Schema).Struct({
+    // yes, redundant but it may be more helpful to 
+    // distinguish between the two later down the line
+    centerCoords: Point,
+    height: (0, _effect.Schema).Number,
+    width: (0, _effect.Schema).Number,
+    total_hp: (0, _effect.Schema).Number,
+    current_hp: (0, _effect.Schema).Number,
+    color: (0, _effect.Schema).String,
+    speed: (0, _effect.Schema).Number
 });
 const Model = (0, _effect.Schema).Struct({
     playerEgg: Egg,
-    eggnemies: (0, _effect.Schema).Array(Egg),
+    eggnemies: (0, _effect.Schema).Array(Eggnemy),
     fps: (0, _effect.Schema).Int,
     currentFrame: (0, _effect.Schema).Int,
     worldHeight: (0, _effect.Schema).Number,
@@ -813,12 +828,14 @@ const Settings = (0, _effect.Schema).Struct({
     fps: (0, _effect.Schema).Number,
     width: (0, _effect.Schema).Number,
     height: (0, _effect.Schema).Number,
-    playerEggHp: (0, _effect.Schema).Number,
-    playerEggWidth: (0, _effect.Schema).Number,
-    playerEggHeight: (0, _effect.Schema).Number,
+    PlayerEggHp: (0, _effect.Schema).Number,
+    PlayerEggWidth: (0, _effect.Schema).Number,
+    PlayerEggHeight: (0, _effect.Schema).Number,
     EggnemyCount: (0, _effect.Schema).Number,
     EggnemyWidth: (0, _effect.Schema).Number,
-    EggnemyHeight: (0, _effect.Schema).Number
+    EggnemyHeight: (0, _effect.Schema).Number,
+    PlayerEggSpeed: (0, _effect.Schema).Number,
+    EggnemySpeed: (0, _effect.Schema).Number
 });
 
 },{"effect":"1QzRN","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"1QzRN":[function(require,module,exports,__globalThis) {
@@ -56851,7 +56868,7 @@ const canvasView = (width, height, fps, canvasId, view)=>(model, dispatch)=>(0, 
             }, [])), (0, _effect.Effect).runSync);
 
 },{".":"6exBX","effect":"1QzRN","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"e136u":[function(require,module,exports,__globalThis) {
-module.exports = JSON.parse("{\"fps\":30,\"width\":300,\"height\":300,\"playerEggHp\":20,\"playerEggWidth\":10,\"playerEggHeight\":20,\"EggnemyCount\":5,\"EggnemyWidth\":5,\"EggnemyHeight\":5}");
+module.exports = JSON.parse("{\"fps\":30,\"width\":300,\"height\":300,\"PlayerEggHp\":20,\"PlayerEggWidth\":10,\"PlayerEggHeight\":20,\"EggnemyCount\":5,\"EggnemyWidth\":5,\"EggnemyHeight\":5,\"PlayerEggSpeed\":3,\"EggnemySpeed\":1}");
 
 },{}]},["9cak8","iaKGF"], "iaKGF", "parcelRequire94c2", {})
 

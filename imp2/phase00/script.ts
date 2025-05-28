@@ -1,4 +1,4 @@
-import { Model, Egg, EggSides, Point, Settings } from "./projectTypes"
+import { Model, Egg, EggSides, Point, Settings, Eggnemy } from "./projectTypes"
 import { Array, Schema as S, Match, pipe } from "effect"
 import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
@@ -130,18 +130,20 @@ function main() {
         total_hp: 20,
         current_hp: 20,
         color: "white",
+        speed: settings.playerEggSpeed,
     })
 
     const initModel = Model.make({
         playerEgg: playerEgg,
         eggnemies: Array.make(
-            Egg.make({
+            Eggnemy.make({
                 centerCoords: Point.make({x: 20, y: 20}),
-                height: settings.EggnemyHeight,
-                width: settings.EggnemyWidth,
+                height: settings.eggnemyHeight,
+                width: settings.eggnemyWidth,
                 total_hp: 5,
                 current_hp: 5,
-                color: "gray"
+                color: "gray",
+                speed: settings.eggnemySpeed,
             })
         ),
         worldHeight: settings.height,
