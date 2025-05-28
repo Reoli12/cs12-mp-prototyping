@@ -71,6 +71,9 @@ class View:
     def is_d_pressed(self):
         return pyxel.btn(pyxel.KEY_D) or pyxel.btn(pyxel.KEY_RIGHT)
     
+    def is_l_pressed(self):
+        return pyxel.btn(pyxel.KEY_L)
+    
     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler):
         pyxel.init(self._window_width, self._window_height, fps=fps)
         pyxel.run(update_handler.update, draw_handler.draw)

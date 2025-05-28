@@ -12,7 +12,8 @@ class Controller:
             self._view.is_w_pressed(), 
             self._view.is_a_pressed(), 
             self._view.is_s_pressed(), 
-            self._view.is_d_pressed()
+            self._view.is_d_pressed(),
+            self._view.is_l_pressed()
             )
 
     def draw(self):

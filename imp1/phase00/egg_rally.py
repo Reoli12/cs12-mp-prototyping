@@ -6,7 +6,6 @@ import json
 
 with open('settings.json', 'r') as file:
     data = json.load(file)
-    print(data, "\n")
 
 def main():
     #Window Size

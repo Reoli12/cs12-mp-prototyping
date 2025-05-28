@@ -13,14 +13,13 @@ class Model:
 
         self._eggnemies: list[Eggnemy] = []
         self._overlapping_player_eggnemy: list[Eggnemy] = []
-        self._dead_eggnemies: set[Eggnemy] = set()
         self._eggnemy_count = eggnemy_count
         self._eggnemy_width = eggnemy_width
         self._eggnemy_height = eggnemy_height
 
         self._is_game_over = False
 
-    def update(self, is_w_pressed: bool, is_a_pressed: bool, is_s_pressed: bool, is_d_pressed: bool):
+    def update(self, is_w_pressed: bool, is_a_pressed: bool, is_s_pressed: bool, is_d_pressed: bool, is_l_pressed: bool):
         player_egg = self._player_egg
 
         #game over state
@@ -43,18 +42,44 @@ class Model:
         if is_d_pressed:
             player_egg.center_position.x += 2
 
+        if is_l_pressed:
+            radius = 50
+            for eggnemy in self._eggnemies:
+                eggnemy_center = eggnemy.center_position
+                
+                #defeats eggnemy
+                distance_to_player = ((self._player_egg.center_position.x - eggnemy_center.x) ** 2 + (self._player_egg.center_position.y - eggnemy_center.y) ** 2) ** 0.5
+                if distance_to_player <= radius:
+                    self._eggnemies.remove(eggnemy)
+            
+
         if self.is_out_of_bounds():
             self.return_to_bounds()
 
+        #eggnemies
         for eggnemy in self._eggnemies:
             if self.is_overlapping_player(eggnemy.center_position, eggnemy.width, eggnemy.height):
                 self._overlapping_player_eggnemy.append(eggnemy)
 
-        if self._fps % 30 == 0:
-            self._player_egg.current_hp -= len(self._overlapping_player_eggnemy)
+                if self._fps % 30 == 0:
+                    self._player_egg.current_hp -= 1 
+            
+            x_distance_to_player = self._player_egg.center_position.x - eggnemy.center_position.x
+            y_distance_to_player = self._player_egg.center_position.y - eggnemy.center_position.y
+            
+            '''#follows player
+            if x_distance_to_player < 0: #right of player
+                eggnemy.center_position.x -= 1 
+            elif x_distance_to_player > 0: #left
+                eggnemy.center_position.x += 1
 
-        #eggnemies
-        if len(self._eggnemies) <= self._eggnemy_count:
+            if y_distance_to_player < 0: #down
+                eggnemy.center_position.y -= 1 
+            elif y_distance_to_player > 0: #up
+                eggnemy.center_position.y += 1'''
+
+
+        if len(self._eggnemies) <= self._eggnemy_count - 1:
             eggnemy_width = self._eggnemy_width
             eggnemy_height = self._eggnemy_height
             eggnemy_center = None
@@ -77,14 +102,25 @@ class Model:
         print(player_egg.center_position, player_egg.topmost_point)
     
     def is_overlapping_player(self, eggnemy_center: Point, eggnemy_width: int, eggnemy_height: int):
+        player_x = self._player_egg.center_position.x
+        player_y = self._player_egg.center_position.y
         eggnemy_x = eggnemy_center.x
         eggnemy_y = eggnemy_center.y
-        return (
-            self._player_egg.center_position.x - self._player_egg.width < eggnemy_x and
-            eggnemy_x < self._player_egg.center_position.x + self._player_egg.width and
-            self._player_egg.center_position.y - self._player_egg.height < eggnemy_y and
-            eggnemy_y < self._player_egg.center_position.y + self._player_egg.height
-        )
+
+        left_bounds = player_x - self._player_egg.width / 2
+        right_bounds = player_x + self._player_egg.width / 2
+        top_bounds = player_y - self._player_egg.height / 2
+        bottom_bounds = player_y + self._player_egg.height / 2
+
+        eggnemy_right = eggnemy_x + eggnemy_width / 2
+        eggnemy_left = eggnemy_x - eggnemy_width / 2
+        eggnemy_bottom = eggnemy_y + eggnemy_height / 2
+        eggnemy_top = eggnemy_y - eggnemy_height / 2
+
+        return (left_bounds < eggnemy_right or 
+                right_bounds > eggnemy_left or
+                top_bounds < eggnemy_bottom or
+                bottom_bounds > eggnemy_top)
 
     def is_out_of_bounds(self) -> bool:
         return (   
@@ -135,10 +171,6 @@ class Model:
     @property
     def eggnemies(self):
         return self._eggnemies
-    
-    @property
-    def dead_eggnemies(self):
-        return self._dead_eggnemies
     
     @property
     def eggnemy_count(self):
