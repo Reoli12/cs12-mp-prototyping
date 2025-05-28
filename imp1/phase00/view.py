@@ -1,5 +1,5 @@
 import pyxel
-from project_types import UpdateHandler, DrawHandler, PlayerEgg
+from project_types import UpdateHandler, DrawHandler, PlayerEgg, Eggnemy
 
 class View:
     def __init__(self, player_egg: PlayerEgg, window_width: int, window_height: int):
@@ -42,6 +42,22 @@ class View:
             self._player_color
             )
     
+    def draw_eggnemy(self, eggnemy: Eggnemy):
+        x_pos = eggnemy.center_position.x
+        y_pos = eggnemy.center_position.y
+        eggnemy_width = eggnemy.width
+        eggnemy_height = eggnemy.height
+
+        pyxel.rect(
+        x_pos - eggnemy_width / 2,
+        y_pos - eggnemy_height / 2,
+        eggnemy_width,
+        eggnemy_height,
+        self._player_color
+    )
+
+
+
     #Inputs
     def is_w_pressed(self):
         return pyxel.btn(pyxel.KEY_W) or pyxel.btn(pyxel.KEY_UP)
@@ -55,6 +71,6 @@ class View:
     def is_d_pressed(self):
         return pyxel.btn(pyxel.KEY_D) or pyxel.btn(pyxel.KEY_RIGHT)
     
-    def start(self, update_handler: UpdateHandler, draw_handler: DrawHandler):
-        pyxel.init(self._window_width, self._window_height)
+    def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler):
+        pyxel.init(self._window_width, self._window_height, fps=fps)
         pyxel.run(update_handler.update, draw_handler.draw)

@@ -2,16 +2,23 @@ from model import Model
 from view import View
 from controller import Controller
 from project_types import Point, PlayerEgg
+import json
+
+with open('settings.json', 'r') as file:
+    data = json.load(file)
+    print(data, "\n")
 
 def main():
     #Window Size
-    window_width = 300
-    window_height = 300
+    window_width = data["width"]
+    window_height = data["height"]
+    fps = data["fps"]
 
     #Player Info
-    egg_height = 20
-    egg_width = 10
-    egg_hp = 10
+    egg_width = data["playerEggWidth"]
+    egg_height = data["playerEggHeight"]
+    egg_hp = data["playerEggHp"]
+    #egg_speed = data["playerEggSpeed"]
 
     player_egg = PlayerEgg(
         egg_height,
@@ -20,8 +27,14 @@ def main():
         Point(window_width / 2, window_height / 2)
     )
 
+    #eggnemy Info
+    eggnemy_count = data['eggnemyCount']
+    eggnemy_width = data["eggnemyWidth"]
+    eggnemy_height = data["eggnemyHeight"]
+    #eggnemy_speed = data["eggnemySpeed"]
+
     #MVC init
-    model = Model(player_egg, window_width, window_height)
+    model = Model(player_egg, fps, window_width, window_height, eggnemy_count, eggnemy_width, eggnemy_height)
     view = View(model.player_egg, model.window_width, model.window_height)
     controller = Controller(model, view)
 

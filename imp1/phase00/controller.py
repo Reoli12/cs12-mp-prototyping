@@ -20,6 +20,10 @@ class Controller:
 
         self._view.draw_egg()
         self._view.text_player_health()
+
+        eggnemies = self._model.eggnemies
+        for eggnemy in eggnemies:
+            self._view.draw_eggnemy(eggnemy)
         
     def start(self):
-        self._view.start(self, self)
+        self._view.start(self._model.fps, self, self)

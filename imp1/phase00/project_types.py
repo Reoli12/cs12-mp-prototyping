@@ -54,3 +54,8 @@ class Egg(ABC):
 class PlayerEgg(Egg):
     def move(self):
         ...
+
+
+class Eggnemy(Egg):
+    def move(self):
+        ...
