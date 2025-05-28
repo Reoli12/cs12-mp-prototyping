@@ -685,13 +685,29 @@ const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Matc
         })), (0, _effect.Match).tag('Canvas.MsgTick', ()=>model.playerEgg.current_hp <= 0 ? (0, _projectTypes.Model).make({
             ...model,
             isOver: true
-        }) : model.isOver ? model : (0, _projectTypes.Model).make({
+        }) : model.isOver ? model : (0, _effect.Array).some(model.eggnemies, (eggnemy)=>isInContact(model.playerEgg, eggnemy)) ? (0, _projectTypes.Model).make({
+            // with collision
             ...model,
             currentFrame: (model.currentFrame + 1) % model.fps,
             playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
                 centerCoords: !isInBounds(model.playerEgg, model.worldWidth, model.worldHeight) ? returnToBounds(model.playerEgg, model.worldWidth, model.worldHeight) : model.playerEgg.centerCoords,
-                current_hp: (0, _effect.Array).some(model.eggnemies, (eggnemy)=>isInContact(model.playerEgg, eggnemy)) ? model.playerEgg.current_hp - 1 : model.playerEgg.current_hp
+                current_hp: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>model.playerEgg.current_hp - 1), (0, _effect.Match).tag("Some", (frameCountSinceLastDamaged)=>// if more than one frame has passed since last dmg, decrement 1
+                    frameCountSinceLastDamaged.value < model.fps ? (0, _effect.pipe)(()=>console.log(frameCountSinceLastDamaged.value, model.fps), ()=>model.playerEgg.current_hp) : model.playerEgg.current_hp - 1), (0, _effect.Match).exhaustive),
+                frameCountSinceLastDamaged: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>(0, _effect.Option).some(model.fps)), (0, _effect.Match).tag("Some", (frameCount)=>frameCount.value < model.fps ? (0, _effect.Option).some(frameCount.value + 1) : (0, _effect.Option).some(0)), (0, _effect.Match).exhaustive)
+            }),
+            eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>Eggnemy.make({
+                    ...eggnemy,
+                    centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
+                }))
+        }) : (0, _projectTypes.Model).make({
+            // no collision 
+            ...model,
+            playerEgg: PlayerEgg.make({
+                ...model.playerEgg,
+                centerCoords: !isInBounds(model.playerEgg, model.worldWidth, model.worldHeight) ? returnToBounds(model.playerEgg, model.worldWidth, model.worldHeight) : model.playerEgg.centerCoords,
+                // violates DRY, fix later
+                frameCountSinceLastDamaged: (0, _effect.Match).value(model.playerEgg.frameCountSinceLastDamaged).pipe((0, _effect.Match).tag("None", ()=>(0, _effect.Option).none()), (0, _effect.Match).tag("Some", (frameCount)=>frameCount.value < model.fps ? (0, _effect.Option).some(frameCount.value + 1) : (0, _effect.Option).none()), (0, _effect.Match).exhaustive)
             }),
             eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>Eggnemy.make({
                     ...eggnemy,
@@ -724,8 +740,8 @@ const view = (model)=>(0, _effect.pipe)(model, ({ playerEgg, eggnemies })=>[
             _canvas.SolidRectangle.make({
                 x: 0,
                 y: 0,
-                width: 300,
-                height: 300,
+                width: model.worldWidth,
+                height: model.worldHeight,
                 color: "black"
             }),
             ...model.isOver ? (0, _effect.Array).empty() : viewEgg(playerEgg, "white"),
@@ -772,7 +788,8 @@ function main() {
         total_hp: 20,
         current_hp: 20,
         color: "white",
-        speed: settings.playerEggSpeed
+        speed: settings.playerEggSpeed,
+        frameCountSinceLastDamaged: (0, _effect.Option).none()
     });
     const initModel = (0, _projectTypes.Model).make({
         playerEgg: playerEgg,
@@ -819,7 +836,8 @@ const PlayerEgg = (0, _effect.Schema).TaggedStruct("PlayerEgg", {
     total_hp: (0, _effect.Schema).Number,
     current_hp: (0, _effect.Schema).Number,
     color: (0, _effect.Schema).String,
-    speed: (0, _effect.Schema).Number
+    speed: (0, _effect.Schema).Number,
+    frameCountSinceLastDamaged: (0, _effect.Schema).Option((0, _effect.Schema).Number)
 });
 const Eggnemy = (0, _effect.Schema).TaggedStruct("Eggnemy", {
     // yes, redundant but it may be more helpful to 

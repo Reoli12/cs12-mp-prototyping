@@ -1,5 +1,5 @@
 import { Model, Egg, Point, Settings, EggSides } from "./projectTypes"
-import { Array, Schema as S, Match, pipe } from "effect"
+import { Array, Schema as S, Match, Option, pipe } from "effect"
 import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
 import * as Canvas from "cs12242-mvu/src/canvas"
@@ -17,7 +17,7 @@ const update = (msg: Msg, model: Model): Model =>
             ...model,
             playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
-                centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3)
+                centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3),
             })
         })),
         Match.tag('Canvas.MsgTick', () => 
@@ -26,26 +26,70 @@ const update = (msg: Msg, model: Model): Model =>
                 isOver: true,
             }) :
             model.isOver? model :
-            Model.make({
-            ...model,
-            currentFrame: (model.currentFrame + 1) % model.fps,
-            playerEgg: PlayerEgg.make({
-                ...model.playerEgg,
-                centerCoords:   !isInBounds(model.playerEgg, 
-                                            model.worldWidth, model.worldHeight) ? 
-                                returnToBounds( model.playerEgg, 
-                                                model.worldWidth, model.worldHeight)! :
-                                model.playerEgg.centerCoords,
-                current_hp: Array.some(model.eggnemies, (eggnemy) => 
-                            isInContact(model.playerEgg, eggnemy)) ? 
-                            model.playerEgg.current_hp - 1 : model.playerEgg.current_hp,
+            Array.some(model.eggnemies, (eggnemy) => isInContact(model.playerEgg, eggnemy)) ? Model.make({
+                // with collision
+                ...model,
+                currentFrame: (model.currentFrame + 1) % model.fps,
+                playerEgg: PlayerEgg.make({
+                    ...model.playerEgg,
+                    centerCoords:   !isInBounds(model.playerEgg, 
+                                                model.worldWidth, model.worldHeight) ? 
+                                    returnToBounds( model.playerEgg, 
+                                                    model.worldWidth, model.worldHeight)! :
+                                    model.playerEgg.centerCoords,
+                    current_hp: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
+                        Match.tag("None", () => model.playerEgg.current_hp - 1),
+                        Match.tag("Some", (frameCountSinceLastDamaged) => (
+                            // if more than one frame has passed since last dmg, decrement 1
+                            frameCountSinceLastDamaged.value < model.fps? 
+                            pipe(
+                                () => console.log(frameCountSinceLastDamaged.value, model.fps),
+                                () => model.playerEgg.current_hp,
+                            )
+                            : model.playerEgg.current_hp - 1
+                        )),
+                        Match.exhaustive,
+                    ),
+                    frameCountSinceLastDamaged: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
+                        Match.tag("None", () => Option.some(model.fps)),
+                        Match.tag("Some", (frameCount) => 
+                            frameCount.value < model.fps? Option.some(frameCount.value + 1) : Option.some(0)
+                            // since egg is damaged here, update count to 0
+                        ),
+                        Match.exhaustive
+                    )
             }),
             eggnemies: Array.map(model.eggnemies, (eggnemy) => Eggnemy.make({
                 ...eggnemy,
                 centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
-            }))
-
-        })),
+            })),
+            }) : Model.make({
+                // no collision 
+                ...model,
+                playerEgg: PlayerEgg.make({
+                    ...model.playerEgg,
+                    centerCoords:   !isInBounds(model.playerEgg, 
+                                                model.worldWidth, model.worldHeight) ? 
+                                    returnToBounds( model.playerEgg, 
+                                                    model.worldWidth, model.worldHeight)! :
+                                    model.playerEgg.centerCoords,
+                                    // violates DRY, fix later
+                    frameCountSinceLastDamaged: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
+                        Match.tag("None", () => Option.none()),
+                        Match.tag("Some", (frameCount) => 
+                            frameCount.value < model.fps? Option.some(frameCount.value + 1) :
+                            Option.none()
+                    ),
+                    Match.exhaustive
+                )
+                }),
+                eggnemies: Array.map(model.eggnemies, (eggnemy) => Eggnemy.make({
+                ...eggnemy,
+                centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
+            })),
+                
+            }),
+        ),
         Match.orElse(() => model)
     )
 
@@ -94,8 +138,8 @@ const view = (model: Model) =>
             Canvas.SolidRectangle.make({
                 x: 0,
                 y: 0, 
-                width: 300,
-                height: 300,
+                width: model.worldWidth,
+                height: model.worldHeight,
                 color: "black"
             }),
             ...(model.isOver? Array.empty(): viewEgg(playerEgg, "white")), // spread empty array
@@ -165,6 +209,7 @@ function main() {
         current_hp: 20,
         color: "white",
         speed: settings.playerEggSpeed,
+        frameCountSinceLastDamaged: Option.none()
     })
 
     const initModel = Model.make({
