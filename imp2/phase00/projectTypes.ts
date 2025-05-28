@@ -21,7 +21,8 @@ export const PlayerEgg = S.TaggedStruct("PlayerEgg", {
     total_hp: S.Number,
     current_hp: S.Number,
     color: S.String,
-    speed: S.Number
+    speed: S.Number,
+    frameCountSinceLastDamaged: S.Option(S.Number),
 })
 export type PlayerEgg = typeof PlayerEgg.Type
 
