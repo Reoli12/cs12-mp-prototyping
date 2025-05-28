@@ -675,24 +675,31 @@ var _canvas = require("cs12242-mvu/src/canvas");
 var _settingsJson = require("./settings.json");
 var _settingsJsonDefault = parcelHelpers.interopDefault(_settingsJson);
 const [PlayerEgg, Eggnemy] = (0, _projectTypes.Egg).members;
-const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Match).tag("Canvas.MsgKeyDown", ({ key })=>(0, _projectTypes.Model).make({
+const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Match).tag("Canvas.MsgKeyDown", ({ key })=>// pipe(console.log(model), () => false)? model :
+        model.isOver ? model : (0, _projectTypes.Model).make({
             ...model,
             playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
                 centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3)
             })
-        })), (0, _effect.Match).tag('Canvas.MsgTick', ()=>(0, _projectTypes.Model).make({
+        })), (0, _effect.Match).tag('Canvas.MsgTick', ()=>model.playerEgg.current_hp <= 0 ? (0, _projectTypes.Model).make({
+            ...model,
+            isOver: true
+        }) : model.isOver ? model : (0, _projectTypes.Model).make({
             ...model,
             currentFrame: (model.currentFrame + 1) % model.fps,
             playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
-                centerCoords: !isInBounds(model.playerEgg, model.worldWidth, model.worldHeight) ? returnToBounds(model.playerEgg, model.worldWidth, model.worldHeight) : model.playerEgg.centerCoords
+                centerCoords: !isInBounds(model.playerEgg, model.worldWidth, model.worldHeight) ? returnToBounds(model.playerEgg, model.worldWidth, model.worldHeight) : model.playerEgg.centerCoords,
+                current_hp: (0, _effect.Array).some(model.eggnemies, (eggnemy)=>isInContact(model.playerEgg, eggnemy)) ? model.playerEgg.current_hp - 1 : model.playerEgg.current_hp
             }),
             eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>Eggnemy.make({
                     ...eggnemy,
                     centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
                 }))
         })), (0, _effect.Match).orElse(()=>model));
+const absDifference = (a, b)=>Math.abs(a - b);
+const isInContact = (egg1, egg2)=>absDifference(egg1.centerCoords.x, egg2.centerCoords.x) < (egg1.width + egg2.width) / 2 && absDifference(egg1.centerCoords.y, egg2.centerCoords.y) < (egg1.height + egg2.height) / 2;
 const isInBounds = (egg, width, height)=>getSideBoundary(egg, "left") < 0 || getSideBoundary(egg, "right") > width || getSideBoundary(egg, "top") < 0 || getSideBoundary(egg, "bottom") > height ? false : true;
 const returnToBounds = (egg, width, height)=>// maybe better to use tagged structs
     getSideBoundary(egg, "left") < 0 ? (0, _projectTypes.Point).make({
@@ -721,7 +728,7 @@ const view = (model)=>(0, _effect.pipe)(model, ({ playerEgg, eggnemies })=>[
                 height: 300,
                 color: "black"
             }),
-            ...viewEgg(playerEgg, "white"),
+            ...model.isOver ? (0, _effect.Array).empty() : viewEgg(playerEgg, "white"),
             ...(0, _effect.pipe)((0, _effect.Array).map(eggnemies, (eggnemy)=>viewEgg(eggnemy, "grey")), (0, _effect.Array).flatten)
         ]);
 const viewEgg = (egg, color)=>(0, _effect.Match).value(egg).pipe((0, _effect.Match).tag('PlayerEgg', (playerEgg)=>[
@@ -782,7 +789,8 @@ function main() {
         worldHeight: settings.height,
         worldWidth: settings.width,
         fps: settings.fps,
-        currentFrame: 0
+        currentFrame: 0,
+        isOver: false
     });
     (0, _src.startSimple)(root, initModel, update, (0, _canvas.canvasView)(settings.width, settings.height, settings.fps, "canvas", view));
 // startSimple
@@ -829,7 +837,8 @@ const Model = (0, _effect.Schema).Struct({
     fps: (0, _effect.Schema).Int,
     currentFrame: (0, _effect.Schema).Int,
     worldHeight: (0, _effect.Schema).Number,
-    worldWidth: (0, _effect.Schema).Number
+    worldWidth: (0, _effect.Schema).Number,
+    isOver: (0, _effect.Schema).Boolean
 });
 const Settings = (0, _effect.Schema).Struct({
     fps: (0, _effect.Schema).Number,

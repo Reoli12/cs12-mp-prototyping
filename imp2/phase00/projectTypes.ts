@@ -49,7 +49,7 @@ export const Model = S.Struct({
     currentFrame: S.Int,
     worldHeight: S.Number,
     worldWidth: S.Number,
-
+    isOver: S.Boolean,
     })
 export type Model = typeof Model.Type
 
