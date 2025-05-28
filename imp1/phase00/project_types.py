@@ -1,6 +1,15 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-# from typing import Protocol
+from typing import Protocol
+
+
+class UpdateHandler(Protocol):
+    def update(self):
+        ...
+
+class DrawHandler(Protocol):
+    def draw(self):
+        ...
 
 @dataclass
 class Point:
