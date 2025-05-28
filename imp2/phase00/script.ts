@@ -10,14 +10,23 @@ const [PlayerEgg, Eggnemy] = Egg.members
 type Msg = typeof CanvasMsg.Type // update strictly only takes in Msg
 const update = (msg: Msg, model: Model): Model => 
     Match.value(msg).pipe(
-        Match.tag("Canvas.MsgKeyDown", ({ key }) => Model.make({
+        Match.tag("Canvas.MsgKeyDown", ({ key }) =>
+            // pipe(console.log(model), () => false)? model :
+            model.isOver? model : 
+            Model.make({
             ...model,
             playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
                 centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3)
             })
         })),
-        Match.tag('Canvas.MsgTick', () => Model.make({
+        Match.tag('Canvas.MsgTick', () => 
+            model.playerEgg.current_hp <= 0 ? Model.make({
+                ...model,
+                isOver: true,
+            }) :
+            model.isOver? model :
+            Model.make({
             ...model,
             currentFrame: (model.currentFrame + 1) % model.fps,
             playerEgg: PlayerEgg.make({
@@ -173,6 +182,7 @@ function main() {
         worldWidth: settings.width,
         fps: settings.fps,
         currentFrame: 0,
+        isOver: false
     })
 
     startSimple(root, initModel, update, canvasView(

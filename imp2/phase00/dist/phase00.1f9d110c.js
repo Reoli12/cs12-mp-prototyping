@@ -675,13 +675,16 @@ var _canvas = require("cs12242-mvu/src/canvas");
 var _settingsJson = require("./settings.json");
 var _settingsJsonDefault = parcelHelpers.interopDefault(_settingsJson);
 const [PlayerEgg, Eggnemy] = (0, _projectTypes.Egg).members;
-const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Match).tag("Canvas.MsgKeyDown", ({ key })=>(0, _projectTypes.Model).make({
+const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Match).tag("Canvas.MsgKeyDown", ({ key })=>(0, _effect.pipe)(console.log(model), ()=>false) ? model : model.isOver ? model : (0, _projectTypes.Model).make({
             ...model,
             playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
                 centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3)
             })
-        })), (0, _effect.Match).tag('Canvas.MsgTick', ()=>(0, _projectTypes.Model).make({
+        })), (0, _effect.Match).tag('Canvas.MsgTick', ()=>model.playerEgg.current_hp <= 0 ? (0, _projectTypes.Model).make({
+            ...model,
+            isOver: true
+        }) : model.isOver ? model : (0, _projectTypes.Model).make({
             ...model,
             currentFrame: (model.currentFrame + 1) % model.fps,
             playerEgg: PlayerEgg.make({
@@ -785,7 +788,8 @@ function main() {
         worldHeight: settings.height,
         worldWidth: settings.width,
         fps: settings.fps,
-        currentFrame: 0
+        currentFrame: 0,
+        isOver: false
     });
     (0, _src.startSimple)(root, initModel, update, (0, _canvas.canvasView)(settings.width, settings.height, settings.fps, "canvas", view));
 // startSimple
@@ -832,7 +836,8 @@ const Model = (0, _effect.Schema).Struct({
     fps: (0, _effect.Schema).Int,
     currentFrame: (0, _effect.Schema).Int,
     worldHeight: (0, _effect.Schema).Number,
-    worldWidth: (0, _effect.Schema).Number
+    worldWidth: (0, _effect.Schema).Number,
+    isOver: (0, _effect.Schema).Boolean
 });
 const Settings = (0, _effect.Schema).Struct({
     fps: (0, _effect.Schema).Number,
