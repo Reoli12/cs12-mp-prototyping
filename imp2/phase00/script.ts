@@ -1,16 +1,18 @@
-import { Model, Egg, EggSides, Point, Settings, Eggnemy } from "./projectTypes"
+import { Model, Egg, Point, Settings, EggSides} from "./projectTypes"
 import { Array, Schema as S, Match, pipe } from "effect"
 import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
 import * as Canvas from "cs12242-mvu/src/canvas"
 import data from "./settings.json" 
 
+const [PlayerEgg, Eggnemy] = Egg.members
+
 type Msg = typeof CanvasMsg.Type // update strictly only takes in Msg
 const update = (msg: Msg, model: Model): Model => 
     Match.value(msg).pipe(
         Match.tag("Canvas.MsgKeyDown", ({ key }) => Model.make({
             ...model,
-            playerEgg: Egg.make({
+            playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
                 centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3)
             })
@@ -18,7 +20,7 @@ const update = (msg: Msg, model: Model): Model =>
         Match.tag('Canvas.MsgTick', () => Model.make({
             ...model,
             currentFrame: (model.currentFrame + 1) % model.fps,
-            playerEgg: Egg.make({
+            playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
                 centerCoords:   !isInBounds(model.playerEgg, 
                                             model.worldWidth, model.worldHeight) ? 
@@ -26,7 +28,7 @@ const update = (msg: Msg, model: Model): Model =>
                                                 model.worldWidth, model.worldHeight)! :
                                 model.playerEgg.centerCoords
             }),
-            eggnemies: Array.map(model.eggnemies, (eggnemy) => Egg.make({
+            eggnemies: Array.map(model.eggnemies, (eggnemy) => Eggnemy.make({
                 ...eggnemy,
                 centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
             }))
@@ -86,23 +88,36 @@ const view = (model: Model) =>
 
     )
 
-const viewEgg = (egg: Egg, color: string) => 
-    [
+const viewEgg = (egg: Egg , color: string) => 
+    Match.value(egg).pipe(
+        Match.tag('PlayerEgg', (playerEgg) => [
         Canvas.SolidRectangle.make({
-                    x: egg.centerCoords.x - (egg.width / 2),
-                    y: egg.centerCoords.y - (egg.height / 2),
-                    width: egg.width,
-                    height: egg.height,
+                    x: playerEgg.centerCoords.x - (playerEgg.width / 2),
+                    y: playerEgg.centerCoords.y - (playerEgg.height / 2),
+                    width: playerEgg.width,
+                    height: playerEgg.height,
                     color: color,
         }),
         Canvas.Text.make({
-            x: egg.centerCoords.x - egg.width,
-            y: getSideBoundary(egg, "bottom") + 10,
-            text: `${egg.current_hp}/${egg.total_hp}`,
-            color: egg.color,
+            x: playerEgg.centerCoords.x - playerEgg.width,
+            y: getSideBoundary(playerEgg, "bottom") + 10,
+            text: `${playerEgg.current_hp}/${playerEgg.total_hp}`,
+            color: playerEgg.color,
             fontSize: 12,
         })
-    ]
+    ]),
+    Match.tag("Eggnemy", (eggnemy) => [
+        Canvas.SolidRectangle.make({
+            x: eggnemy.centerCoords.x - (eggnemy.width / 2),
+            y: eggnemy.centerCoords.y - (eggnemy.height / 2),
+            width: eggnemy.width,
+            height:eggnemy.height,
+            color: color,
+        }),
+    ]),
+    Match.exhaustive
+    )
+    
 
 const getNewEggnemyCoords = (eggnemyCoords: Point, playerEggCoords: Point, eggnemySpeed: number): Point => 
     Point.make({
@@ -120,7 +135,7 @@ function main() {
 
     const settings = data as Settings
 
-    const playerEgg = Egg.make({
+    const playerEgg = PlayerEgg.make({
         centerCoords: Point.make({
             x: settings.width / 2,
             y: settings.height / 2,
@@ -140,8 +155,6 @@ function main() {
                 centerCoords: Point.make({x: 20, y: 20}),
                 height: settings.eggnemyHeight,
                 width: settings.eggnemyWidth,
-                total_hp: 5,
-                current_hp: 5,
                 color: "gray",
                 speed: settings.eggnemySpeed,
             })

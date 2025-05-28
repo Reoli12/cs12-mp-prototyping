@@ -14,7 +14,7 @@ export const Point = S.Struct({
 })
 export type Point= typeof Point.Type
 
-export const Egg = S.Struct({
+export const PlayerEgg = S.TaggedStruct("PlayerEgg", {
     centerCoords: Point,
     height: S.Number,
     width: S.Number,
@@ -23,23 +23,27 @@ export const Egg = S.Struct({
     color: S.String,
     speed: S.Number
 })
-export type Egg = typeof Egg.Type
+export type PlayerEgg = typeof PlayerEgg.Type
 
-export const Eggnemy = S.Struct({
+export const Eggnemy = S.TaggedStruct("Eggnemy", {
     // yes, redundant but it may be more helpful to 
     // distinguish between the two later down the line
     centerCoords: Point,
     height: S.Number,
     width: S.Number,
-    total_hp: S.Number,
-    current_hp: S.Number,
     color: S.String,
     speed: S.Number
 })
 export type Eggnemy = typeof Eggnemy.Type
 
+export const Egg = S.Union(
+    PlayerEgg,
+    Eggnemy,
+)
+export type Egg = typeof Egg.Type
+
 export const Model = S.Struct({
-    playerEgg: Egg,
+    playerEgg: PlayerEgg,
     eggnemies: S.Array(Eggnemy),
     fps: S.Int,
     currentFrame: S.Int,
@@ -53,13 +57,13 @@ const Settings = S.Struct({
     fps: S.Number,
     width: S.Number,
     height: S.Number,
-    PlayerEggHp: S.Number,
-    PlayerEggWidth: S.Number,
-    PlayerEggHeight: S.Number,
-    EggnemyCount: S.Number,
-    EggnemyWidth: S.Number,
-    EggnemyHeight: S.Number,
-    PlayerEggSpeed: S.Number,
-    EggnemySpeed: S.Number,
+    playerEggHp: S.Number,
+    playerEggWidth: S.Number,
+    playerEggHeight: S.Number,
+    eggnemyCount: S.Number,
+    eggnemyWidth: S.Number,
+    eggnemyHeight: S.Number,
+    playerEggSpeed: S.Number,
+    eggnemySpeed: S.Number,
 })
 export type Settings = typeof Settings.Type

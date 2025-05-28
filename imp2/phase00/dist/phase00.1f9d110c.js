@@ -674,20 +674,21 @@ var _src = require("cs12242-mvu/src");
 var _canvas = require("cs12242-mvu/src/canvas");
 var _settingsJson = require("./settings.json");
 var _settingsJsonDefault = parcelHelpers.interopDefault(_settingsJson);
+const [PlayerEgg, Eggnemy] = (0, _projectTypes.Egg).members;
 const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Match).tag("Canvas.MsgKeyDown", ({ key })=>(0, _projectTypes.Model).make({
             ...model,
-            playerEgg: (0, _projectTypes.Egg).make({
+            playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
                 centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3)
             })
         })), (0, _effect.Match).tag('Canvas.MsgTick', ()=>(0, _projectTypes.Model).make({
             ...model,
             currentFrame: (model.currentFrame + 1) % model.fps,
-            playerEgg: (0, _projectTypes.Egg).make({
+            playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
                 centerCoords: !isInBounds(model.playerEgg, model.worldWidth, model.worldHeight) ? returnToBounds(model.playerEgg, model.worldWidth, model.worldHeight) : model.playerEgg.centerCoords
             }),
-            eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>(0, _projectTypes.Egg).make({
+            eggnemies: (0, _effect.Array).map(model.eggnemies, (eggnemy)=>Eggnemy.make({
                     ...eggnemy,
                     centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
                 }))
@@ -723,22 +724,30 @@ const view = (model)=>(0, _effect.pipe)(model, ({ playerEgg, eggnemies })=>[
             ...viewEgg(playerEgg, "white"),
             ...(0, _effect.pipe)((0, _effect.Array).map(eggnemies, (eggnemy)=>viewEgg(eggnemy, "grey")), (0, _effect.Array).flatten)
         ]);
-const viewEgg = (egg, color)=>[
-        _canvas.SolidRectangle.make({
-            x: egg.centerCoords.x - egg.width / 2,
-            y: egg.centerCoords.y - egg.height / 2,
-            width: egg.width,
-            height: egg.height,
-            color: color
-        }),
-        _canvas.Text.make({
-            x: egg.centerCoords.x - egg.width,
-            y: getSideBoundary(egg, "bottom") + 10,
-            text: `${egg.current_hp}/${egg.total_hp}`,
-            color: egg.color,
-            fontSize: 12
-        })
-    ];
+const viewEgg = (egg, color)=>(0, _effect.Match).value(egg).pipe((0, _effect.Match).tag('PlayerEgg', (playerEgg)=>[
+            _canvas.SolidRectangle.make({
+                x: playerEgg.centerCoords.x - playerEgg.width / 2,
+                y: playerEgg.centerCoords.y - playerEgg.height / 2,
+                width: playerEgg.width,
+                height: playerEgg.height,
+                color: color
+            }),
+            _canvas.Text.make({
+                x: playerEgg.centerCoords.x - playerEgg.width,
+                y: getSideBoundary(playerEgg, "bottom") + 10,
+                text: `${playerEgg.current_hp}/${playerEgg.total_hp}`,
+                color: playerEgg.color,
+                fontSize: 12
+            })
+        ]), (0, _effect.Match).tag("Eggnemy", (eggnemy)=>[
+            _canvas.SolidRectangle.make({
+                x: eggnemy.centerCoords.x - eggnemy.width / 2,
+                y: eggnemy.centerCoords.y - eggnemy.height / 2,
+                width: eggnemy.width,
+                height: eggnemy.height,
+                color: color
+            })
+        ]), (0, _effect.Match).exhaustive);
 const getNewEggnemyCoords = (eggnemyCoords, playerEggCoords, eggnemySpeed)=>(0, _projectTypes.Point).make({
         x: eggnemyCoords.x < playerEggCoords.x ? eggnemyCoords.x + eggnemySpeed : eggnemyCoords.x > playerEggCoords.x ? eggnemyCoords.x - eggnemySpeed : eggnemyCoords.x,
         y: eggnemyCoords.y < playerEggCoords.y ? eggnemyCoords.y + eggnemySpeed : eggnemyCoords.y > playerEggCoords.y ? eggnemyCoords.y - eggnemySpeed : eggnemyCoords.y
@@ -746,7 +755,7 @@ const getNewEggnemyCoords = (eggnemyCoords, playerEggCoords, eggnemySpeed)=>(0, 
 function main() {
     const root = document.getElementById("root");
     const settings = (0, _settingsJsonDefault.default);
-    const playerEgg = (0, _projectTypes.Egg).make({
+    const playerEgg = PlayerEgg.make({
         centerCoords: (0, _projectTypes.Point).make({
             x: settings.width / 2,
             y: settings.height / 2
@@ -756,21 +765,19 @@ function main() {
         total_hp: 20,
         current_hp: 20,
         color: "white",
-        speed: settings.PlayerEggSpeed
+        speed: settings.playerEggSpeed
     });
     const initModel = (0, _projectTypes.Model).make({
         playerEgg: playerEgg,
-        eggnemies: (0, _effect.Array).make((0, _projectTypes.Eggnemy).make({
+        eggnemies: (0, _effect.Array).make(Eggnemy.make({
             centerCoords: (0, _projectTypes.Point).make({
                 x: 20,
                 y: 20
             }),
-            height: settings.EggnemyHeight,
-            width: settings.EggnemyWidth,
-            total_hp: 5,
-            current_hp: 5,
+            height: settings.eggnemyHeight,
+            width: settings.eggnemyWidth,
             color: "gray",
-            speed: settings.EggnemySpeed
+            speed: settings.eggnemySpeed
         })),
         worldHeight: settings.height,
         worldWidth: settings.width,
@@ -787,8 +794,9 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "EggSides", ()=>EggSides);
 parcelHelpers.export(exports, "Point", ()=>Point);
-parcelHelpers.export(exports, "Egg", ()=>Egg);
+parcelHelpers.export(exports, "PlayerEgg", ()=>PlayerEgg);
 parcelHelpers.export(exports, "Eggnemy", ()=>Eggnemy);
+parcelHelpers.export(exports, "Egg", ()=>Egg);
 parcelHelpers.export(exports, "Model", ()=>Model);
 var _effect = require("effect");
 const EggSides = (0, _effect.Schema).Union((0, _effect.Schema).Literal("top"), (0, _effect.Schema).Literal("bottom"), (0, _effect.Schema).Literal("left"), (0, _effect.Schema).Literal("right"));
@@ -796,7 +804,7 @@ const Point = (0, _effect.Schema).Struct({
     x: (0, _effect.Schema).Number,
     y: (0, _effect.Schema).Number
 });
-const Egg = (0, _effect.Schema).Struct({
+const PlayerEgg = (0, _effect.Schema).TaggedStruct("PlayerEgg", {
     centerCoords: Point,
     height: (0, _effect.Schema).Number,
     width: (0, _effect.Schema).Number,
@@ -805,19 +813,18 @@ const Egg = (0, _effect.Schema).Struct({
     color: (0, _effect.Schema).String,
     speed: (0, _effect.Schema).Number
 });
-const Eggnemy = (0, _effect.Schema).Struct({
+const Eggnemy = (0, _effect.Schema).TaggedStruct("Eggnemy", {
     // yes, redundant but it may be more helpful to 
     // distinguish between the two later down the line
     centerCoords: Point,
     height: (0, _effect.Schema).Number,
     width: (0, _effect.Schema).Number,
-    total_hp: (0, _effect.Schema).Number,
-    current_hp: (0, _effect.Schema).Number,
     color: (0, _effect.Schema).String,
     speed: (0, _effect.Schema).Number
 });
+const Egg = (0, _effect.Schema).Union(PlayerEgg, Eggnemy);
 const Model = (0, _effect.Schema).Struct({
-    playerEgg: Egg,
+    playerEgg: PlayerEgg,
     eggnemies: (0, _effect.Schema).Array(Eggnemy),
     fps: (0, _effect.Schema).Int,
     currentFrame: (0, _effect.Schema).Int,
@@ -828,14 +835,14 @@ const Settings = (0, _effect.Schema).Struct({
     fps: (0, _effect.Schema).Number,
     width: (0, _effect.Schema).Number,
     height: (0, _effect.Schema).Number,
-    PlayerEggHp: (0, _effect.Schema).Number,
-    PlayerEggWidth: (0, _effect.Schema).Number,
-    PlayerEggHeight: (0, _effect.Schema).Number,
-    EggnemyCount: (0, _effect.Schema).Number,
-    EggnemyWidth: (0, _effect.Schema).Number,
-    EggnemyHeight: (0, _effect.Schema).Number,
-    PlayerEggSpeed: (0, _effect.Schema).Number,
-    EggnemySpeed: (0, _effect.Schema).Number
+    playerEggHp: (0, _effect.Schema).Number,
+    playerEggWidth: (0, _effect.Schema).Number,
+    playerEggHeight: (0, _effect.Schema).Number,
+    eggnemyCount: (0, _effect.Schema).Number,
+    eggnemyWidth: (0, _effect.Schema).Number,
+    eggnemyHeight: (0, _effect.Schema).Number,
+    playerEggSpeed: (0, _effect.Schema).Number,
+    eggnemySpeed: (0, _effect.Schema).Number
 });
 
 },{"effect":"1QzRN","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"1QzRN":[function(require,module,exports,__globalThis) {
@@ -56868,7 +56875,7 @@ const canvasView = (width, height, fps, canvasId, view)=>(model, dispatch)=>(0, 
             }, [])), (0, _effect.Effect).runSync);
 
 },{".":"6exBX","effect":"1QzRN","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"e136u":[function(require,module,exports,__globalThis) {
-module.exports = JSON.parse("{\"fps\":30,\"width\":300,\"height\":300,\"PlayerEggHp\":20,\"PlayerEggWidth\":10,\"PlayerEggHeight\":20,\"EggnemyCount\":5,\"EggnemyWidth\":5,\"EggnemyHeight\":5,\"PlayerEggSpeed\":3,\"EggnemySpeed\":1}");
+module.exports = JSON.parse("{\"fps\":30,\"width\":300,\"height\":300,\"playerEggHp\":20,\"playerEggWidth\":10,\"playerEggHeight\":20,\"eggnemyCount\":5,\"eggnemyWidth\":5,\"eggnemyHeight\":5,\"playerEggSpeed\":3,\"eggnemySpeed\":1}");
 
 },{}]},["9cak8","iaKGF"], "iaKGF", "parcelRequire94c2", {})
 
