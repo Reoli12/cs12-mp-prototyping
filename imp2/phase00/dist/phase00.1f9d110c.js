@@ -675,7 +675,8 @@ var _canvas = require("cs12242-mvu/src/canvas");
 var _settingsJson = require("./settings.json");
 var _settingsJsonDefault = parcelHelpers.interopDefault(_settingsJson);
 const [PlayerEgg, Eggnemy] = (0, _projectTypes.Egg).members;
-const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Match).tag("Canvas.MsgKeyDown", ({ key })=>(0, _effect.pipe)(console.log(model), ()=>false) ? model : model.isOver ? model : (0, _projectTypes.Model).make({
+const update = (msg, model)=>(0, _effect.Match).value(msg).pipe((0, _effect.Match).tag("Canvas.MsgKeyDown", ({ key })=>// pipe(console.log(model), () => false)? model :
+        model.isOver ? model : (0, _projectTypes.Model).make({
             ...model,
             playerEgg: PlayerEgg.make({
                 ...model.playerEgg,
@@ -727,7 +728,7 @@ const view = (model)=>(0, _effect.pipe)(model, ({ playerEgg, eggnemies })=>[
                 height: 300,
                 color: "black"
             }),
-            ...viewEgg(playerEgg, "white"),
+            ...model.isOver ? (0, _effect.Array).empty() : viewEgg(playerEgg, "white"),
             ...(0, _effect.pipe)((0, _effect.Array).map(eggnemies, (eggnemy)=>viewEgg(eggnemy, "grey")), (0, _effect.Array).flatten)
         ]);
 const viewEgg = (egg, color)=>(0, _effect.Match).value(egg).pipe((0, _effect.Match).tag('PlayerEgg', (playerEgg)=>[

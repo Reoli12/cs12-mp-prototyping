@@ -98,7 +98,7 @@ const view = (model: Model) =>
                 height: 300,
                 color: "black"
             }),
-            ...viewEgg(playerEgg, "white"),
+            ...(model.isOver? Array.empty(): viewEgg(playerEgg, "white")), // spread empty array
             ...pipe(
                 Array.map(eggnemies, (eggnemy) => viewEgg(eggnemy, "grey")),
                 Array.flatten
