@@ -1,7 +1,7 @@
 {
   "fps": 30,
-  "width": 300,
-  "height": 300,
+  "worldWidth": 300,
+  "worldHeight": 300,
   "playerEggHp": 20,
   "playerEggWidth": 10,
   "playerEggHeight": 20,
@@ -9,5 +9,5 @@
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,
   "playerEggSpeed": 3,
-  "eggnemySpeed": 1
+  "eggnemySpeed": 1,
 }
