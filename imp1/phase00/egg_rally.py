@@ -9,8 +9,8 @@ with open('settings.json', 'r') as file:
 
 def main():
     #Window Size
-    window_width = data["width"]
-    window_height = data["height"]
+    window_width = data["worldWidth"]
+    window_height = data["worldHeight"]
     fps = data["fps"]
 
     #Player Info
@@ -35,7 +35,7 @@ def main():
 
     #MVC init
     model = Model(player_egg, fps, window_width, window_height, eggnemy_count, eggnemy_width, eggnemy_height, eggnemy_speed)
-    view = View(model.player_egg, model.window_width, model.window_height)
+    view = View(model.window_width, model.window_height)
     controller = Controller(model, view)
 
     controller.start()

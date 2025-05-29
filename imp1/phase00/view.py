@@ -1,11 +1,10 @@
 import pyxel
-from project_types import UpdateHandler, DrawHandler, PlayerEgg, Eggnemy
+from project_types import UpdateHandler, DrawHandler
 
 class View:
-    def __init__(self, player_egg: PlayerEgg, window_width: int, window_height: int):
-        self._player_egg = player_egg
+    def __init__(self, window_width: int, window_height: int):
         self._player_color = 7
-        self._eggnemy_color = 13
+        self._eggnemy_color = 15
 
         self._window_width = window_width
         self._window_height = window_height
@@ -14,49 +13,31 @@ class View:
     def clear_screen(self):
         pyxel.cls(0)
 
-    def draw_egg(self):
-        x_pos = self._player_egg.center_position.x
-        y_pos = self._player_egg.center_position.y
-        player_width = self._player_egg.width
-        player_height = self._player_egg.height
-
+    def draw_egg(self, x_pos: int, y_pos: int, width: int, height: int):
         pyxel.rect(
-        x_pos - player_width / 2,
-        y_pos - player_height / 2,
-        player_width,
-        player_height,
+        x_pos,
+        y_pos,
+        width,
+        height,
         self._player_color
     )
         
-    def text_player_health(self):
-        x_pos = self._player_egg.center_position.x
-        y_pos = self._player_egg.center_position.y
-        player_width = self._player_egg.width
-        player_height = self._player_egg.height
-        cur_hp = self._player_egg.current_hp
-        max_hp = self._player_egg.total_hp
-
+    def text_player_health(self, x_pos: int, y_pos: int, cur_hp: int, total_hp: int):
         pyxel.text( 
-            x_pos - player_width / 2,
-            y_pos + player_height,
-            f'{cur_hp}/{max_hp}',
+            x_pos,
+            y_pos,
+            f'{cur_hp}/{total_hp}',
             self._player_color
             )
     
-    def draw_eggnemy(self, eggnemy: Eggnemy):
-        x_pos = eggnemy.center_position.x
-        y_pos = eggnemy.center_position.y
-        eggnemy_width = eggnemy.width
-        eggnemy_height = eggnemy.height
-
+    def draw_eggnemy(self, x_pos: int, y_pos: int, width: int, height: int):
         pyxel.rect(
-        x_pos - eggnemy_width / 2,
-        y_pos - eggnemy_height / 2,
-        eggnemy_width,
-        eggnemy_height,
+        x_pos,
+        y_pos,
+        width,
+        height,
         self._eggnemy_color
     )
-
 
 
     #Inputs
