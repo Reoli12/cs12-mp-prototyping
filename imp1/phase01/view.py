@@ -1,17 +1,29 @@
 import pyxel
-from project_types import UpdateHandler, DrawHandler
+from project_types import UpdateHandler, DrawHandler, GameSettings
 
 class View:
-    def __init__(self, window_width: int, window_height: int):
+    def __init__(self, settings: GameSettings):
         self._player_color = 7
-        self._eggnemy_color = 15
+        self._eggnemy_color = 13
+        self._world_border_color = 7
 
-        self._window_width = window_width
-        self._window_height = window_height
+        self._screen_width = settings.screen_width
+        self._screen_height = settings.screen_height
+        self._world_width = settings.world_width
+        self._world_height = settings.world_height
 
     #Outputs
     def clear_screen(self):
         pyxel.cls(0)
+
+    def draw_world(self, x_pos: int, y_pos: int):
+        pyxel.rectb(
+            x_pos,
+            y_pos,
+            self._world_width,
+            self._world_height,
+            self._world_border_color
+        )
 
     def draw_egg(self, x_pos: int, y_pos: int, width: int, height: int):
         pyxel.rect(
@@ -57,5 +69,5 @@ class View:
         return pyxel.btn(pyxel.KEY_L)
     
     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler):
-        pyxel.init(self._window_width, self._window_height, fps=fps)
+        pyxel.init(self._screen_width, self._screen_height, fps=fps)
         pyxel.run(update_handler.update, draw_handler.draw)

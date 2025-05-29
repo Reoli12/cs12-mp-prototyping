@@ -12,6 +12,21 @@ class DrawHandler(Protocol):
         ...
 
 @dataclass
+class GameSettings:
+    fps: int
+    world_width: int
+    world_height: int
+    screen_width: int
+    screen_height: int
+
+    def __init__(self, fps: int, world_width: int, world_height: int, screen_width: int, screen_height: int):
+        self.fps: int = fps
+        self.world_width: int = world_width
+        self.world_height: int = world_height
+        self.screen_width: int = screen_width
+        self.screen_height: int = screen_height
+
+@dataclass
 class Point:
     x: float
     y: float

@@ -1,13 +1,15 @@
 from __future__ import annotations
-from project_types import Eggnemy, PlayerEgg, Point
+from project_types import Eggnemy, PlayerEgg, Point, GameSettings
 import random
 
 
 class Model:
-    def __init__(self, player_egg: PlayerEgg, fps: int, window_width: int, window_height: int, eggnemy_count: int, eggnemy_width: int, eggnemy_height: int, eggnemy_speed: int):
-        self._window_width = window_width
-        self._window_height = window_height
-        self._fps = fps
+    def __init__(self, player_egg: PlayerEgg, settings: GameSettings, eggnemy_count: int, eggnemy_width: int, eggnemy_height: int, eggnemy_speed: int, eggnemy_initial_hp: int):
+        self._screen_width = settings.screen_width
+        self._screen_height = settings.screen_height
+        self._world_width = settings.world_width
+        self._world_height = settings.world_height
+        self._fps = settings.fps
         self._frame_count = 0
 
         self._player_egg = player_egg
@@ -18,6 +20,7 @@ class Model:
         self._eggnemy_width = eggnemy_width
         self._eggnemy_height = eggnemy_height
         self._eggnemy_speed = eggnemy_speed
+        self._eggnemy_max_hp = eggnemy_initial_hp
 
         self._is_game_over = False
 
@@ -48,7 +51,7 @@ class Model:
             self._player_egg.current_hp -= 1 
 
         self._frame_count += 1
-        print(player_egg.center_position, player_egg.topmost_point)
+        print(player_egg.center_position, player_egg.topmost_point, self._fps)
 
 
     def is_overlapping_player(self, eggnemy: Eggnemy):
@@ -70,9 +73,9 @@ class Model:
     def is_out_of_bounds(self) -> bool:
         return (   
             self._player_egg.leftmost_point < 0 
-            or self._player_egg.rightmost_point > self._window_width
+            or self._player_egg.rightmost_point > self._world_width
             or self._player_egg.topmost_point < 0
-            or self._player_egg.bottom_point > self._window_height 
+            or self._player_egg.bottom_point > self._world_height 
         )
 
     def return_to_bounds(self):
@@ -82,11 +85,11 @@ class Model:
         if player_egg.leftmost_point < 0:
             player_egg.center_position.x = player_egg.width / 2
 
-        if player_egg.rightmost_point > self._window_width:
-            player_egg.center_position.x = self._window_width - (player_egg.width / 2)
+        if player_egg.rightmost_point > self._world_width:
+            player_egg.center_position.x = self._world_width - (player_egg.width / 2)
 
-        if player_egg.bottom_point > self._window_height:
-            player_egg.center_position.y = self._window_height - (player_egg.height / 2)
+        if player_egg.bottom_point > self._world_height:
+            player_egg.center_position.y = self._world_height - (player_egg.height / 2)
 
         if player_egg.topmost_point < 0:
             player_egg.center_position.y = player_egg.height / 2
@@ -148,14 +151,14 @@ class Model:
             eggnemy_height = self._eggnemy_height
             eggnemy_center = None
             while True:
-                test_eggnemy_x = random.randint(eggnemy_width, self._window_width - eggnemy_width)
-                test_eggnemy_y = random.randint(eggnemy_height, self._window_height - eggnemy_height)
+                test_eggnemy_x = random.randint(eggnemy_width, self._world_width - eggnemy_width)
+                test_eggnemy_y = random.randint(eggnemy_height, self._world_height - eggnemy_height)
                 
                 eggnemy_center = Point(test_eggnemy_x, test_eggnemy_y)
                 eggnemy = Eggnemy(
                     self._eggnemy_height, 
                     self._eggnemy_width,
-                    1,
+                    self._eggnemy_max_hp,
                     eggnemy_center,
                     self.eggnemy_speed
                     )
@@ -165,12 +168,20 @@ class Model:
             self._eggnemies.append(eggnemy)
 
     @property
-    def window_width(self):
-        return self._window_width
+    def screen_width(self):
+        return self._screen_width
     
     @property
-    def window_height(self):
-        return self._window_height
+    def screen_height(self):
+        return self._screen_height
+
+    @property
+    def world_width(self):
+        return self._world_width
+    
+    @property
+    def world_height(self):
+        return self._world_height
 
     @property
     def fps(self):
@@ -203,6 +214,10 @@ class Model:
     @property
     def eggnemy_speed(self):
         return self._eggnemy_speed
+
+    @property
+    def eggnemy_max_hp(self):
+        return self._eggnemy_max_hp
 
     @property
     def overlapping_player_eggnemy(self):

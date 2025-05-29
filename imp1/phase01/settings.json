@@ -1,23 +1,23 @@
 {
   "fps": 30,
-  "worldWidth": 300,
-  "worldHeight": 300,
-  "screenWidth": 300,           //phase01
-  "screenHeight": 300,          //phase01
+  "worldWidth": 200,
+  "worldHeight": 200,
+  "screenWidth": 400,           
+  "screenHeight": 400,          
 
   "playerEggHp": 20,
   "playerEggWidth": 10,
   "playerEggHeight": 20,
   "playerEggSpeed": 3,
 
-  "eggnemInitialHp": 2,         //phase01
+  "eggnemInitialHp": 2,         
   "eggnemyInitialCount": 5,
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,
   "eggnemySpeed": 1,
 
-  "bossSpawnRateInEggnemy": 20, //phase01
-  "bossInitialHp": 50,          //phase01
-  "bossWidth": 20,              //phase01
-  "bossHeight": 40              //phase01
+  "bossSpawnRateInEggnemy": 20, 
+  "bossInitialHp": 50,          
+  "bossWidth": 20,             
+  "bossHeight": 40              
 }
