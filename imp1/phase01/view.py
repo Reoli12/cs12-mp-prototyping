@@ -49,7 +49,23 @@ class View:
         width,
         height,
         self._eggnemy_color
-    )
+    )        
+        
+    def text_eggnemy_health(self, x_pos: int, y_pos: int, cur_hp: int, total_hp: int):
+        pyxel.text( 
+            x_pos,
+            y_pos,
+            f'{cur_hp}/{total_hp}',
+            self._eggnemy_color
+            )
+        
+    def text_num_defeated_eggnemy(self, x_pos: int, y_pos: int, num: int):
+        pyxel.text(
+            x_pos,
+            y_pos,
+            f'{num}',
+            self._player_color
+        )
 
 
     #Inputs

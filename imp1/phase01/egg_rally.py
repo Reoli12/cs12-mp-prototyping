@@ -28,13 +28,17 @@ def main():
     egg_width = data["playerEggWidth"]
     egg_height = data["playerEggHeight"]
     egg_speed = data["playerEggSpeed"]
+    egg_damage = data["playerAttackDamage"]
+    egg_attack_radius = data["playerAttackRadius"]
 
     player_egg = PlayerEgg(
         egg_height,
         egg_width,
         egg_hp,
         Point(world_width / 2, world_height / 2),
-        egg_speed
+        egg_speed,
+        egg_damage,
+        egg_attack_radius
     )
 
     #eggnemy Info
@@ -48,7 +52,7 @@ def main():
     model = Model(player_egg, settings, eggnemy_count, eggnemy_width, eggnemy_height, eggnemy_speed, eggnemy_initial_hp)
     view = View(settings)
     controller = Controller(model, view)
-    
+
     controller.start()
 
 if __name__ == '__main__':

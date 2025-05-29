@@ -16,6 +16,7 @@ class Model:
 
         self._eggnemies: list[Eggnemy] = []
         self._overlapping_player_eggnemy: list[Eggnemy] = []
+        self._num_defeated_eggnemies = 0
         self._eggnemy_count = eggnemy_count
         self._eggnemy_width = eggnemy_width
         self._eggnemy_height = eggnemy_height
@@ -106,16 +107,21 @@ class Model:
 
     def player_attack(self, is_attack_pressed: bool):
         if is_attack_pressed:
-            radius = 50
+            radius = self._player_egg.player_attack_radius
+            damage = self._player_egg.player_attack_damage
             for eggnemy in self._eggnemies:
                 eggnemy_center = eggnemy.center_position
                 
                 #defeats eggnemy
                 distance_to_player = ((self._player_egg.center_position.x - eggnemy_center.x) ** 2 + (self._player_egg.center_position.y - eggnemy_center.y) ** 2) ** 0.5
                 if distance_to_player <= radius:
-                    self._eggnemies.remove(eggnemy)
-                    if eggnemy in self._overlapping_player_eggnemy:
-                        self._overlapping_player_eggnemy.remove(eggnemy)
+                    eggnemy.current_hp -= damage
+
+                    if eggnemy.current_hp <= 0:
+                        self._eggnemies.remove(eggnemy)
+                        self._num_defeated_eggnemies += 1
+                        if eggnemy in self._overlapping_player_eggnemy:
+                            self._overlapping_player_eggnemy.remove(eggnemy)
 
     def eggnemy_movement(self):
         for eggnemy in self._eggnemies:
@@ -218,6 +224,10 @@ class Model:
     @property
     def eggnemy_max_hp(self):
         return self._eggnemy_max_hp
+    
+    @property
+    def num_defeated_eggnemies(self):
+        return self._num_defeated_eggnemies
 
     @property
     def overlapping_player_eggnemy(self):

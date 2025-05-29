@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Protocol
 
 
@@ -49,10 +49,6 @@ class Egg(ABC):
         self.center_position: Point = center
         self.speed: int = speed
 
-    @abstractmethod
-    def move(self): # generalize how eggs should move, then add args
-        ...
-        
 
     @property
     def rightmost_point(self):
@@ -69,10 +65,17 @@ class Egg(ABC):
     
 
 class PlayerEgg(Egg):
-    def move(self):
-        ...
+    def __init__(self, height: int, width: int, hp: int, center: Point, speed: int, damage: int, attack_radius: int):
+        super().__init__(height, width, hp, center, speed)
+        
+        self.player_attack_damage = damage
+        self.player_attack_radius = attack_radius
 
 
 class Eggnemy(Egg):
-    def move(self):
-        ...
+    def __init__(self, height: int, width: int, hp: int, center: Point, speed: int):
+        super().__init__(height, width, hp, center, speed)
+
+class Boss(Egg):
+    def __init__(self, height: int, width: int, hp: int, center: Point, speed: int):
+        super().__init__(height, width, hp, center, speed)

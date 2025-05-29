@@ -1,16 +1,18 @@
 {
   "fps": 30,
-  "worldWidth": 200,
-  "worldHeight": 200,
-  "screenWidth": 400,           
-  "screenHeight": 400,          
+  "worldWidth": 400,
+  "worldHeight": 400,
+  "screenWidth": 300,           
+  "screenHeight": 300,          
 
   "playerEggHp": 20,
   "playerEggWidth": 10,
   "playerEggHeight": 20,
   "playerEggSpeed": 3,
+  "playerAttackDamage": 1,
+  "playerAttackRadius": 50,
 
-  "eggnemInitialHp": 2,         
+  "eggnemInitialHp": 10,         
   "eggnemyInitialCount": 5,
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,

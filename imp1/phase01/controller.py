@@ -51,15 +51,35 @@ class Controller:
         #eggnemies
         eggnemies = self._model.eggnemies
         for eggnemy in eggnemies:
-            x_pos = int(eggnemy.leftmost_point)
-            y_pos = int(eggnemy.topmost_point)
+            eggnemy_x_pos = int(eggnemy.leftmost_point)
+            eggnemy_y_pos = int(eggnemy.topmost_point)
             eggnemy_width = eggnemy.width
             eggnemy_height = eggnemy.height
+
+            eggnemy_cur_hp = eggnemy.current_hp
+            eggnemy_total_hp = eggnemy.total_hp
+            eggnemy_hp_x = int((eggnemy_x_pos - eggnemy_width / 2))
+            eggnemy_hp_y = int(eggnemy_y_pos + int(eggnemy_height * 1.5))
+
             self._view.draw_eggnemy(
-                x_pos - camera_x, 
-                y_pos - camera_y, 
+                eggnemy_x_pos - camera_x, 
+                eggnemy_y_pos - camera_y, 
                 eggnemy_width, 
                 eggnemy_height)
+            self._view.text_eggnemy_health(
+                eggnemy_hp_x - camera_x, 
+                eggnemy_hp_y - camera_y, 
+                eggnemy_cur_hp, 
+                eggnemy_total_hp)
+            
+        #stats
+        num_defeated_eggnemies = self._model.num_defeated_eggnemies
+        num_defeated_x_pos = 7
+        num_defeated_y_pos = 7
+        self._view.text_num_defeated_eggnemy(
+            num_defeated_x_pos, 
+            num_defeated_y_pos, 
+            num_defeated_eggnemies)
         
     def start(self):
         self._view.start(self._model.fps, self, self)
