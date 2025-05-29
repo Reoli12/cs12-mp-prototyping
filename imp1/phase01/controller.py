@@ -72,6 +72,8 @@ class Controller:
                 eggnemy_cur_hp, 
                 eggnemy_total_hp)
             
+        #boss
+            
         #stats
         num_defeated_eggnemies = self._model.num_defeated_eggnemies
         num_defeated_x_pos = 7

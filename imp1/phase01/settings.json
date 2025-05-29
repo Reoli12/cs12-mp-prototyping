@@ -8,7 +8,7 @@
   "playerEggHp": 20,
   "playerEggWidth": 10,
   "playerEggHeight": 20,
-  "playerEggSpeed": 3,
+  "playerEggSpeed": 5,
   "playerAttackDamage": 1,
   "playerAttackRadius": 50,
 
@@ -21,5 +21,6 @@
   "bossSpawnRateInEggnemy": 20, 
   "bossInitialHp": 50,          
   "bossWidth": 20,             
-  "bossHeight": 40              
+  "bossHeight": 40,
+  "bossSpeed": 3
 }
