@@ -25,26 +25,26 @@ class Controller:
         player_width = self._model.player_egg.stats.width
         player_height = self._model.player_egg.stats.height
         
-        camera_x = player_x_pos - self._model.screen_width // 2
-        camera_y = player_y_pos - self._model.screen_height // 2
+        camera_x_pos = player_x_pos - self._model.screen_width // 2
+        camera_y_pos = player_y_pos - self._model.screen_height // 2
 
         player_cur_hp = self._model.player_egg.stats.current_hp
         player_max_hp = self._model.player_egg.stats.max_hp
-        player_hp_x = int((player_x_pos - player_width / 2))
-        player_hp_y = int(player_y_pos + int(player_height * 1.5))
+        player_hp_x_pos = int((player_x_pos - player_width / 2))
+        player_hp_y_pos = int(player_y_pos + int(player_height * 1.5))
 
-        self._view.draw_world(-camera_x, -camera_y)
+        self._view.draw_world(-camera_x_pos, -camera_y_pos)
 
         if not self._model.is_game_over:
             self._view.draw_egg(
-                player_x_pos - camera_x, 
-                player_y_pos - camera_y, 
+                player_x_pos - camera_x_pos, 
+                player_y_pos - camera_y_pos, 
                 player_width, 
                 player_height)
         
         self._view.text_player_health(
-            player_hp_x - camera_x, 
-            player_hp_y - camera_y, 
+            player_hp_x_pos - camera_x_pos, 
+            player_hp_y_pos - camera_y_pos, 
             player_cur_hp, 
             player_max_hp)
 
@@ -62,13 +62,13 @@ class Controller:
             eggnemy_hp_y = int(eggnemy_y_pos + int(eggnemy_height * 1.5))
 
             self._view.draw_eggnemy(
-                eggnemy_x_pos - camera_x, 
-                eggnemy_y_pos - camera_y, 
+                eggnemy_x_pos - camera_x_pos, 
+                eggnemy_y_pos - camera_y_pos, 
                 eggnemy_width, 
                 eggnemy_height)
             self._view.text_eggnemy_health(
-                eggnemy_hp_x - camera_x, 
-                eggnemy_hp_y - camera_y, 
+                eggnemy_hp_x - camera_x_pos, 
+                eggnemy_hp_y - camera_y_pos, 
                 eggnemy_cur_hp, 
                 eggnemy_max_hp)
             
@@ -87,13 +87,13 @@ class Controller:
             boss_hp_y = int(boss_y_pos + int(boss_height * 1.5))
 
             self._view.draw_boss(
-                boss_x_pos - camera_x, 
-                boss_y_pos - camera_y, 
+                boss_x_pos - camera_x_pos, 
+                boss_y_pos - camera_y_pos, 
                 boss_width, 
                 boss_height)
             self._view.text_boss_health(
-                boss_hp_x - camera_x, 
-                boss_hp_y - camera_y, 
+                boss_hp_x - camera_x_pos, 
+                boss_hp_y - camera_y_pos, 
                 boss_cur_hp, 
                 boss_max_hp)
             
@@ -105,6 +105,23 @@ class Controller:
             num_defeated_x_pos, 
             num_defeated_y_pos, 
             num_defeated_eggnemies)
+        
+        time_x_pos = self._model.screen_width - 21
+        time_y_pos = 7
+        sec = self._model.sec
+        min = self._model.min
+        self._view.text_time(
+            time_x_pos, 
+            time_y_pos,
+            min,
+            sec)
+        
+        if self._model.is_game_won:
+            win_x_pos = int((player_x_pos - int((player_width / 2) * 2)))
+            win_y_pos = int(player_y_pos - int(player_height))
+            self._view.text_win_message(
+            win_x_pos - camera_x_pos, 
+            win_y_pos - camera_y_pos)
         
     def start(self):
         self._view.start(self._model.fps, self, self)

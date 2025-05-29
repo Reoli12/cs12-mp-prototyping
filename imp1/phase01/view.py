@@ -83,6 +83,22 @@ class View:
             y_pos,
             f'{num}',
             self._player_color
+        ) 
+
+    def text_time(self, x_pos: int, y_pos: int, min: int, sec: int):
+        pyxel.text(
+            x_pos,
+            y_pos,
+            f'{min}:{sec}',
+            self._player_color
+        )
+
+    def text_win_message(self, x_pos: int, y_pos: int):
+        pyxel.text(
+            x_pos,
+            y_pos,
+            f'You Win!',
+            self._player_color
         )
 
 

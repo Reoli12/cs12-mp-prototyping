@@ -11,6 +11,8 @@ class Model:
         self._world_height = settings.world_height
         self._fps = settings.fps
         self._frame_count = 0
+        self._sec = 0
+        self._min = 0
 
         self._player_egg = player_egg
 
@@ -31,6 +33,7 @@ class Model:
         self._boss_max_hp = boss_info.max_hp
 
         self._is_game_over = False
+        self._is_game_won = False
 
     def update(self, is_forward_pressed: bool, is_left_pressed: bool, is_down_pressed: bool, is_right_pressed: bool, is_attack_pressed: bool):
         player_egg = self._player_egg
@@ -39,7 +42,7 @@ class Model:
         if player_egg.stats.current_hp <= 0:
             self._is_game_over = True
 
-        if self._is_game_over:
+        if self._is_game_over or self._is_game_won:
             return
         
         #player movement, position and attack
@@ -67,8 +70,18 @@ class Model:
         if self._frame_count % self._fps == 0  and self._boss_egg and self.is_overlapping_player(self._boss_egg):
             self._player_egg.stats.current_hp -= 3 
 
+
+        #time and frame
+        if self._frame_count % self._fps == 0:
+            self._sec += 1
+            if self._sec % 60 == 0:
+                self._min += 1
+                self._sec = 0
+
         self._frame_count += 1
-        #print(player_egg.center_position, player_egg.topmost_point, self._fps)
+
+
+        print(player_egg.center_position, player_egg.topmost_point, self._fps)
 
 
     def is_overlapping_player(self, eggnemy: Eggnemy | Boss):
@@ -149,7 +162,7 @@ class Model:
                     if boss.stats.current_hp <= 0:
                         self._num_defeated_eggnemies += 1
                         self._boss_egg = None
-                        self._is_game_over = True 
+                        self._is_game_won = True 
                         if boss in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(boss)
                 
@@ -269,6 +282,14 @@ class Model:
     @property
     def frame_count(self):
         return self._frame_count
+    
+    @property
+    def sec(self):
+        return self._sec
+    
+    @property
+    def min(self):
+        return self._min
 
     @property
     def player_egg(self):
@@ -333,3 +354,7 @@ class Model:
     @property
     def is_game_over(self):
         return self._is_game_over
+    
+    @property
+    def is_game_won(self):
+        return self._is_game_won
