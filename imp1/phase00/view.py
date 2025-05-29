@@ -60,19 +60,19 @@ class View:
 
 
     #Inputs
-    def is_w_pressed(self):
+    def is_forward_pressed(self):
         return pyxel.btn(pyxel.KEY_W) or pyxel.btn(pyxel.KEY_UP)
     
-    def is_a_pressed(self):
+    def is_left_pressed(self):
         return pyxel.btn(pyxel.KEY_A) or pyxel.btn(pyxel.KEY_LEFT)
     
-    def is_s_pressed(self):
+    def is_down_pressed(self):
         return pyxel.btn(pyxel.KEY_S) or pyxel.btn(pyxel.KEY_DOWN)
     
-    def is_d_pressed(self):
+    def is_right_pressed(self):
         return pyxel.btn(pyxel.KEY_D) or pyxel.btn(pyxel.KEY_RIGHT)
     
-    def is_l_pressed(self):
+    def is_attack_pressed(self):
         return pyxel.btn(pyxel.KEY_L)
     
     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler):

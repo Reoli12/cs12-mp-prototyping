@@ -9,11 +9,11 @@ class Controller:
 
     def update(self):
         self._model.update(
-            self._view.is_w_pressed(), 
-            self._view.is_a_pressed(), 
-            self._view.is_s_pressed(), 
-            self._view.is_d_pressed(),
-            self._view.is_l_pressed()
+            self._view.is_forward_pressed(), 
+            self._view.is_left_pressed(), 
+            self._view.is_down_pressed(), 
+            self._view.is_right_pressed(),
+            self._view.is_attack_pressed()
             )
 
     def draw(self):

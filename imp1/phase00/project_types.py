@@ -23,14 +23,16 @@ class Egg(ABC):
     total_hp: int
     current_hp: int
     center_position: Point
+    speed: int
     
 
-    def __init__(self, height: int, width: int, hp: int, center: Point):
+    def __init__(self, height: int, width: int, hp: int, center: Point, speed: int):
         self.height: int = height
         self.width: int = width
         self.total_hp: int = hp
         self.current_hp = hp
         self.center_position: Point = center
+        self.speed: int = speed
 
     @abstractmethod
     def move(self): # generalize how eggs should move, then add args
