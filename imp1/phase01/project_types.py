@@ -23,7 +23,7 @@ class GameSettings:
 class EggInfo:
     width: int
     height: int
-    total_hp: int
+    max_hp: int
     current_hp: int
     speed: int
 
@@ -63,11 +63,10 @@ class PlayerEgg(Egg):
         self.player_attack_damage = damage
         self.player_attack_radius = attack_radius
 
-
 class Eggnemy(Egg):
     def __init__(self, egginfo: EggInfo, center: Point):
         super().__init__(egginfo, center)
 
-class Boss(Egg):
+class Boss(Eggnemy):
     def __init__(self, egginfo: EggInfo, center: Point):
         super().__init__(egginfo, center)

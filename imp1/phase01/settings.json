@@ -13,7 +13,7 @@
   "playerAttackRadius": 50,
 
   "eggnemInitialHp": 10,         
-  "eggnemyInitialCount": 5,
+  "eggnemyInitialCount": 10,
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,
   "eggnemySpeed": 1,

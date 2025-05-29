@@ -5,6 +5,7 @@ class View:
     def __init__(self, settings: GameSettings):
         self._player_color = 7
         self._eggnemy_color = 13
+        self._boss_color = 2
         self._world_border_color = 7
 
         self._screen_width = settings.screen_width
@@ -34,11 +35,11 @@ class View:
         self._player_color
     )
         
-    def text_player_health(self, x_pos: int, y_pos: int, cur_hp: int, total_hp: int):
+    def text_player_health(self, x_pos: int, y_pos: int, cur_hp: int, max_hp: int):
         pyxel.text( 
             x_pos,
             y_pos,
-            f'{cur_hp}/{total_hp}',
+            f'{cur_hp}/{max_hp}',
             self._player_color
             )
     
@@ -51,12 +52,29 @@ class View:
         self._eggnemy_color
     )        
         
-    def text_eggnemy_health(self, x_pos: int, y_pos: int, cur_hp: int, total_hp: int):
+    def text_eggnemy_health(self, x_pos: int, y_pos: int, cur_hp: int, max_hp: int):
         pyxel.text( 
             x_pos,
             y_pos,
-            f'{cur_hp}/{total_hp}',
+            f'{cur_hp}/{max_hp}',
             self._eggnemy_color
+            )
+            
+    def draw_boss(self, x_pos: int, y_pos: int, width: int, height: int):
+        pyxel.rect(
+        x_pos,
+        y_pos,
+        width,
+        height,
+        self._boss_color
+    )        
+        
+    def text_boss_health(self, x_pos: int, y_pos: int, cur_hp: int, max_hp: int):
+        pyxel.text( 
+            x_pos,
+            y_pos,
+            f'{cur_hp}/{max_hp}',
+            self._boss_color
             )
         
     def text_num_defeated_eggnemy(self, x_pos: int, y_pos: int, num: int):
