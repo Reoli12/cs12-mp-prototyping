@@ -18,7 +18,7 @@
   "eggnemyHeight": 5,
   "eggnemySpeed": 1,
 
-  "bossSpawnRateInEggnemy": 20, 
+  "bossSpawnRate": 20, 
   "bossInitialHp": 50,          
   "bossWidth": 20,             
   "bossHeight": 40,

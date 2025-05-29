@@ -1,7 +1,7 @@
 from model import Model
 from view import View
 from controller import Controller
-from project_types import Point, PlayerEgg, GameSettings
+from project_types import Point, PlayerEgg, EggInfo, GameSettings
 import json
 
 with open('settings.json', 'r') as file:
@@ -32,24 +32,50 @@ def main():
     egg_attack_radius = data["playerAttackRadius"]
 
     player_egg = PlayerEgg(
-        egg_height,
-        egg_width,
-        egg_hp,
+        EggInfo(
+            egg_width,
+            egg_height,
+            egg_hp,
+            egg_hp,
+            egg_speed
+        ),
         Point(world_width / 2, world_height / 2),
-        egg_speed,
         egg_damage,
         egg_attack_radius
     )
 
     #eggnemy Info
-    eggnemy_initial_hp = data["eggnemInitialHp"]
+    eggnemy_hp = data["eggnemInitialHp"]
     eggnemy_count = data["eggnemyInitialCount"]
     eggnemy_width = data["eggnemyWidth"]
     eggnemy_height = data["eggnemyHeight"]
     eggnemy_speed = data["eggnemySpeed"]
 
+    eggnemy_info = EggInfo(
+        eggnemy_width,
+        eggnemy_height,
+        eggnemy_hp,
+        eggnemy_hp,
+        eggnemy_speed
+    )
+
+    #boss Info
+    boss_spawn_rate = data["bossSpawnRate"]
+    boss_hp = data["bossInitialHp"]
+    boss_width = data["bossWidth"]
+    boss_height = data["bossHeight"]
+    boss_speed = data["bossSpeed"]
+
+    boss_info = EggInfo(
+        boss_width,
+        boss_height,
+        boss_hp,
+        boss_hp,
+        boss_speed
+    )
+
     #MVC init
-    model = Model(player_egg, settings, eggnemy_count, eggnemy_width, eggnemy_height, eggnemy_speed, eggnemy_initial_hp)
+    model = Model(player_egg, settings, eggnemy_count, eggnemy_info, boss_info, boss_spawn_rate)
     view = View(settings)
     controller = Controller(model, view)
 

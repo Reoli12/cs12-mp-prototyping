@@ -1,10 +1,10 @@
 from __future__ import annotations
-from project_types import Eggnemy, PlayerEgg, Point, GameSettings
+from project_types import Eggnemy, PlayerEgg, Point, GameSettings, EggInfo
 import random
 
 
 class Model:
-    def __init__(self, player_egg: PlayerEgg, settings: GameSettings, eggnemy_count: int, eggnemy_width: int, eggnemy_height: int, eggnemy_speed: int, eggnemy_initial_hp: int):
+    def __init__(self, player_egg: PlayerEgg, settings: GameSettings, eggnemy_count: int, eggnemy_info: EggInfo, boss_info: EggInfo, boss_spawn_rate: int):
         self._screen_width = settings.screen_width
         self._screen_height = settings.screen_height
         self._world_width = settings.world_width
@@ -17,11 +17,12 @@ class Model:
         self._eggnemies: list[Eggnemy] = []
         self._overlapping_player_eggnemy: list[Eggnemy] = []
         self._num_defeated_eggnemies = 0
+        self._eggnemy_info = eggnemy_info
         self._eggnemy_count = eggnemy_count
-        self._eggnemy_width = eggnemy_width
-        self._eggnemy_height = eggnemy_height
-        self._eggnemy_speed = eggnemy_speed
-        self._eggnemy_max_hp = eggnemy_initial_hp
+        self._eggnemy_width = eggnemy_info.width
+        self._eggnemy_height = eggnemy_info.height
+        self._eggnemy_speed = eggnemy_info.speed
+        self._eggnemy_max_hp = eggnemy_info.total_hp
 
         self._is_game_over = False
 
@@ -29,7 +30,7 @@ class Model:
         player_egg = self._player_egg
 
         #game over state
-        if player_egg.current_hp <= 0:
+        if player_egg.stats.current_hp <= 0:
             self._is_game_over = True
 
         if self._is_game_over:
@@ -49,7 +50,7 @@ class Model:
 
         #damage
         if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
-            self._player_egg.current_hp -= 1 
+            self._player_egg.stats.current_hp -= 1 
 
         self._frame_count += 1
         print(player_egg.center_position, player_egg.topmost_point, self._fps)
@@ -84,26 +85,26 @@ class Model:
         assert self.is_out_of_bounds()
         
         if player_egg.leftmost_point < 0:
-            player_egg.center_position.x = player_egg.width / 2
+            player_egg.center_position.x = player_egg.stats.width / 2
 
         if player_egg.rightmost_point > self._world_width:
-            player_egg.center_position.x = self._world_width - (player_egg.width / 2)
+            player_egg.center_position.x = self._world_width - (player_egg.stats.width / 2)
 
         if player_egg.bottom_point > self._world_height:
-            player_egg.center_position.y = self._world_height - (player_egg.height / 2)
+            player_egg.center_position.y = self._world_height - (player_egg.stats.height / 2)
 
         if player_egg.topmost_point < 0:
-            player_egg.center_position.y = player_egg.height / 2
+            player_egg.center_position.y = player_egg.stats.height / 2
     
     def player_movement(self, forward_btn: bool, down_btn: bool, left_btn: bool, right_btn: bool):
         if forward_btn:
-            self._player_egg.center_position.y -= self._player_egg.speed
+            self._player_egg.center_position.y -= self._player_egg.stats.speed
         if left_btn:
-            self._player_egg.center_position.x -= self._player_egg.speed
+            self._player_egg.center_position.x -= self._player_egg.stats.speed
         if down_btn:
-            self._player_egg.center_position.y += self._player_egg.speed
+            self._player_egg.center_position.y += self._player_egg.stats.speed
         if right_btn:
-            self._player_egg.center_position.x += self._player_egg.speed
+            self._player_egg.center_position.x += self._player_egg.stats.speed
 
     def player_attack(self, is_attack_pressed: bool):
         if is_attack_pressed:
@@ -115,9 +116,9 @@ class Model:
                 #defeats eggnemy
                 distance_to_player = ((self._player_egg.center_position.x - eggnemy_center.x) ** 2 + (self._player_egg.center_position.y - eggnemy_center.y) ** 2) ** 0.5
                 if distance_to_player <= radius:
-                    eggnemy.current_hp -= damage
+                    eggnemy.stats.current_hp -= damage
 
-                    if eggnemy.current_hp <= 0:
+                    if eggnemy.stats.current_hp <= 0:
                         self._eggnemies.remove(eggnemy)
                         self._num_defeated_eggnemies += 1
                         if eggnemy in self._overlapping_player_eggnemy:
@@ -133,14 +134,14 @@ class Model:
             #follows player
             if not self._is_game_over:
                 if x_distance_to_player < 0: #right of player
-                    eggnemy.center_position.x -= eggnemy.speed
+                    eggnemy.center_position.x -= eggnemy.stats.speed
                 elif x_distance_to_player > 0: #left
-                    eggnemy.center_position.x += eggnemy.speed
+                    eggnemy.center_position.x += eggnemy.stats.speed
 
                 if y_distance_to_player < 0: #down
-                    eggnemy.center_position.y -= eggnemy.speed
+                    eggnemy.center_position.y -= eggnemy.stats.speed
                 elif y_distance_to_player > 0: #up
-                    eggnemy.center_position.y += eggnemy.speed
+                    eggnemy.center_position.y += eggnemy.stats.speed
                     
     def eggnemy_overlap_check(self, eggnemy: Eggnemy):
         is_overlap: bool = self.is_overlapping_player(eggnemy) 
@@ -162,11 +163,8 @@ class Model:
                 
                 eggnemy_center = Point(test_eggnemy_x, test_eggnemy_y)
                 eggnemy = Eggnemy(
-                    self._eggnemy_height, 
-                    self._eggnemy_width,
-                    self._eggnemy_max_hp,
+                    self.eggnemy_info,
                     eggnemy_center,
-                    self.eggnemy_speed
                     )
                 
                 if not self.is_overlapping_player(eggnemy):
@@ -204,6 +202,10 @@ class Model:
     @property
     def eggnemies(self):
         return self._eggnemies
+    
+    @property
+    def eggnemy_info(self):
+        return self._eggnemy_info
     
     @property
     def eggnemy_count(self):

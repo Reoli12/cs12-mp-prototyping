@@ -22,14 +22,14 @@ class Controller:
         #player and camera
         player_x_pos = int(self._model.player_egg.leftmost_point)
         player_y_pos = int(self._model.player_egg.topmost_point)
-        player_width = self._model.player_egg.width
-        player_height = self._model.player_egg.height
+        player_width = self._model.player_egg.stats.width
+        player_height = self._model.player_egg.stats.height
         
         camera_x = player_x_pos - self._model.screen_width // 2
         camera_y = player_y_pos - self._model.screen_height // 2
 
-        player_cur_hp = self._model.player_egg.current_hp
-        player_total_hp = self._model.player_egg.total_hp
+        player_cur_hp = self._model.player_egg.stats.current_hp
+        player_total_hp = self._model.player_egg.stats.total_hp
         player_hp_x = int((player_x_pos - player_width / 2))
         player_hp_y = int(player_y_pos + int(player_height * 1.5))
 
@@ -53,11 +53,11 @@ class Controller:
         for eggnemy in eggnemies:
             eggnemy_x_pos = int(eggnemy.leftmost_point)
             eggnemy_y_pos = int(eggnemy.topmost_point)
-            eggnemy_width = eggnemy.width
-            eggnemy_height = eggnemy.height
+            eggnemy_width = eggnemy.stats.width
+            eggnemy_height = eggnemy.stats.height
 
-            eggnemy_cur_hp = eggnemy.current_hp
-            eggnemy_total_hp = eggnemy.total_hp
+            eggnemy_cur_hp = eggnemy.stats.current_hp
+            eggnemy_total_hp = eggnemy.stats.total_hp
             eggnemy_hp_x = int((eggnemy_x_pos - eggnemy_width / 2))
             eggnemy_hp_y = int(eggnemy_y_pos + int(eggnemy_height * 1.5))
 
