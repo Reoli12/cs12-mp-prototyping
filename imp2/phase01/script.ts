@@ -13,26 +13,10 @@ const update = (msg: Msg, model: Model): Model =>
             model.isOver? model : 
             (key == 'l' || key == 'L') ? 
             modelDefeatedEggnemies(model) :
-            // move all elements relative to egg loc
-            Model.make({
-            ...model,
-            eggnemies: pipe(
-                model.eggnemies,
-                Array.map((eggnemy) => Eggnemy.make({
-                    ...eggnemy,
-                    centerCoords: moveRelativeToPlayer(
-                        eggnemy.centerCoords,
-                        String.toLowerCase(key),
-                        model.playerEgg.speed
-                    ),
-                }),   
-            )),
-            worldCenter: moveRelativeToPlayer(
-                model.worldCenter,
-                String.toLowerCase(key),
-                model.playerEgg.speed
-            )
-        })),
+            willNewStepBeInsideBounds(key, model, model.playerEgg.speed) ?  
+            getModelAfterEverythingMoved(model, key, model.playerEgg.speed) :
+            model // replace with move minimum dist
+        ),
         Match.tag('Canvas.MsgTick', () => 
             model.playerEgg.current_hp <= 0 ? Model.make({
                 ...model,
@@ -65,7 +49,7 @@ const update = (msg: Msg, model: Model): Model =>
                         Match.tag("Some", (frameCount) => 
                             frameCount.value < model.fps? Option.some(frameCount.value + 1) : Option.some(0)
                             // since egg is damaged here, update count to 0
-                        ),
+                        ), 
                         Match.exhaustive
                     )
             }),
@@ -100,6 +84,42 @@ const update = (msg: Msg, model: Model): Model =>
         ),
         Match.orElse(() => model)
     )
+
+const willNewStepBeInsideBounds = (key: string, model: Model, distance: number): boolean =>
+    // true
+    key == 'a' ?    Math.abs(model.worldCenter.x - model.playerEgg.centerCoords.x) + 
+                    model.playerEgg.width / 2 + - model.worldBoundaryWidth +distance 
+                    <= model.worldWidth / 2:
+    key == 'd' ?    Math.abs(model.worldCenter.x - model.playerEgg.centerCoords.x) + 
+                    model.playerEgg.width / 2 + - model.worldBoundaryWidth +distance 
+                    <= model.worldWidth / 2:
+
+    key == 's' || key == 'w'?   Math.abs(model.worldCenter.y - model.playerEgg.centerCoords.y) + 
+                                model.playerEgg.height / 2 + distance
+                                <= model.worldHeight / 2 :
+    false   
+
+
+const getModelAfterEverythingMoved = (model: Model, key: string, distance: number) =>
+    Model.make({
+                ...model,
+                eggnemies: pipe(
+                    model.eggnemies,
+                    Array.map((eggnemy) => Eggnemy.make({
+                        ...eggnemy,
+                        centerCoords: moveRelativeToPlayer(
+                            eggnemy.centerCoords,
+                            String.toLowerCase(key),
+                            distance,
+                        ),
+                    }),   
+                )),
+                worldCenter: moveRelativeToPlayer(
+                    model.worldCenter,
+                    String.toLowerCase(key),
+                    distance,
+                )
+            })
 
 const moveRelativeToPlayer = (point: Point, key: string, playerSpeed): Point =>
     key == 'w' ? Point.make({...point, y: point.y + playerSpeed}) :
@@ -177,7 +197,7 @@ const view = (model: Model) =>
                 width: model.worldWidth,
                 height: model.worldHeight,
                 color: "white",
-                lineWidth: 3,
+                lineWidth: model.worldBoundaryWidth,
             }),
             ...(model.isOver? Array.empty(): viewEgg(playerEgg, "white")), // spread empty array
             ...pipe(
@@ -281,6 +301,7 @@ function main() {
             x: settings.screenWidth / 2,
             y: settings.screenHeight / 2,
         }),
+        worldBoundaryWidth: settings.worldBoundaryWidth,
         screenHeight: settings.screenHeight,
         screenWidth: settings.screenWidth,
         fps: settings.fps,
