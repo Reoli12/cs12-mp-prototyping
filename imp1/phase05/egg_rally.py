@@ -1,7 +1,7 @@
 from model import Model
 from view import View
 from controller import Controller
-from project_types import Point, PlayerEgg, EggInfo, GameSettings
+from project_types import Point, PlayerEgg, EggInfo, GameSettings, EgghancementSettings
 import json
 
 with open('settings.json', 'r') as file:
@@ -37,10 +37,10 @@ def main():
             egg_height,
             egg_hp,
             egg_hp,
+            egg_damage,
             egg_speed
         ),
         Point(world_width / 2, world_height / 2),
-        egg_damage,
         egg_attack_radius
     )
 
@@ -74,8 +74,21 @@ def main():
         boss_speed
     )
 
+    #Egghancement Settings
+    egghancementNeededXp: int = data["egghancementNeededXp"]
+    maxHpEgghancement: int = data["maxHpEgghancement"]
+    atkEgghancement: int = data["attackEgghancement"]
+    spdEgghancement: int = data["speedEgghancement"]
+
+    egghancement = EgghancementSettings(
+        egghancementNeededXp,
+        maxHpEgghancement,
+        atkEgghancement,
+        spdEgghancement
+    )
+
     #MVC init
-    model = Model(player_egg, settings, eggnemy_count, eggnemy_info, boss_info, boss_spawn_rate)
+    model = Model(player_egg, settings, eggnemy_count, eggnemy_info, boss_info, boss_spawn_rate, egghancement)
     view = View(settings)
     controller = Controller(model, view)
 
