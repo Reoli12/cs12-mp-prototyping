@@ -90,9 +90,9 @@ def main():
     )
 
     #MVC init
-    model = Model(player_egg, settings, eggnemy_count, eggnemy_info, boss_info, boss_spawn_rate, egghancement)
-    view = View(settings)
-    controller = Controller(model, view)
+    model: Model = Model(player_egg, settings, eggnemy_count, eggnemy_info, boss_info, boss_spawn_rate, egghancement)
+    view: View = View(settings)
+    controller: Controller = Controller(model, view)
 
     controller.start()
 

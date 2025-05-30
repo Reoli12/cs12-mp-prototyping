@@ -7,7 +7,7 @@ class View:
         self._eggnemy_color: int = 13               #gray
         self._boss_color: int = 10                  #yellow
         self._world_border_color: int = 7           #wwhite
-        self._text_ui_color: int = 7             #white
+        self._text_ui_color: int = 7                #white
         self._egghancement_border_color: int = 7    #white
         self._egghancement_fill_color: int = 0      #black 
 
@@ -15,11 +15,6 @@ class View:
         self._screen_height: int = settings.screen_height
         self._world_width: int = settings.world_width
         self._world_height: int = settings.world_height
-        self._egghancements: list[str] = [
-            f'[1]   Increase Max HP by 5',
-            f'[2]   Increase Attack by 1',
-            f'[3]   Increase Speed by 1',
-        ]
 
     #Outputs
     def clear_screen(self):
@@ -50,14 +45,13 @@ class View:
             self._egghancement_border_color
         )
 
-    def text_egghance(self, x_pos: int, y_pos: int, spacing: int):
-        for (i, egghancement) in enumerate(self._egghancements):
-            pyxel.text(
-                x_pos,
-                y_pos + (i * spacing),
-                egghancement,
-                self._text_ui_color
-            )
+    def text_egghance(self, x_pos: int, y_pos: int, egghancement_text: str):
+        pyxel.text(
+            x_pos,
+            y_pos,
+            egghancement_text,
+            self._text_ui_color
+        )
 
     def draw_egg(self, x_pos: int, y_pos: int, width: int, height: int):
         pyxel.rect(
@@ -187,6 +181,7 @@ class View:
     def is_third_egghancement(self):
         return pyxel.btn(pyxel.KEY_3)
     
+    #start
     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler):
         pyxel.init(self._screen_width, self._screen_height, fps=fps)
         pyxel.run(update_handler.update, draw_handler.draw)

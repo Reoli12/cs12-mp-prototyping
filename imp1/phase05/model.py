@@ -8,13 +8,13 @@ import random
 class Model:
     def __init__(self, player_egg: PlayerEgg, settings: GameSettings, eggnemy_count: int, eggnemy_info: EggInfo, boss_info: EggInfo, boss_spawn_rate: int, egghancement: EgghancementSettings):
         #Stored parameters
-        self._param_player_egg = player_egg
-        self._param_settings = settings
-        self._param_eggnemy_count = eggnemy_count
-        self._param_eggnemy_info = eggnemy_info
-        self._param_boss_info = boss_info
-        self._param_boss_spawn_rate = boss_spawn_rate
-        self._param_egghancement = egghancement
+        self._param_player_egg: PlayerEgg = player_egg
+        self._param_settings: GameSettings = settings
+        self._param_eggnemy_count: int = eggnemy_count
+        self._param_eggnemy_info: EggInfo = eggnemy_info
+        self._param_boss_info: EggInfo = boss_info
+        self._param_boss_spawn_rate: int = boss_spawn_rate
+        self._param_egghancement: EgghancementSettings = egghancement
         self._leaderboards: list[tuple[int, int]] = []
         self._leaderboards_str: list[str] = []
         self._is_time_get: bool = False
@@ -129,7 +129,7 @@ class Model:
                     if eggnemy.stats.current_hp <= 0:
                         self._cur_xp += 1
                         self._num_defeated_eggnemies += 1
-                        self._got_egghanced = False
+                        self._got_egghanced: bool = False
                         self._eggnemies.remove(eggnemy)
                         self.egghance_check()
                         if self._is_to_be_egghanced:
@@ -195,12 +195,12 @@ class Model:
             x_distance_to_player: float = self._player_egg.center_position.x - eggnemy.center_position.x
             y_distance_to_player: float = self._player_egg.center_position.y - eggnemy.center_position.y
             distance_to_player: float = ((x_distance_to_player) ** 2 + (y_distance_to_player) ** 2) ** 0.5
-            original_center = deepcopy(eggnemy.center_position)
+            original_center: Point = deepcopy(eggnemy.center_position)
 
             #follows player
             if not self._is_game_over and distance_to_player > 0:
-                x_pos = (x_distance_to_player / distance_to_player) * eggnemy.stats.speed
-                y_pos = (y_distance_to_player / distance_to_player) * eggnemy.stats.speed
+                x_pos: float = (x_distance_to_player / distance_to_player) * eggnemy.stats.speed
+                y_pos: float = (y_distance_to_player / distance_to_player) * eggnemy.stats.speed
 
                 eggnemy.center_position.x += x_pos
                 eggnemy.center_position.y += y_pos
@@ -253,9 +253,9 @@ class Model:
             
             #follows player
             if not self._is_game_over and distance_to_player > 0:
-                x_pos = (x_distance_to_player / distance_to_player) * self._boss_egg.stats.speed
-                y_pos = (y_distance_to_player / distance_to_player) * self._boss_egg.stats.speed
-                original_center = deepcopy(self._boss_egg.center_position)
+                x_pos: float = (x_distance_to_player / distance_to_player) * self._boss_egg.stats.speed
+                y_pos: float = (y_distance_to_player / distance_to_player) * self._boss_egg.stats.speed
+                original_center: Point = deepcopy(self._boss_egg.center_position)
 
                 self._boss_egg.center_position.x += x_pos
                 self._boss_egg.center_position.y += y_pos
@@ -309,17 +309,17 @@ class Model:
         self._is_game_won: bool = False
 
     def update_leaderboards(self, min: int, sec: int):
-        self._is_time_get = True
+        self._is_time_get: bool = True
         self._leaderboards.append((min, sec))
 
         #in terms of seconds
         self._leaderboards.sort(key=lambda time: time[0] * 60 + time[1])
-        self._leaderboards = self._leaderboards [:3]
+        self._leaderboards: list[tuple[int, int]] = self._leaderboards [:3]
         self.leaderboards_stringify()
     
     def leaderboards_stringify(self):
         runs: list[tuple[int, int]] = self.leaderboards
-        self._leaderboards_str = []
+        self._leaderboards_str: list[str] = []
         runs_str: list[str] = self._leaderboards_str
             
         for i, (min, sec) in enumerate(runs, 1):
@@ -355,8 +355,8 @@ class Model:
             case _:
                 return
         
-        self._is_to_be_egghanced = False
-        self._got_egghanced = True
+        self._is_to_be_egghanced: bool = False
+        self._got_egghanced: bool = True
 
     def player_takes_damage(self):
         if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
@@ -368,7 +368,7 @@ class Model:
     def egghance_check(self):
         if not self._got_egghanced and self._cur_xp != 0 and self._cur_xp % self._egghancement.xp_needed == 0:
             print("level up")
-            self._is_to_be_egghanced = True
+            self._is_to_be_egghanced: bool = True
 
     @property
     def param_player_egg(self) -> PlayerEgg:

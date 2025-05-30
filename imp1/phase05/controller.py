@@ -1,6 +1,7 @@
 from model import Model
 from view import View
 from copy import deepcopy
+from project_types import Eggnemy
 from typing import Literal
 
 
@@ -58,8 +59,8 @@ class Controller:
         self._view.clear_screen()
 
         #screen dimensions
-        screen_width = self._model.screen_width
-        screen_height = self._model.screen_height
+        screen_width: int = self._model.screen_width
+        screen_height: int = self._model.screen_height
 
         #player and camera
         player_x_pos: int = int(self._model.player_egg.leftmost_point)
@@ -91,7 +92,7 @@ class Controller:
             player_max_hp)
 
         #eggnemies
-        eggnemies = self._model.eggnemies
+        eggnemies: list[Eggnemy] = self._model.eggnemies
         for eggnemy in eggnemies:
             eggnemy_x_pos: int = int(eggnemy.leftmost_point)
             eggnemy_y_pos: int = int(eggnemy.topmost_point)
@@ -215,8 +216,8 @@ class Controller:
             win_y_pos - camera_y_pos)
 
         if self._model.is_game_over or self._model.is_game_won:
-            restart_x_pos = player_hp_x_pos - 13
-            restart_y_pos = int(player_y_pos + int(player_height * 2))
+            restart_x_pos: int = player_hp_x_pos - 13
+            restart_y_pos: int = int(player_y_pos + int(player_height * 2))
 
             #restart message
             self._view.text_restart_message(
@@ -226,24 +227,30 @@ class Controller:
         
         #egghance
         if self._model.is_to_be_egghanced:
-            egghance_x_pos = screen_width // 4
-            egghance_y_pos = int(screen_height // 2.5)
-            egghance_width = screen_width // 2
-            egghance_height = screen_height // 8
+            egghance_x_pos: int = screen_width // 4
+            egghance_y_pos: int = int(screen_height // 2.5)
+            egghance_width: int = screen_width // 2
+            egghance_height: int = screen_height // 8
             self._view.draw_egghance_ui(
                 egghance_x_pos,
                 egghance_y_pos,
                 egghance_width,
                 egghance_height
             )
-            egghance_text_x_pos = egghance_x_pos + egghance_width // 7
-            egghance_text_y_pos = egghance_y_pos + egghance_height // 6
-            egghance_spacing = egghance_height // 4
+            egghance_text_x_pos: int = egghance_x_pos + egghance_width // 7
+            egghance_text_y_pos: int = egghance_y_pos + egghance_height // 6
+            egghance_spacing: int = egghance_height // 4
+            egghancements: list[str] = [
+                f'[1]   Increase Max HP by 5',
+                f'[2]   Increase Attack by 1',
+                f'[3]   Increase Speed by 1',
+            ]
 
-            self._view.text_egghance(
-                egghance_text_x_pos,
-                egghance_text_y_pos,
-                egghance_spacing)
+            for (i, egghancement) in enumerate(egghancements):
+                self._view.text_egghance(
+                    egghance_text_x_pos,
+                    egghance_text_y_pos + (i * egghance_spacing),
+                    egghancement)
 
         
     def start(self):
