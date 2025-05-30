@@ -15,6 +15,11 @@ class View:
         self._screen_height: int = settings.screen_height
         self._world_width: int = settings.world_width
         self._world_height: int = settings.world_height
+        self._egghancements: list[str] = [
+            f'[1]   Increase Max HP by 5',
+            f'[2]   Increase Attack by 1',
+            f'[3]   Increase Speed by 1',
+        ]
 
     #Outputs
     def clear_screen(self):
@@ -44,6 +49,15 @@ class View:
             height,
             self._egghancement_border_color
         )
+
+    def text_egghance(self, x_pos: int, y_pos: int, spacing: int):
+        for (i, egghancement) in enumerate(self._egghancements):
+            pyxel.text(
+                x_pos,
+                y_pos + (i * spacing),
+                egghancement,
+                self._text_ui_color
+            )
 
     def draw_egg(self, x_pos: int, y_pos: int, width: int, height: int):
         pyxel.rect(

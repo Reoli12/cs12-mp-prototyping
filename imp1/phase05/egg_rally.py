@@ -56,6 +56,7 @@ def main():
         eggnemy_height,
         eggnemy_hp,
         eggnemy_hp,
+        1,
         eggnemy_speed
     )
 
@@ -71,6 +72,7 @@ def main():
         boss_height,
         boss_hp,
         boss_hp,
+        3,
         boss_speed
     )
 

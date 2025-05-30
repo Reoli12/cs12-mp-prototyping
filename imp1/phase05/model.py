@@ -21,53 +21,52 @@ class Model:
 
         self.restart()
 
-    def update(self, is_forward_pressed: bool, is_left_pressed: bool, is_down_pressed: bool, is_right_pressed: bool, is_attack_pressed: bool, egghancement_pressed: Literal[1, 2, 3]):
-        player_egg: PlayerEgg = self._player_egg
+    def update(self, is_forward_pressed: bool, is_left_pressed: bool, is_down_pressed: bool, is_right_pressed: bool, is_attack_pressed: bool, egghancement_pressed: Literal[1, 2, 3, None]):
 
-        #game over state
-        if player_egg.stats.current_hp <= 0:
-            self._is_game_over: bool = True
+        if not self.is_egghance:
+            player_egg: PlayerEgg = self._player_egg
 
-        if self._is_game_over or self._is_game_won:
-            return
-        
-        #player movement, position and attack
-        self.player_movement(is_forward_pressed, is_down_pressed, is_left_pressed, is_right_pressed)
+            #game over state
+            if player_egg.stats.current_hp <= 0:
+                self._is_game_over: bool = True
 
-        self.player_attack(is_attack_pressed)
+            if self._is_game_over or self._is_game_won:
+                return
             
-        if self.is_out_of_world_bounds(player_egg):
-            self.return_to_world_bounds(player_egg)
+            #player movement, position and attack
+            self.player_movement(is_forward_pressed, is_down_pressed, is_left_pressed, is_right_pressed)
 
-        #eggnemies/boss movement and spawn
-        self.eggnemy_movement()
-        self.eggnemy_spawn()
+            self.player_attack(is_attack_pressed)
+                
+            if self.is_out_of_world_bounds(player_egg):
+                self.return_to_world_bounds(player_egg)
 
-        self.boss_movement()
-        
-        if (not(self._is_game_won or self._is_game_over) and 
-            not self._boss_egg and 
-            self.num_defeated_eggnemies != 0 and 
-            self._num_defeated_eggnemies - self._boss_spawn_rate >= 0 ):
-            print("spawning boss")
+            #eggnemies/boss movement and spawn
+            self.eggnemy_movement()
+            self.eggnemy_spawn()
+
+            self.boss_movement()
             self.boss_spawn()
-            print("spawned boss")
+                
+            #damage
+            self.player_takes_damage()
 
-        #damage
-        if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
-            self._player_egg.stats.current_hp -= 1 
-        if self._frame_count % self._fps == 0  and self._boss_egg and self.is_overlapping_entities(self._player_egg, self._boss_egg):
-            self._player_egg.stats.current_hp -= 3 
+            #egghance
+            if self._cur_xp != 0 and self._cur_xp % self._egghancement.xp_needed == 0:
+                print("level up")
+                self._is_egghance = True
 
+            #time and frame
+            if self._frame_count % self._fps == 0 and not(self._is_game_over or self._is_game_won):
+                self._sec += 1
+                if self._sec % 60 == 0:
+                    self._min += 1
+                    self._sec = 0
 
-        #time and frame
-        if self._frame_count % self._fps == 0 and not(self._is_game_over or self._is_game_won):
-            self._sec += 1
-            if self._sec % 60 == 0:
-                self._min += 1
-                self._sec = 0
-
-        self._frame_count += 1
+            self._frame_count += 1
+        
+        else:
+            self.egghancement_stats(egghancement_pressed)
 
 
     def is_overlapping_entities(self, entity_a: PlayerEgg | Eggnemy | Boss, entity_b: PlayerEgg | Eggnemy | Boss):
@@ -122,7 +121,7 @@ class Model:
     def player_attack(self, is_attack_pressed: bool):
         if is_attack_pressed:
             radius: int = self._player_egg.player_attack_radius
-            damage: int = self._player_egg.player_attack_damage
+            damage: int = self._player_egg.stats.atk
 
             for eggnemy in self._eggnemies:
                 eggnemy_center = eggnemy.center_position
@@ -133,6 +132,7 @@ class Model:
                     eggnemy.stats.current_hp -= damage
 
                     if eggnemy.stats.current_hp <= 0:
+                        self._cur_xp += 1
                         self._eggnemies.remove(eggnemy)
                         self._num_defeated_eggnemies += 1
                         if eggnemy in self._overlapping_player_eggnemy:
@@ -176,6 +176,7 @@ class Model:
                         eggnemy_height,
                         self._eggnemy_max_hp,
                         self._eggnemy_max_hp,
+                        self._eggnemy_atk,
                         self.eggnemy_speed
                     ),
                     eggnemy_center,
@@ -214,27 +215,35 @@ class Model:
                 self.return_to_world_bounds(eggnemy)
 
     def boss_spawn(self):
-        boss_width: int = self._boss_width
-        boss_height: int = self._boss_height
-        boss_center: None | Point = None
-        while True:
-            test_eggnemy_x: int = random.randint(boss_width, self._world_width - boss_width)
-            test_eggnemy_y: int = random.randint(boss_height, self._world_height - boss_height)
+        if (not(self._is_game_won or self._is_game_over) and 
+            not self._boss_egg and 
+            self.num_defeated_eggnemies != 0 and 
+            self._num_defeated_eggnemies - self._boss_spawn_rate >= 0 ):
             
-            boss_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
-            self._boss_egg: None | Boss = Boss(
-                EggInfo(
-                    boss_width,
-                    boss_height,
-                    self._boss_max_hp,
-                    self._boss_max_hp,
-                    self.boss_speed
-                    ),
-                boss_center,
-                )
-            if (not self.is_overlapping_entities(self.player_egg, self._boss_egg) and
-                not any(self.is_overlapping_entities(self._boss_egg, eggnemy) for eggnemy in self._eggnemies)):
-                break
+            print("spawning boss")
+            boss_width: int = self._boss_width
+            boss_height: int = self._boss_height
+            boss_center: None | Point = None
+            while True:
+                test_eggnemy_x: int = random.randint(boss_width, self._world_width - boss_width)
+                test_eggnemy_y: int = random.randint(boss_height, self._world_height - boss_height)
+                
+                boss_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
+                self._boss_egg: None | Boss = Boss(
+                    EggInfo(
+                        boss_width,
+                        boss_height,
+                        self._boss_max_hp,
+                        self._boss_max_hp,
+                        self._boss_atk,
+                        self.boss_speed
+                        ),
+                    boss_center,
+                    )
+                if (not self.is_overlapping_entities(self.player_egg, self._boss_egg) and
+                    not any(self.is_overlapping_entities(self._boss_egg, eggnemy) for eggnemy in self._eggnemies)):
+                    break
+            print("spawned boss")
     
     def boss_movement(self):
         if self._boss_egg:
@@ -273,6 +282,8 @@ class Model:
 
         self._player_egg: PlayerEgg = deepcopy(self._param_player_egg)
         self._egghancement: EgghancementSettings = deepcopy(self._param_egghancement)
+        self._is_egghance: bool = False
+        self._cur_xp: int = 0
 
         self._eggnemies: list[Eggnemy] = []
         self._overlapping_player_eggnemy: list[Eggnemy] = []
@@ -281,8 +292,9 @@ class Model:
         self._eggnemy_info: EggInfo = deepcopy(self._param_eggnemy_info)
         self._eggnemy_width: int = self._eggnemy_info.width
         self._eggnemy_height: int = self._eggnemy_info.height
-        self._eggnemy_speed: int = self._eggnemy_info.speed
         self._eggnemy_max_hp: int = self._eggnemy_info.max_hp
+        self._eggnemy_atk: int = self._eggnemy_info.atk
+        self._eggnemy_speed: int = self._eggnemy_info.speed
         
         self._boss_egg: None | Boss = None
         self._boss_info: EggInfo = deepcopy(self._param_boss_info)
@@ -291,6 +303,7 @@ class Model:
         self._boss_height: int = self._boss_info.height
         self._boss_speed: int = self._boss_info.speed
         self._boss_max_hp: int = self._boss_info.max_hp
+        self._boss_atk: int = self._boss_info.atk
 
         self._is_game_over: bool = False
         self._is_game_won: bool = False
@@ -330,16 +343,30 @@ class Model:
                 run_str: str = f'    {i}   --:--'
                 runs_str.append(run_str)
 
-    def egghancement_stats(self, egghancement_pressed: Literal[1, 2, 3]):
+    def egghancement_stats(self, egghancement_pressed: Literal[1, 2, 3, None]):
         match egghancement_pressed:
             case 1:
                 self._player_egg.stats.current_hp += self._egghancement.inc_max_hp
                 self._player_egg.stats.max_hp += self._egghancement.inc_max_hp
+                self._is_egghance = False
+                self._cur_xp = 0
             case 2:
-                self._player_egg.player_attack_damage
+                self._player_egg.stats.atk += self._egghancement.inc_atk
+                self._is_egghance = False
+                self._cur_xp = 0
+            case 3:
+                self._player_egg.stats.speed += self._egghancement.inc_spd
+                self._is_egghance = False
+                self._cur_xp = 0
+            case _:
+                return
 
+    def player_takes_damage(self):
+        if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
+            self._player_egg.stats.current_hp -= self._eggnemy_info.atk
 
-
+        if self._frame_count % self._fps == 0  and self._boss_egg and self.is_overlapping_entities(self._player_egg, self._boss_egg):
+            self._player_egg.stats.current_hp -= self._boss_egg.stats.atk         
 
     @property
     def param_player_egg(self) -> PlayerEgg:
@@ -422,6 +449,14 @@ class Model:
         return self._egghancement
     
     @property
+    def is_egghance(self) -> bool:
+        return self._is_egghance
+    
+    @property
+    def cur_xp(self) -> int:
+        return self._cur_xp
+
+    @property
     def eggnemies(self) -> list[Eggnemy]:
         return self._eggnemies
     
@@ -458,6 +493,10 @@ class Model:
         return self._eggnemy_max_hp
     
     @property
+    def eggnemy_atk(self) -> int:
+        return self._eggnemy_atk
+    
+    @property
     def boss_egg(self) -> None | Boss:
         return self._boss_egg
     
@@ -484,6 +523,10 @@ class Model:
     @property
     def boss_max_hp(self) -> int:
         return self._boss_max_hp
+    
+    @property
+    def boss_atk(self) -> int:
+        return self._boss_atk
     
     @property
     def is_game_over(self) -> bool:
