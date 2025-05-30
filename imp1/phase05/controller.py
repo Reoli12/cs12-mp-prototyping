@@ -20,7 +20,7 @@ class Controller:
             return
 
         egghancement_chosen: Literal[1, 2, 3, None] = None
-        if self._model.is_egghance and not egghancement_chosen:
+        if self._model.is_to_be_egghanced and not egghancement_chosen:
             egghancement_pressed: list[bool] = [
                 self._view.is_first_egghancement(),
                 self._view.is_second_egghancement(),
@@ -159,6 +159,7 @@ class Controller:
             num_defeated_y_pos, 
             num_defeated_eggnemies)
         
+        #time
         time_x_pos: int = screen_width - 25
         time_y_pos: int = 7
         sec: int = self._model.sec
@@ -167,7 +168,6 @@ class Controller:
         min_str: str = f'{min}' if min > 9 else f'0{min}'
         time: str = f'{min_str}:{sec_str}'
 
-        #time
         self._view.text_time(
             time_x_pos, 
             time_y_pos,
@@ -177,15 +177,32 @@ class Controller:
         if self._model.is_game_over or self._model.is_game_won:
             runs_str: list[str] = self._model.leaderboards_str
 
-            leaderboard_x_pos = 7
-            leaderboard_spacing = 10
-            leaderboard_y_pos = screen_height - (leaderboard_spacing * len(runs_str)) - 7
+            leaderboard_x_pos: int = 7
+            leaderboard_spacing: int = 10
+            leaderboard_y_pos: int = screen_height - (leaderboard_spacing * len(runs_str)) - 7
             
             for (i, top_runs_str) in enumerate(runs_str):
                 self._view.text_leaderboards(
                     leaderboard_x_pos,
                     leaderboard_y_pos + (i * leaderboard_spacing),
                     top_runs_str)
+                
+        #player stats
+        stats_strs: list[str] = [
+            f"Atk {self._model.player_egg.stats.atk}",
+            f"Spd {self._model.player_egg.stats.speed}",
+            f"Exp {self._model.cur_xp}"
+        ]
+        stats_x_pos: int = screen_width - 50
+        stats_spacing: int = 10
+        stats_y_pos: int = screen_height - (stats_spacing * len(stats_strs)) - 7
+
+        for (i, stats_str) in enumerate(stats_strs):
+            self._view.text_player_stats(
+                stats_x_pos,
+                stats_y_pos + (i * stats_spacing),
+                stats_str
+            )
         
         #end state messages
         if self._model.is_game_won:
@@ -208,7 +225,7 @@ class Controller:
             )
         
         #egghance
-        if self._model.is_egghance:
+        if self._model.is_to_be_egghanced:
             egghance_x_pos = screen_width // 4
             egghance_y_pos = int(screen_height // 2.5)
             egghance_width = screen_width // 2

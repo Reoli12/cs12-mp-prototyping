@@ -23,7 +23,7 @@ class Model:
 
     def update(self, is_forward_pressed: bool, is_left_pressed: bool, is_down_pressed: bool, is_right_pressed: bool, is_attack_pressed: bool, egghancement_pressed: Literal[1, 2, 3, None]):
 
-        if not self.is_egghance:
+        if not self.is_to_be_egghanced:
             player_egg: PlayerEgg = self._player_egg
 
             #game over state
@@ -50,11 +50,6 @@ class Model:
                 
             #damage
             self.player_takes_damage()
-
-            #egghance
-            if self._cur_xp != 0 and self._cur_xp % self._egghancement.xp_needed == 0:
-                print("level up")
-                self._is_egghance = True
 
             #time and frame
             if self._frame_count % self._fps == 0 and not(self._is_game_over or self._is_game_won):
@@ -133,8 +128,12 @@ class Model:
 
                     if eggnemy.stats.current_hp <= 0:
                         self._cur_xp += 1
-                        self._eggnemies.remove(eggnemy)
                         self._num_defeated_eggnemies += 1
+                        self._got_egghanced = False
+                        self._eggnemies.remove(eggnemy)
+                        self.egghance_check()
+                        if self._is_to_be_egghanced:
+                            break
                         if eggnemy in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(eggnemy)
             
@@ -282,7 +281,8 @@ class Model:
 
         self._player_egg: PlayerEgg = deepcopy(self._param_player_egg)
         self._egghancement: EgghancementSettings = deepcopy(self._param_egghancement)
-        self._is_egghance: bool = False
+        self._is_to_be_egghanced: bool = False
+        self._got_egghanced: bool = False
         self._cur_xp: int = 0
 
         self._eggnemies: list[Eggnemy] = []
@@ -348,25 +348,27 @@ class Model:
             case 1:
                 self._player_egg.stats.current_hp += self._egghancement.inc_max_hp
                 self._player_egg.stats.max_hp += self._egghancement.inc_max_hp
-                self._is_egghance = False
-                self._cur_xp = 0
             case 2:
                 self._player_egg.stats.atk += self._egghancement.inc_atk
-                self._is_egghance = False
-                self._cur_xp = 0
             case 3:
                 self._player_egg.stats.speed += self._egghancement.inc_spd
-                self._is_egghance = False
-                self._cur_xp = 0
             case _:
                 return
+        
+        self._is_to_be_egghanced = False
+        self._got_egghanced = True
 
     def player_takes_damage(self):
         if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
             self._player_egg.stats.current_hp -= self._eggnemy_info.atk
 
         if self._frame_count % self._fps == 0  and self._boss_egg and self.is_overlapping_entities(self._player_egg, self._boss_egg):
-            self._player_egg.stats.current_hp -= self._boss_egg.stats.atk         
+            self._player_egg.stats.current_hp -= self._boss_egg.stats.atk 
+
+    def egghance_check(self):
+        if not self._got_egghanced and self._cur_xp != 0 and self._cur_xp % self._egghancement.xp_needed == 0:
+            print("level up")
+            self._is_to_be_egghanced = True
 
     @property
     def param_player_egg(self) -> PlayerEgg:
@@ -449,9 +451,13 @@ class Model:
         return self._egghancement
     
     @property
-    def is_egghance(self) -> bool:
-        return self._is_egghance
+    def is_to_be_egghanced(self) -> bool:
+        return self._is_to_be_egghanced
     
+    @property
+    def got_egghanced(self) -> bool:
+        return self._got_egghanced
+
     @property
     def cur_xp(self) -> int:
         return self._cur_xp
