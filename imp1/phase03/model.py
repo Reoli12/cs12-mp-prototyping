@@ -43,7 +43,7 @@ class Model:
 
         self.boss_movement()
         
-        if not(self._is_game_won or self._is_game_over) and self.num_defeated_eggnemies != 0 and self._num_defeated_eggnemies % self._boss_spawn_rate == 0 and not self._boss_egg:
+        if not(self._is_game_won or self._is_game_over) and not self._boss_egg and self.num_defeated_eggnemies != 0 and self._num_defeated_eggnemies - self._boss_spawn_rate >= 0:
             print("spawning boss")
             self.boss_spawn()
             print("spawned boss")

@@ -34,8 +34,8 @@ class Model:
 
         self.player_attack(is_attack_pressed)
             
-        if self.is_out_of_bounds(player_egg):
-            self.return_to_bounds(player_egg)
+        if self.is_out_of_world_bounds(player_egg):
+            self.return_to_world_bounds(player_egg)
 
         #eggnemies/boss movement and spawn
         self.eggnemy_movement()
@@ -43,7 +43,10 @@ class Model:
 
         self.boss_movement()
         
-        if not(self._is_game_won or self._is_game_over) and self.num_defeated_eggnemies != 0 and self._num_defeated_eggnemies % self._boss_spawn_rate == 0 and not self._boss_egg:
+        if (not(self._is_game_won or self._is_game_over) and 
+            not self._boss_egg and 
+            self.num_defeated_eggnemies != 0 and 
+            self._num_defeated_eggnemies - self._boss_spawn_rate >= 0 ):
             print("spawning boss")
             self.boss_spawn()
             print("spawned boss")
@@ -51,7 +54,7 @@ class Model:
         #damage
         if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
             self._player_egg.stats.current_hp -= 1 
-        if self._frame_count % self._fps == 0  and self._boss_egg and self.is_overlapping_player(self._boss_egg):
+        if self._frame_count % self._fps == 0  and self._boss_egg and self.is_overlapping_entities(self._player_egg, self._boss_egg):
             self._player_egg.stats.current_hp -= 3 
 
 
@@ -64,27 +67,24 @@ class Model:
 
         self._frame_count += 1
 
-        print(self._leaderboards)
-        print(self._leaderboards_str)
 
+    def is_overlapping_entities(self, entity_a: PlayerEgg | Eggnemy | Boss, entity_b: PlayerEgg | Eggnemy | Boss):
+        left_bounds: float = entity_a.leftmost_point
+        right_bounds: float = entity_a.rightmost_point
+        top_bounds: float = entity_a.topmost_point
+        bottom_bounds: float = entity_a.bottom_point
 
-    def is_overlapping_player(self, eggnemy: Eggnemy | Boss):
-        left_bounds: float = self._player_egg.leftmost_point
-        right_bounds: float = self._player_egg.rightmost_point
-        top_bounds: float = self._player_egg.topmost_point
-        bottom_bounds: float = self._player_egg.bottom_point
-
-        eggnemy_right: float = eggnemy.rightmost_point
-        eggnemy_left: float = eggnemy.leftmost_point
-        eggnemy_bottom: float = eggnemy.bottom_point
-        eggnemy_top: float = eggnemy.topmost_point
+        eggnemy_right: float = entity_b.rightmost_point
+        eggnemy_left: float = entity_b.leftmost_point
+        eggnemy_bottom: float = entity_b.bottom_point
+        eggnemy_top: float = entity_b.topmost_point
 
         return not (left_bounds > eggnemy_right or 
                 right_bounds < eggnemy_left or
                 top_bounds > eggnemy_bottom or
                 bottom_bounds < eggnemy_top)
 
-    def is_out_of_bounds(self, entity: PlayerEgg | Eggnemy | Boss) -> bool:
+    def is_out_of_world_bounds(self, entity: PlayerEgg | Eggnemy | Boss) -> bool:
         return (   
             entity.leftmost_point < 0 
             or entity.rightmost_point > self._world_width
@@ -92,8 +92,8 @@ class Model:
             or entity.bottom_point > self._world_height 
         )
 
-    def return_to_bounds(self, entity: PlayerEgg | Eggnemy | Boss):
-        assert self.is_out_of_bounds(entity)
+    def return_to_world_bounds(self, entity: PlayerEgg | Eggnemy | Boss):
+        assert self.is_out_of_world_bounds(entity)
         
         if entity.leftmost_point < 0:
             entity.center_position.x = entity.stats.width / 2
@@ -148,29 +148,9 @@ class Model:
                         self._is_game_won: bool = True 
                         if boss in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(boss)
-                
-
-    def eggnemy_movement(self):
-        for eggnemy in self._eggnemies:
-            self.eggnemy_overlap_check(eggnemy)
-            
-            x_distance_to_player: float = self._player_egg.center_position.x - eggnemy.center_position.x
-            y_distance_to_player: float = self._player_egg.center_position.y - eggnemy.center_position.y
-            distance_to_player: float = ((x_distance_to_player) ** 2 + (y_distance_to_player) ** 2) ** 0.5
-
-            #follows player
-            if not self._is_game_over and distance_to_player > 0:
-                x_pos = (x_distance_to_player / distance_to_player) * eggnemy.stats.speed
-                y_pos = (y_distance_to_player / distance_to_player) * eggnemy.stats.speed
-
-                eggnemy.center_position.x += x_pos
-                eggnemy.center_position.y += y_pos
-            
-            if self.is_out_of_bounds(eggnemy):
-                self.return_to_bounds(eggnemy)
-                    
+   
     def eggnemy_overlap_check(self, eggnemy: Eggnemy):
-        is_overlap: bool = self.is_overlapping_player(eggnemy) 
+        is_overlap: bool = self.is_overlapping_entities(self._player_egg, eggnemy) 
 
         if is_overlap and eggnemy not in self._overlapping_player_eggnemy:
             self._overlapping_player_eggnemy.append(eggnemy)
@@ -188,7 +168,7 @@ class Model:
                 test_eggnemy_y: int = random.randint(eggnemy_height, self._world_height - eggnemy_height)
                 
                 eggnemy_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
-                eggnemy: Eggnemy = Eggnemy(
+                new_eggnemy: Eggnemy = Eggnemy(
                     EggInfo(
                         eggnemy_width,
                         eggnemy_height,
@@ -199,9 +179,37 @@ class Model:
                     eggnemy_center,
                     )
                 
-                if not self.is_overlapping_player(eggnemy):
+                #check overlap for player, other eggnemies, and boss
+                if (not self.is_overlapping_entities(self.player_egg, new_eggnemy) and
+                    not any(self.is_overlapping_entities(new_eggnemy, eggnemy) for eggnemy in self._eggnemies) and
+                    (self._boss_egg is None or not self.is_overlapping_entities(new_eggnemy, self._boss_egg))):
                     break
-            self._eggnemies.append(eggnemy)
+            self._eggnemies.append(new_eggnemy)               
+
+    def eggnemy_movement(self):
+        for eggnemy in self._eggnemies:
+            self.eggnemy_overlap_check(eggnemy)
+            
+            x_distance_to_player: float = self._player_egg.center_position.x - eggnemy.center_position.x
+            y_distance_to_player: float = self._player_egg.center_position.y - eggnemy.center_position.y
+            distance_to_player: float = ((x_distance_to_player) ** 2 + (y_distance_to_player) ** 2) ** 0.5
+            original_center = deepcopy(eggnemy.center_position)
+
+            #follows player
+            if not self._is_game_over and distance_to_player > 0:
+                x_pos = (x_distance_to_player / distance_to_player) * eggnemy.stats.speed
+                y_pos = (y_distance_to_player / distance_to_player) * eggnemy.stats.speed
+
+                eggnemy.center_position.x += x_pos
+                eggnemy.center_position.y += y_pos
+
+            #if overlap with other eggnemy or boss, go back to original center
+            if (any(self.is_overlapping_entities(eggnemy, other_eggnemy) for other_eggnemy in self._eggnemies if other_eggnemy != eggnemy) or
+                (self._boss_egg and self.is_overlapping_entities(eggnemy, self._boss_egg))):
+                eggnemy.center_position = original_center
+            
+            if self.is_out_of_world_bounds(eggnemy):
+                self.return_to_world_bounds(eggnemy)
 
     def boss_spawn(self):
         boss_width: int = self._boss_width
@@ -222,7 +230,8 @@ class Model:
                     ),
                 boss_center,
                 )
-            if not self.is_overlapping_player(self._boss_egg):
+            if (not self.is_overlapping_entities(self.player_egg, self._boss_egg) and
+                not any(self.is_overlapping_entities(self._boss_egg, eggnemy) for eggnemy in self._eggnemies)):
                 break
     
     def boss_movement(self):
@@ -236,12 +245,17 @@ class Model:
             if not self._is_game_over and distance_to_player > 0:
                 x_pos = (x_distance_to_player / distance_to_player) * self._boss_egg.stats.speed
                 y_pos = (y_distance_to_player / distance_to_player) * self._boss_egg.stats.speed
+                original_center = deepcopy(self._boss_egg.center_position)
 
                 self._boss_egg.center_position.x += x_pos
                 self._boss_egg.center_position.y += y_pos
+            
+                #if overlap with other eggnemy, go back to original pos
+                if (any(self.is_overlapping_entities(self._boss_egg, other_eggnemy) for other_eggnemy in self._eggnemies)):
+                    self._boss_egg.center_position = original_center
 
-            if self.is_out_of_bounds(self._boss_egg):
-                self.return_to_bounds(self._boss_egg)
+            if self.is_out_of_world_bounds(self._boss_egg):
+                self.return_to_world_bounds(self._boss_egg)
 
     def restart(self):
         self._is_time_get: bool = False
