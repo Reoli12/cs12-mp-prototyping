@@ -4,8 +4,8 @@ from view import View
 
 class Controller:
     def __init__(self, model: Model, view: View):
-        self._model = model
-        self._view = view
+        self._model: Model = model
+        self._view: View = view
 
     def update(self):
         self._model.update(
@@ -20,18 +20,18 @@ class Controller:
         self._view.clear_screen()
 
         #player and camera
-        player_x_pos = int(self._model.player_egg.leftmost_point)
-        player_y_pos = int(self._model.player_egg.topmost_point)
-        player_width = self._model.player_egg.stats.width
-        player_height = self._model.player_egg.stats.height
+        player_x_pos: int = int(self._model.player_egg.leftmost_point)
+        player_y_pos: int = int(self._model.player_egg.topmost_point)
+        player_width: int = self._model.player_egg.stats.width
+        player_height: int = self._model.player_egg.stats.height
         
-        camera_x_pos = player_x_pos - self._model.screen_width // 2
-        camera_y_pos = player_y_pos - self._model.screen_height // 2
+        camera_x_pos: int = player_x_pos - self._model.screen_width // 2
+        camera_y_pos: int = player_y_pos - self._model.screen_height // 2
 
-        player_cur_hp = self._model.player_egg.stats.current_hp
-        player_max_hp = self._model.player_egg.stats.max_hp
-        player_hp_x_pos = int((player_x_pos - player_width / 2))
-        player_hp_y_pos = int(player_y_pos + int(player_height * 1.5))
+        player_cur_hp: int = self._model.player_egg.stats.current_hp
+        player_max_hp: int = self._model.player_egg.stats.max_hp
+        player_hp_x_pos: int = int((player_x_pos - player_width / 2))
+        player_hp_y_pos: int = int(player_y_pos + int(player_height * 1.5))
 
         self._view.draw_world(-camera_x_pos, -camera_y_pos)
 
@@ -51,15 +51,15 @@ class Controller:
         #eggnemies
         eggnemies = self._model.eggnemies
         for eggnemy in eggnemies:
-            eggnemy_x_pos = int(eggnemy.leftmost_point)
-            eggnemy_y_pos = int(eggnemy.topmost_point)
-            eggnemy_width = eggnemy.stats.width
-            eggnemy_height = eggnemy.stats.height
+            eggnemy_x_pos: int = int(eggnemy.leftmost_point)
+            eggnemy_y_pos: int = int(eggnemy.topmost_point)
+            eggnemy_width: int = eggnemy.stats.width
+            eggnemy_height: int = eggnemy.stats.height
 
-            eggnemy_cur_hp = eggnemy.stats.current_hp
-            eggnemy_max_hp = eggnemy.stats.max_hp
-            eggnemy_hp_x = int((eggnemy_x_pos - eggnemy_width / 2))
-            eggnemy_hp_y = int(eggnemy_y_pos + int(eggnemy_height * 1.5))
+            eggnemy_cur_hp: int = eggnemy.stats.current_hp
+            eggnemy_max_hp: int = eggnemy.stats.max_hp
+            eggnemy_hp_x: int = int((eggnemy_x_pos -( eggnemy_width / 2) ** 0.5))
+            eggnemy_hp_y: int = int(eggnemy_y_pos + int(eggnemy_height * 1.5))
 
             self._view.draw_eggnemy(
                 eggnemy_x_pos - camera_x_pos, 
@@ -76,15 +76,15 @@ class Controller:
         boss = self._model.boss_egg
         if boss:
             assert boss
-            boss_x_pos = int(boss.leftmost_point)
-            boss_y_pos = int(boss.topmost_point)
-            boss_width = boss.stats.width
-            boss_height = boss.stats.height
+            boss_x_pos: int = int(boss.leftmost_point)
+            boss_y_pos: int = int(boss.topmost_point)
+            boss_width: int = boss.stats.width
+            boss_height: int = boss.stats.height
 
-            boss_cur_hp = boss.stats.current_hp
-            boss_max_hp = boss.stats.max_hp
-            boss_hp_x = int((boss_x_pos - boss_width / 2))
-            boss_hp_y = int(boss_y_pos + int(boss_height * 1.5))
+            boss_cur_hp: int = boss.stats.current_hp
+            boss_max_hp: int = boss.stats.max_hp
+            boss_hp_x: int = int((boss_x_pos - (boss_width / 2) ** 0.5))
+            boss_hp_y: int = int(boss_y_pos + int(boss_height * 1.25))
 
             self._view.draw_boss(
                 boss_x_pos - camera_x_pos, 
@@ -98,27 +98,30 @@ class Controller:
                 boss_max_hp)
             
         #stats
-        num_defeated_eggnemies = self._model.num_defeated_eggnemies
-        num_defeated_x_pos = 7
-        num_defeated_y_pos = 7
+        num_defeated_eggnemies: int = self._model.num_defeated_eggnemies
+        num_defeated_x_pos: int = 7
+        num_defeated_y_pos: int = 7
         self._view.text_num_defeated_eggnemy(
             num_defeated_x_pos, 
             num_defeated_y_pos, 
             num_defeated_eggnemies)
         
-        time_x_pos = self._model.screen_width - 21
-        time_y_pos = 7
-        sec = self._model.sec
-        min = self._model.min
+        time_x_pos: int = self._model.screen_width - 25
+        time_y_pos: int = 7
+        sec: int = self._model.sec
+        sec_str: str = f'{sec}' if sec > 9 else f'0{sec}'
+        min: int = self._model.min
+        min_str: str = f'{min}' if min > 9 else f'0{min}'
+        time: str = f'{min_str}:{sec_str}'
+
         self._view.text_time(
             time_x_pos, 
             time_y_pos,
-            min,
-            sec)
+            time)
         
         if self._model.is_game_won:
-            win_x_pos = int((player_x_pos - int((player_width / 2) * 2)))
-            win_y_pos = int(player_y_pos - int(player_height))
+            win_x_pos: int = int((player_x_pos - int((player_width / 2) * 2)))
+            win_y_pos: int = int(player_y_pos - int(player_height))
             self._view.text_win_message(
             win_x_pos - camera_x_pos, 
             win_y_pos - camera_y_pos)

@@ -9,11 +9,11 @@ with open('settings.json', 'r') as file:
 
 def main():
     #Game Settings
-    fps = data["fps"]
-    world_width = data["worldWidth"]
-    world_height = data["worldHeight"]
-    screen_width = data["screenWidth"]
-    screen_height = data["screenHeight"]
+    fps: int = data["fps"]
+    world_width: int = data["worldWidth"]
+    world_height: int = data["worldHeight"]
+    screen_width: int = data["screenWidth"]
+    screen_height: int = data["screenHeight"]
 
     settings = GameSettings(
         fps,
@@ -24,12 +24,12 @@ def main():
     )
 
     #Player Info
-    egg_hp = data["playerEggHp"]
-    egg_width = data["playerEggWidth"]
-    egg_height = data["playerEggHeight"]
-    egg_speed = data["playerEggSpeed"]
-    egg_damage = data["playerAttackDamage"]
-    egg_attack_radius = data["playerAttackRadius"]
+    egg_hp: int = data["playerEggHp"]
+    egg_width: int = data["playerEggWidth"]
+    egg_height: int = data["playerEggHeight"]
+    egg_speed: int = data["playerEggSpeed"]
+    egg_damage: int = data["playerAttackDamage"]
+    egg_attack_radius: int = data["playerAttackRadius"]
 
     player_egg = PlayerEgg(
         EggInfo(
@@ -45,11 +45,11 @@ def main():
     )
 
     #eggnemy Info
-    eggnemy_hp = data["eggnemInitialHp"]
-    eggnemy_count = data["eggnemyInitialCount"]
-    eggnemy_width = data["eggnemyWidth"]
-    eggnemy_height = data["eggnemyHeight"]
-    eggnemy_speed = data["eggnemySpeed"]
+    eggnemy_hp: int = data["eggnemInitialHp"]
+    eggnemy_count: int = data["eggnemyInitialCount"]
+    eggnemy_width: int = data["eggnemyWidth"]
+    eggnemy_height: int = data["eggnemyHeight"]
+    eggnemy_speed: int = data["eggnemySpeed"]
 
     eggnemy_info = EggInfo(
         eggnemy_width,
@@ -60,11 +60,11 @@ def main():
     )
 
     #boss Info
-    boss_spawn_rate = data["bossSpawnRate"]
-    boss_hp = data["bossInitialHp"]
-    boss_width = data["bossWidth"]
-    boss_height = data["bossHeight"]
-    boss_speed = data["bossSpeed"]
+    boss_spawn_rate: int = data["bossSpawnRate"]
+    boss_hp: int = data["bossInitialHp"]
+    boss_width: int = data["bossWidth"]
+    boss_height: int = data["bossHeight"]
+    boss_speed: int = data["bossSpeed"]
 
     boss_info = EggInfo(
         boss_width,

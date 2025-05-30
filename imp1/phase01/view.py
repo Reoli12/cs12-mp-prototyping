@@ -3,15 +3,15 @@ from project_types import UpdateHandler, DrawHandler, GameSettings
 
 class View:
     def __init__(self, settings: GameSettings):
-        self._player_color = 1
-        self._eggnemy_color = 13
-        self._boss_color = 10
-        self._world_border_color = 7
-        self._text_stats_color = 7
-        self._screen_width = settings.screen_width
-        self._screen_height = settings.screen_height
-        self._world_width = settings.world_width
-        self._world_height = settings.world_height
+        self._player_color: int = 1
+        self._eggnemy_color: int = 13
+        self._boss_color: int = 10
+        self._world_border_color: int = 7
+        self._text_stats_color: int = 7
+        self._screen_width: int = settings.screen_width
+        self._screen_height: int = settings.screen_height
+        self._world_width: int = settings.world_width
+        self._world_height: int = settings.world_height
 
     #Outputs
     def clear_screen(self):
@@ -82,14 +82,14 @@ class View:
             x_pos,
             y_pos,
             f'{num}',
-            self._player_color
+            self._text_stats_color
         ) 
 
-    def text_time(self, x_pos: int, y_pos: int, min: int, sec: int):
+    def text_time(self, x_pos: int, y_pos: int, time: str):
         pyxel.text(
             x_pos,
             y_pos,
-            f'{min}:{sec}',
+            time,
             self._text_stats_color
         )
 
