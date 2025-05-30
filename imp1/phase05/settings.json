@@ -12,7 +12,7 @@
   "playerAttackDamage": 1,
   "playerAttackRadius": 50,
 
-  "egghancementNeededXp": 20,
+  "egghancementNeededXp": 10,
   "maxHpEgghancement": 5,
   "attackEgghancement": 1,
   "speedEgghancement": 1,

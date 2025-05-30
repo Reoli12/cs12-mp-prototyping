@@ -66,7 +66,7 @@ class Egg(ABC):
     
 
 class PlayerEgg(Egg):
-    def __init__(self, egginfo: EggInfo, center: Point, damage: int, attack_radius: int):
+    def __init__(self, egginfo: EggInfo, center: Point, attack_radius: int):
         super().__init__(egginfo, center)
         self.player_attack_radius = attack_radius
 

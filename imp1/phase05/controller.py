@@ -1,6 +1,8 @@
 from model import Model
 from view import View
 from copy import deepcopy
+from project_types import Eggnemy
+from typing import Literal
 
 
 class Controller:
@@ -18,16 +20,47 @@ class Controller:
                 self._model.restart()
             return
 
+        egghancement_chosen: Literal[1, 2, 3, None] = None
+        if self._model.is_to_be_egghanced and not egghancement_chosen:
+            egghancement_pressed: list[bool] = [
+                self._view.is_first_egghancement(),
+                self._view.is_second_egghancement(),
+                self._view.is_third_egghancement()
+            ]
+            egghancement_pressed_indices: list[int] = [
+                i for (i, chosen) in enumerate(egghancement_pressed, 1) if chosen
+            ]
+            print(egghancement_pressed)
+            print(egghancement_pressed_indices)
+            print(egghancement_chosen)
+            
+            if len(egghancement_pressed_indices) == 1:
+                [egghancement_checker] = egghancement_pressed_indices
+                match egghancement_checker:
+                    case 1:
+                        egghancement_chosen = 1
+                    case 2:
+                        egghancement_chosen = 2
+                    case 3:
+                        egghancement_chosen = 3
+                    case _:
+                        pass
+        
         self._model.update(
             self._view.is_forward_pressed(), 
             self._view.is_left_pressed(), 
             self._view.is_down_pressed(), 
             self._view.is_right_pressed(),
-            self._view.is_attack_pressed()
+            self._view.is_attack_pressed(),
+            egghancement_chosen
             )
 
     def draw(self):
         self._view.clear_screen()
+
+        #screen dimensions
+        screen_width: int = self._model.screen_width
+        screen_height: int = self._model.screen_height
 
         #player and camera
         player_x_pos: int = int(self._model.player_egg.leftmost_point)
@@ -35,8 +68,8 @@ class Controller:
         player_width: int = self._model.player_egg.stats.width
         player_height: int = self._model.player_egg.stats.height
         
-        camera_x_pos: int = player_x_pos - self._model.screen_width // 2
-        camera_y_pos: int = player_y_pos - self._model.screen_height // 2 + 5
+        camera_x_pos: int = player_x_pos - screen_width // 2
+        camera_y_pos: int = player_y_pos - screen_height // 2 + 5
 
         player_cur_hp: int = self._model.player_egg.stats.current_hp
         player_max_hp: int = self._model.player_egg.stats.max_hp
@@ -59,7 +92,7 @@ class Controller:
             player_max_hp)
 
         #eggnemies
-        eggnemies = self._model.eggnemies
+        eggnemies: list[Eggnemy] = self._model.eggnemies
         for eggnemy in eggnemies:
             eggnemy_x_pos: int = int(eggnemy.leftmost_point)
             eggnemy_y_pos: int = int(eggnemy.topmost_point)
@@ -127,7 +160,8 @@ class Controller:
             num_defeated_y_pos, 
             num_defeated_eggnemies)
         
-        time_x_pos: int = self._model.screen_width - 25
+        #time
+        time_x_pos: int = screen_width - 25
         time_y_pos: int = 7
         sec: int = self._model.sec
         sec_str: str = f'{sec}' if sec > 9 else f'0{sec}'
@@ -135,7 +169,6 @@ class Controller:
         min_str: str = f'{min}' if min > 9 else f'0{min}'
         time: str = f'{min_str}:{sec_str}'
 
-        #time
         self._view.text_time(
             time_x_pos, 
             time_y_pos,
@@ -145,15 +178,32 @@ class Controller:
         if self._model.is_game_over or self._model.is_game_won:
             runs_str: list[str] = self._model.leaderboards_str
 
-            leaderboard_x_pos = 7
-            spacing = 10
-            leaderboard_y_pos = self._model.screen_height - (spacing * len(runs_str)) - 7
+            leaderboard_x_pos: int = 7
+            leaderboard_spacing: int = 10
+            leaderboard_y_pos: int = screen_height - (leaderboard_spacing * len(runs_str)) - 7
             
-            for i, top_runs_str in enumerate(runs_str):
+            for (i, top_runs_str) in enumerate(runs_str):
                 self._view.text_leaderboards(
                     leaderboard_x_pos,
-                    leaderboard_y_pos + (i * spacing),
+                    leaderboard_y_pos + (i * leaderboard_spacing),
                     top_runs_str)
+                
+        #player stats
+        stats_strs: list[str] = [
+            f"Atk {self._model.player_egg.stats.atk}",
+            f"Spd {self._model.player_egg.stats.speed}",
+            f"Exp {self._model.cur_xp}"
+        ]
+        stats_x_pos: int = screen_width - 50
+        stats_spacing: int = 10
+        stats_y_pos: int = screen_height - (stats_spacing * len(stats_strs)) - 7
+
+        for (i, stats_str) in enumerate(stats_strs):
+            self._view.text_player_stats(
+                stats_x_pos,
+                stats_y_pos + (i * stats_spacing),
+                stats_str
+            )
         
         #end state messages
         if self._model.is_game_won:
@@ -166,14 +216,42 @@ class Controller:
             win_y_pos - camera_y_pos)
 
         if self._model.is_game_over or self._model.is_game_won:
-            restart_x_pos = player_hp_x_pos - 13
-            restart_y_pos = int(player_y_pos + int(player_height * 2))
+            restart_x_pos: int = player_hp_x_pos - 13
+            restart_y_pos: int = int(player_y_pos + int(player_height * 2))
 
             #restart message
             self._view.text_restart_message(
                 restart_x_pos - camera_x_pos,
                 restart_y_pos - camera_y_pos
             )
+        
+        #egghance
+        if self._model.is_to_be_egghanced:
+            egghance_x_pos: int = screen_width // 4
+            egghance_y_pos: int = int(screen_height // 2.5)
+            egghance_width: int = screen_width // 2
+            egghance_height: int = screen_height // 8
+            self._view.draw_egghance_ui(
+                egghance_x_pos,
+                egghance_y_pos,
+                egghance_width,
+                egghance_height
+            )
+            egghance_text_x_pos: int = egghance_x_pos + egghance_width // 7
+            egghance_text_y_pos: int = egghance_y_pos + egghance_height // 6
+            egghance_spacing: int = egghance_height // 4
+            egghancements: list[str] = [
+                f'[1]   Increase Max HP by 5',
+                f'[2]   Increase Attack by 1',
+                f'[3]   Increase Speed by 1',
+            ]
+
+            for (i, egghancement) in enumerate(egghancements):
+                self._view.text_egghance(
+                    egghance_text_x_pos,
+                    egghance_text_y_pos + (i * egghance_spacing),
+                    egghancement)
+
         
     def start(self):
         self._view.start(self._model.fps, self, self)
