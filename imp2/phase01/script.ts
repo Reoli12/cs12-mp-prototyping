@@ -18,11 +18,19 @@ const update = (msg: Msg, model: Model): Model =>
             ...model,
             eggnemies: pipe(
                 model.eggnemies,
-                Array.map((eggnemy) => moveRelativeToPlayer(
-                    eggnemy,
-                    key,
-                    model.playerEgg.speed
-                ))
+                Array.map((eggnemy) => Eggnemy.make({
+                    ...eggnemy,
+                    centerCoords: moveRelativeToPlayer(
+                        eggnemy.centerCoords,
+                        String.toLowerCase(key),
+                        model.playerEgg.speed
+                    ),
+                }),   
+            )),
+            worldCenter: moveRelativeToPlayer(
+                model.worldCenter,
+                String.toLowerCase(key),
+                model.playerEgg.speed
             )
         })),
         Match.tag('Canvas.MsgTick', () => 
@@ -93,20 +101,12 @@ const update = (msg: Msg, model: Model): Model =>
         Match.orElse(() => model)
     )
 
-const moveRelativeToPlayer = (eggnemy: Eggnemy, key: string, playerSpeed): Eggnemy =>
-    Eggnemy.make({
-        ...eggnemy,
-        centerCoords: (
-            key == 'w' ? Point.make({...eggnemy.centerCoords, y: eggnemy.centerCoords.y + playerSpeed}) :
-            key == 'a' ? Point.make({...eggnemy.centerCoords, x: eggnemy.centerCoords.x + playerSpeed}) :
-            key == 's' ? Point.make({...eggnemy.centerCoords, y: eggnemy.centerCoords.y - playerSpeed}) :
-            key == 'd' ? Point.make({...eggnemy.centerCoords, x: eggnemy.centerCoords.x - playerSpeed}) :
-            pipe(
-                console.log(key),
-                () => eggnemy.centerCoords
-            )
-        )
-    })
+const moveRelativeToPlayer = (point: Point, key: string, playerSpeed): Point =>
+    key == 'w' ? Point.make({...point, y: point.y + playerSpeed}) :
+    key == 'a' ? Point.make({...point, x: point.x + playerSpeed}) :
+    key == 's' ? Point.make({...point, y: point.y - playerSpeed}) :
+    key == 'd' ? Point.make({...point, x: point.x - playerSpeed}) :
+    point
 
 const modelDefeatedEggnemies = (model: Model): Model => 
     Model.make({
@@ -171,14 +171,14 @@ const view = (model: Model) =>
             Canvas.Clear.make({
                 color: "black",
             }),
-            // Canvas.OutlinedRectangle.make({
-            //     x: 0,
-            //     y: 0, 
-            //     width: model.worldWidth,
-            //     height: model.worldHeight,
-            //     color: "white",
-            //     lineWidth: 3,
-            // }),
+            Canvas.OutlinedRectangle.make({
+                x: model.worldCenter.x - (model.worldWidth / 2),
+                y: model.worldCenter.y - (model.worldHeight / 2), 
+                width: model.worldWidth,
+                height: model.worldHeight,
+                color: "white",
+                lineWidth: 3,
+            }),
             ...(model.isOver? Array.empty(): viewEgg(playerEgg, "white")), // spread empty array
             ...pipe(
                 Array.map(eggnemies, (eggnemy) => viewEgg(eggnemy, "grey")),
@@ -277,6 +277,10 @@ function main() {
         ),
         worldHeight: settings.worldHeight,
         worldWidth: settings.worldWidth,
+        worldCenter: Point.make({
+            x: settings.screenWidth / 2,
+            y: settings.screenHeight / 2,
+        }),
         screenHeight: settings.screenHeight,
         screenWidth: settings.screenWidth,
         fps: settings.fps,
