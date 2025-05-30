@@ -51,6 +51,7 @@ export const Model = S.Struct({
     currentFrame: S.Int,
     worldHeight: S.Number,
     worldWidth: S.Number,
+    worldCenter: Point,
     screenHeight: S.Number,
     screenWidth: S.Number,
     isOver: S.Boolean,

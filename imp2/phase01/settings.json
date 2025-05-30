@@ -1,7 +1,7 @@
 {
   "fps": 30,
-  "screenWidth": 1500,
-  "screenHeight": 1500,
+  "screenWidth": 1080,
+  "screenHeight": 920,
   "worldWidth": 300,
   "worldHeight": 300,
   "playerEggHp": 20,
