@@ -1,5 +1,5 @@
 import { Model, Egg, Point, Settings, EggSides,PlayerEgg, Eggnemy } from "./projectTypes"
-import { Array, Schema as S, Match, Option, pipe } from "effect"
+import { Array, Schema as S, Match, Option, pipe, String } from "effect"
 import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
 import * as Canvas from "cs12242-mvu/src/canvas"
@@ -13,12 +13,17 @@ const update = (msg: Msg, model: Model): Model =>
             model.isOver? model : 
             (key == 'l' || key == 'L') ? 
             modelDefeatedEggnemies(model) :
+            // move all elements relative to egg loc
             Model.make({
             ...model,
-            playerEgg: PlayerEgg.make({
-                ...model.playerEgg,
-                centerCoords: stepOnce(key, model.playerEgg.centerCoords, 3),
-            })
+            eggnemies: pipe(
+                model.eggnemies,
+                Array.map((eggnemy) => moveRelativeToPlayer(
+                    eggnemy,
+                    key,
+                    model.playerEgg.speed
+                ))
+            )
         })),
         Match.tag('Canvas.MsgTick', () => 
             model.playerEgg.current_hp <= 0 ? Model.make({
@@ -32,10 +37,10 @@ const update = (msg: Msg, model: Model): Model =>
                 currentFrame: (model.currentFrame + 1) % model.fps,
                 playerEgg: PlayerEgg.make({
                     ...model.playerEgg,
-                    centerCoords:   handleBoundsBehavior( model.playerEgg,
-                                                        model.worldWidth,
-                                                        model.worldHeight
-                    ),
+                    // centerCoords:   handleBoundsBehavior( model.playerEgg,
+                    //                                     model.worldWidth,
+                    //                                     model.worldHeight
+                    // ),
                     current_hp: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
                         Match.tag("None", () => model.playerEgg.current_hp),
                             // if we decrement immediately after a new collision, the next tick will
@@ -65,10 +70,10 @@ const update = (msg: Msg, model: Model): Model =>
                 ...model,
                 playerEgg: PlayerEgg.make({
                     ...model.playerEgg,
-                    centerCoords: handleBoundsBehavior( model.playerEgg,
-                                                        model.worldWidth,
-                                                        model.worldHeight
-                    ),
+                    // centerCoords: handleBoundsBehavior( model.playerEgg,
+                    //                                     model.worldWidth,
+                    //                                     model.worldHeight
+                    // ),
                     frameCountSinceLastDamaged: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
                         Match.tag("None", () => Option.none()),
                         Match.tag("Some", (frameCount) => 
@@ -87,6 +92,21 @@ const update = (msg: Msg, model: Model): Model =>
         ),
         Match.orElse(() => model)
     )
+
+const moveRelativeToPlayer = (eggnemy: Eggnemy, key: string, playerSpeed): Eggnemy =>
+    Eggnemy.make({
+        ...eggnemy,
+        centerCoords: (
+            key == 'w' ? Point.make({...eggnemy.centerCoords, y: eggnemy.centerCoords.y + playerSpeed}) :
+            key == 'a' ? Point.make({...eggnemy.centerCoords, x: eggnemy.centerCoords.x + playerSpeed}) :
+            key == 's' ? Point.make({...eggnemy.centerCoords, y: eggnemy.centerCoords.y - playerSpeed}) :
+            key == 'd' ? Point.make({...eggnemy.centerCoords, x: eggnemy.centerCoords.x - playerSpeed}) :
+            pipe(
+                console.log(key),
+                () => eggnemy.centerCoords
+            )
+        )
+    })
 
 const modelDefeatedEggnemies = (model: Model): Model => 
     Model.make({
@@ -148,21 +168,17 @@ const view = (model: Model) =>
     pipe(
         model,
         ({ playerEgg, eggnemies }) => [
-            Canvas.SolidRectangle.make({
-                x: 0,
-                y: 0,
-                width: model.screenWidth,
-                height: model.screenHeight,
+            Canvas.Clear.make({
                 color: "black",
             }),
-            Canvas.OutlinedRectangle.make({
-                x: 0,
-                y: 0, 
-                width: model.worldWidth,
-                height: model.worldHeight,
-                color: "white",
-                lineWidth: 3,
-            }),
+            // Canvas.OutlinedRectangle.make({
+            //     x: 0,
+            //     y: 0, 
+            //     width: model.worldWidth,
+            //     height: model.worldHeight,
+            //     color: "white",
+            //     lineWidth: 3,
+            // }),
             ...(model.isOver? Array.empty(): viewEgg(playerEgg, "white")), // spread empty array
             ...pipe(
                 Array.map(eggnemies, (eggnemy) => viewEgg(eggnemy, "grey")),
@@ -221,8 +237,8 @@ function main() {
 
     const playerEgg = PlayerEgg.make({
         centerCoords: Point.make({
-            x: settings.worldWidth / 2,
-            y: settings.worldHeight / 2,
+            x: settings.screenWidth / 2,
+            y: settings.screenHeight / 2,
         }),
         height: 20,
         width: 10,
@@ -244,20 +260,20 @@ function main() {
                 color: "gray",
                 speed: settings.eggnemySpeed,
             }),
-            // Eggnemy.make({
-            //     centerCoords: Point.make({x: 100, y: 250}),
-            //     height: settings.eggnemyHeight,
-            //     width: settings.eggnemyWidth,
-            //     color: "gray",
-            //     speed: settings.eggnemySpeed,
-            // }),
-            // Eggnemy.make({
-            //     centerCoords: Point.make({x: 200, y: 200}),
-            //     height: settings.eggnemyHeight,
-            //     width: settings.eggnemyWidth,
-            //     color: "gray",
-            //     speed: settings.eggnemySpeed,
-            // }),
+            Eggnemy.make({
+                centerCoords: Point.make({x: 100, y: 250}),
+                height: settings.eggnemyHeight,
+                width: settings.eggnemyWidth,
+                color: "gray",
+                speed: settings.eggnemySpeed,
+            }),
+            Eggnemy.make({
+                centerCoords: Point.make({x: 200, y: 200}),
+                height: settings.eggnemyHeight,
+                width: settings.eggnemyWidth,
+                color: "gray",
+                speed: settings.eggnemySpeed,
+            }),
         ),
         worldHeight: settings.worldHeight,
         worldWidth: settings.worldWidth,
