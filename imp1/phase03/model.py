@@ -13,6 +13,9 @@ class Model:
         self._param_eggnemy_info = eggnemy_info
         self._param_boss_info = boss_info
         self._param_boss_spawn_rate = boss_spawn_rate
+        self._leaderboards: list[tuple[int, int]] = []
+        self._leaderboards_str: list[str] = []
+        self._is_time_get: bool = False
 
         self.restart()
 
@@ -40,7 +43,7 @@ class Model:
 
         self.boss_movement()
         
-        if self._boss_spawn_rate - self._num_defeated_eggnemies == 0 and not self._boss_egg:
+        if not(self._is_game_won or self._is_game_over) and self.num_defeated_eggnemies != 0 and self._num_defeated_eggnemies % self._boss_spawn_rate == 0 and not self._boss_egg:
             print("spawning boss")
             self.boss_spawn()
             print("spawned boss")
@@ -53,7 +56,7 @@ class Model:
 
 
         #time and frame
-        if self._frame_count % self._fps == 0:
+        if self._frame_count % self._fps == 0 and not(self._is_game_over or self._is_game_won):
             self._sec += 1
             if self._sec % 60 == 0:
                 self._min += 1
@@ -61,8 +64,8 @@ class Model:
 
         self._frame_count += 1
 
-
-        print(player_egg.center_position, player_egg.topmost_point, self._fps)
+        print(self._leaderboards)
+        print(self._leaderboards_str)
 
 
     def is_overlapping_player(self, eggnemy: Eggnemy | Boss):
@@ -241,6 +244,8 @@ class Model:
                 self.return_to_bounds(self._boss_egg)
 
     def restart(self):
+        self._is_time_get: bool = False
+        
         self._screen_width: int = self._param_settings.screen_width
         self._screen_height: int = self._param_settings.screen_height
         self._world_width: int = self._param_settings.world_width
@@ -271,7 +276,43 @@ class Model:
         self._boss_max_hp: int = self._boss_info.max_hp
 
         self._is_game_over: bool = False
-        self._is_game_won: bool = False       
+        self._is_game_won: bool = False
+
+    def update_leaderboards(self, min: int, sec: int):
+        self._is_time_get = True
+        self._leaderboards.append((min, sec))
+
+        #in terms of seconds
+        self._leaderboards.sort(key=lambda time: time[0] * 60 + time[1])
+        self._leaderboards = self._leaderboards [:3]
+        self.leaderboards_stringify()
+    
+    def leaderboards_stringify(self):
+        runs: list[tuple[int, int]] = self.leaderboards
+        self._leaderboards_str = []
+        runs_str: list[str] = self._leaderboards_str
+            
+        for i, (min, sec) in enumerate(runs, 1):
+            #stringify time
+            run_sec_str: str = f'{sec}' if sec > 9 else f'0{sec}'
+            run_min_str: str = f'{min}' if min > 9 else f'0{min}'
+            time_str: str = f"{run_min_str}:{run_sec_str}"
+            
+            #place handler
+            if i == 1:
+                run_str: str = f'Top 1   {time_str}'
+                runs_str.append(run_str)
+            else:
+                run_str: str = f'    {i}   {time_str}'
+                runs_str.append(run_str)
+
+        if len(runs_str) < 3:
+            # 2 missing, len(runs_str) = 1, [2, 3]
+            # 1 missing, len(runs_str) = 2, [3,]
+            for i in range(len(runs_str) + 1, 4):
+                run_str: str = f'    {i}   --:--'
+                runs_str.append(run_str)
+
 
     @property
     def param_player_egg(self) -> PlayerEgg:
@@ -296,6 +337,18 @@ class Model:
     @property
     def param_boss_spawn_rate(self) -> int:
         return self._param_boss_spawn_rate
+
+    @property
+    def leaderboards(self) -> list[tuple[int, int]]:
+        return self._leaderboards
+
+    @property
+    def leaderboards_str(self) -> list[str]:
+        return self._leaderboards_str
+
+    @property
+    def is_time_get(self) -> bool:
+        return self._is_time_get
 
     @property
     def screen_width(self) -> int:

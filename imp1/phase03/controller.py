@@ -1,5 +1,6 @@
 from model import Model
 from view import View
+from copy import deepcopy
 
 
 class Controller:
@@ -9,6 +10,10 @@ class Controller:
 
     def update(self):
         if self._model.is_game_over or self._model.is_game_won:
+            if not self._model.is_time_get and self._model.is_game_won:
+                min = deepcopy(self._model.min)
+                sec = deepcopy(self._model.sec)
+                self._model.update_leaderboards(min, sec)
             if self._view.is_restart_pressed():
                 self._model.restart()
             return
@@ -36,7 +41,7 @@ class Controller:
         player_cur_hp: int = self._model.player_egg.stats.current_hp
         player_max_hp: int = self._model.player_egg.stats.max_hp
         player_hp_x_pos: int = int((player_x_pos - player_width / 2))
-        player_hp_y_pos: int = int(player_y_pos + int(player_height * 1.5))
+        player_hp_y_pos: int = int(player_y_pos + int(player_height * 1.25))
 
         #player egg
         if not self._model.is_game_over:
@@ -108,6 +113,9 @@ class Controller:
                 boss_cur_hp, 
                 boss_max_hp)
             
+        #world border
+        self._view.draw_world(-camera_x_pos, -camera_y_pos)
+
         #stats
         num_defeated_eggnemies: int = self._model.num_defeated_eggnemies
         num_defeated_x_pos: int = 7
@@ -132,7 +140,22 @@ class Controller:
             time_x_pos, 
             time_y_pos,
             time)
+
+        #leaderboards
+        if self._model.is_game_over or self._model.is_game_won:
+            runs_str: list[str] = self._model.leaderboards_str
+
+            leaderboard_x_pos = 7
+            spacing = 10
+            leaderboard_y_pos = self._model.screen_height - (spacing * len(runs_str)) - 7
+            
+            for i, top_runs_str in enumerate(runs_str):
+                self._view.text_leaderboards(
+                    leaderboard_x_pos,
+                    leaderboard_y_pos + (i * spacing),
+                    top_runs_str)
         
+        #end state messages
         if self._model.is_game_won:
             win_x_pos: int = int((player_x_pos - int((player_width / 2) * 2)))
             win_y_pos: int = int(player_y_pos - int(player_height))
@@ -151,10 +174,6 @@ class Controller:
                 restart_x_pos - camera_x_pos,
                 restart_y_pos - camera_y_pos
             )
-
-        #world border
-        self._view.draw_world(-camera_x_pos, -camera_y_pos)
-
         
     def start(self):
         self._view.start(self._model.fps, self, self)

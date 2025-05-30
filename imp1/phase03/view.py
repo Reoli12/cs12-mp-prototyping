@@ -109,6 +109,14 @@ class View:
             self._text_stats_color
         )
 
+    def text_leaderboards(self, x_pos: int, y_pos: int, run_str: str):
+        pyxel.text(
+            x_pos,
+            y_pos,
+            run_str,
+            self._text_stats_color
+        )
+
 
     #Inputs
     def is_forward_pressed(self):
