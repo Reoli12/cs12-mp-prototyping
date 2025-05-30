@@ -100,6 +100,14 @@ class View:
             f'You Win!',
             self._text_stats_color
         )
+    
+    def text_restart_message(self, x_pos: int, y_pos: int):
+        pyxel.text(
+            x_pos,
+            y_pos,
+            f'Restart? [R]',
+            self._text_stats_color
+        )
 
 
     #Inputs
@@ -117,6 +125,9 @@ class View:
     
     def is_attack_pressed(self):
         return pyxel.btn(pyxel.KEY_L)
+    
+    def is_restart_pressed(self):
+        return pyxel.btn(pyxel.KEY_R)
     
     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler):
         pyxel.init(self._screen_width, self._screen_height, fps=fps)

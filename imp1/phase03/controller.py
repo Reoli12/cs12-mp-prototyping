@@ -8,6 +8,11 @@ class Controller:
         self._view: View = view
 
     def update(self):
+        if self._model.is_game_over or self._model.is_game_won:
+            if self._view.is_restart_pressed():
+                self._model.restart()
+            return
+
         self._model.update(
             self._view.is_forward_pressed(), 
             self._view.is_left_pressed(), 
@@ -26,15 +31,14 @@ class Controller:
         player_height: int = self._model.player_egg.stats.height
         
         camera_x_pos: int = player_x_pos - self._model.screen_width // 2
-        camera_y_pos: int = player_y_pos - self._model.screen_height // 2
+        camera_y_pos: int = player_y_pos - self._model.screen_height // 2 + 5
 
         player_cur_hp: int = self._model.player_egg.stats.current_hp
         player_max_hp: int = self._model.player_egg.stats.max_hp
         player_hp_x_pos: int = int((player_x_pos - player_width / 2))
         player_hp_y_pos: int = int(player_y_pos + int(player_height * 1.5))
 
-        self._view.draw_world(-camera_x_pos, -camera_y_pos)
-
+        #player egg
         if not self._model.is_game_over:
             self._view.draw_egg(
                 player_x_pos - camera_x_pos, 
@@ -42,6 +46,7 @@ class Controller:
                 player_width, 
                 player_height)
         
+        #player hp
         self._view.text_player_health(
             player_hp_x_pos - camera_x_pos, 
             player_hp_y_pos - camera_y_pos, 
@@ -61,11 +66,14 @@ class Controller:
             eggnemy_hp_x: int = int((eggnemy_x_pos -( eggnemy_width / 2) ** 0.5))
             eggnemy_hp_y: int = int(eggnemy_y_pos + int(eggnemy_height * 1.5))
 
+            #eggnemy
             self._view.draw_eggnemy(
                 eggnemy_x_pos - camera_x_pos, 
                 eggnemy_y_pos - camera_y_pos, 
                 eggnemy_width, 
                 eggnemy_height)
+            
+            #eggnemy hp
             self._view.text_eggnemy_health(
                 eggnemy_hp_x - camera_x_pos, 
                 eggnemy_hp_y - camera_y_pos, 
@@ -86,11 +94,14 @@ class Controller:
             boss_hp_x: int = int((boss_x_pos - (boss_width / 2) ** 0.5))
             boss_hp_y: int = int(boss_y_pos + int(boss_height * 1.25))
 
+            #boss
             self._view.draw_boss(
                 boss_x_pos - camera_x_pos, 
                 boss_y_pos - camera_y_pos, 
                 boss_width, 
                 boss_height)
+
+            #boss hp
             self._view.text_boss_health(
                 boss_hp_x - camera_x_pos, 
                 boss_hp_y - camera_y_pos, 
@@ -101,6 +112,8 @@ class Controller:
         num_defeated_eggnemies: int = self._model.num_defeated_eggnemies
         num_defeated_x_pos: int = 7
         num_defeated_y_pos: int = 7
+
+        #num defeated
         self._view.text_num_defeated_eggnemy(
             num_defeated_x_pos, 
             num_defeated_y_pos, 
@@ -114,6 +127,7 @@ class Controller:
         min_str: str = f'{min}' if min > 9 else f'0{min}'
         time: str = f'{min_str}:{sec_str}'
 
+        #time
         self._view.text_time(
             time_x_pos, 
             time_y_pos,
@@ -122,9 +136,25 @@ class Controller:
         if self._model.is_game_won:
             win_x_pos: int = int((player_x_pos - int((player_width / 2) * 2)))
             win_y_pos: int = int(player_y_pos - int(player_height))
+
+            #win message
             self._view.text_win_message(
             win_x_pos - camera_x_pos, 
             win_y_pos - camera_y_pos)
+
+        if self._model.is_game_over or self._model.is_game_won:
+            restart_x_pos = player_hp_x_pos - 13
+            restart_y_pos = int(player_y_pos + int(player_height * 2))
+
+            #restart message
+            self._view.text_restart_message(
+                restart_x_pos - camera_x_pos,
+                restart_y_pos - camera_y_pos
+            )
+
+        #world border
+        self._view.draw_world(-camera_x_pos, -camera_y_pos)
+
         
     def start(self):
         self._view.start(self._model.fps, self, self)

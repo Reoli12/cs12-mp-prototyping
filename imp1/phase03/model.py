@@ -1,39 +1,20 @@
 from __future__ import annotations
 from project_types import Eggnemy, PlayerEgg, Boss, Point, GameSettings, EggInfo
+from copy import deepcopy
 import random
 
 
 class Model:
     def __init__(self, player_egg: PlayerEgg, settings: GameSettings, eggnemy_count: int, eggnemy_info: EggInfo, boss_info: EggInfo, boss_spawn_rate: int):
-        self._screen_width: int = settings.screen_width
-        self._screen_height: int = settings.screen_height
-        self._world_width: int = settings.world_width
-        self._world_height: int = settings.world_height
-        self._fps: int = settings.fps
-        self._frame_count: int = 0
-        self._sec: int = 0
-        self._min: int = 0
+        #Stored parameters
+        self._param_player_egg = player_egg
+        self._param_settings = settings
+        self._param_eggnemy_count = eggnemy_count
+        self._param_eggnemy_info = eggnemy_info
+        self._param_boss_info = boss_info
+        self._param_boss_spawn_rate = boss_spawn_rate
 
-        self._player_egg: PlayerEgg = player_egg
-
-        self._eggnemies: list[Eggnemy] = []
-        self._overlapping_player_eggnemy: list[Eggnemy] = []
-        self._num_defeated_eggnemies: int = 0
-        self._eggnemy_count: int = eggnemy_count
-        self._eggnemy_width: int = eggnemy_info.width
-        self._eggnemy_height: int = eggnemy_info.height
-        self._eggnemy_speed: int = eggnemy_info.speed
-        self._eggnemy_max_hp: int = eggnemy_info.max_hp
-        
-        self._boss_egg: None | Boss = None
-        self._boss_spawn_rate: int = boss_spawn_rate
-        self._boss_width: int = boss_info.width
-        self._boss_height: int = boss_info.height
-        self._boss_speed: int = boss_info.speed
-        self._boss_max_hp: int = boss_info.max_hp
-
-        self._is_game_over: bool = False
-        self._is_game_won: bool = False
+        self.restart()
 
     def update(self, is_forward_pressed: bool, is_left_pressed: bool, is_down_pressed: bool, is_right_pressed: bool, is_attack_pressed: bool):
         player_egg: PlayerEgg = self._player_egg
@@ -259,6 +240,62 @@ class Model:
             if self.is_out_of_bounds(self._boss_egg):
                 self.return_to_bounds(self._boss_egg)
 
+    def restart(self):
+        self._screen_width: int = self._param_settings.screen_width
+        self._screen_height: int = self._param_settings.screen_height
+        self._world_width: int = self._param_settings.world_width
+        self._world_height: int = self._param_settings.world_height
+        self._fps: int = self._param_settings.fps
+        self._frame_count: int = 0
+        self._sec: int = 0
+        self._min: int = 0
+
+        self._player_egg: PlayerEgg = deepcopy(self._param_player_egg)
+
+        self._eggnemies: list[Eggnemy] = []
+        self._overlapping_player_eggnemy: list[Eggnemy] = []
+        self._num_defeated_eggnemies: int = 0
+        self._eggnemy_count: int = self._param_eggnemy_count
+        self._eggnemy_info: EggInfo = deepcopy(self._param_eggnemy_info)
+        self._eggnemy_width: int = self._eggnemy_info.width
+        self._eggnemy_height: int = self._eggnemy_info.height
+        self._eggnemy_speed: int = self._eggnemy_info.speed
+        self._eggnemy_max_hp: int = self._eggnemy_info.max_hp
+        
+        self._boss_egg: None | Boss = None
+        self._boss_info: EggInfo = deepcopy(self._param_boss_info)
+        self._boss_spawn_rate: int = self._param_boss_spawn_rate
+        self._boss_width: int = self._boss_info.width
+        self._boss_height: int = self._boss_info.height
+        self._boss_speed: int = self._boss_info.speed
+        self._boss_max_hp: int = self._boss_info.max_hp
+
+        self._is_game_over: bool = False
+        self._is_game_won: bool = False       
+
+    @property
+    def param_player_egg(self) -> PlayerEgg:
+        return self._param_player_egg
+    
+    @property
+    def param_settings(self) -> GameSettings:
+        return self._param_settings
+    
+    @property
+    def param_eggnemy_count(self) -> int:
+        return self._param_eggnemy_count
+    
+    @property
+    def param_eggnemy_info(self) -> EggInfo:
+        return self._param_eggnemy_info
+
+    @property
+    def param_boss_info(self) -> EggInfo:
+        return self._param_boss_info
+    
+    @property
+    def param_boss_spawn_rate(self) -> int:
+        return self._param_boss_spawn_rate
 
     @property
     def screen_width(self) -> int:
@@ -313,6 +350,10 @@ class Model:
         return self._eggnemy_count
     
     @property
+    def eggnemy_info(self) -> EggInfo:
+        return self._eggnemy_info
+
+    @property
     def eggnemy_width(self) -> int:
         return self._eggnemy_width
     
@@ -332,6 +373,10 @@ class Model:
     def boss_egg(self) -> None | Boss:
         return self._boss_egg
     
+    @property
+    def boss_info(self) -> EggInfo:
+        return self._boss_info
+
     @property
     def boss_spawn_rate(self) -> int:
         return self._boss_spawn_rate
