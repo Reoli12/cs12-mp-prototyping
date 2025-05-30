@@ -22,6 +22,7 @@ export const PlayerEgg = S.TaggedStruct("PlayerEgg", {
     current_hp: S.Number,
     color: S.String,
     speed: S.Number,
+    attackRange: S.Number,
     frameCountSinceLastDamaged: S.Option(S.Number),
 })
 export type PlayerEgg = typeof PlayerEgg.Type
@@ -61,6 +62,7 @@ const Settings = S.Struct({
     playerEggHp: S.Number,
     playerEggWidth: S.Number,
     playerEggHeight: S.Number,
+    playerEggRange: S.Number,
     eggnemyCount: S.Number,
     eggnemyWidth: S.Number,
     eggnemyHeight: S.Number,

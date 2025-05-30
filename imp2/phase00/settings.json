@@ -5,6 +5,7 @@
   "playerEggHp": 20,
   "playerEggWidth": 10,
   "playerEggHeight": 20,
+  "playerEggRange": 30,
   "eggnemyCount": 5,
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,
