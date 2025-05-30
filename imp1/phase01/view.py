@@ -3,11 +3,11 @@ from project_types import UpdateHandler, DrawHandler, GameSettings
 
 class View:
     def __init__(self, settings: GameSettings):
-        self._player_color = 7
+        self._player_color = 1
         self._eggnemy_color = 13
-        self._boss_color = 2
+        self._boss_color = 10
         self._world_border_color = 7
-
+        self._text_stats_color = 7
         self._screen_width = settings.screen_width
         self._screen_height = settings.screen_height
         self._world_width = settings.world_width
@@ -90,7 +90,7 @@ class View:
             x_pos,
             y_pos,
             f'{min}:{sec}',
-            self._player_color
+            self._text_stats_color
         )
 
     def text_win_message(self, x_pos: int, y_pos: int):
@@ -98,7 +98,7 @@ class View:
             x_pos,
             y_pos,
             f'You Win!',
-            self._player_color
+            self._text_stats_color
         )
 
 
