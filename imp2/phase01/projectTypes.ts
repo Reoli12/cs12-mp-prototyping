@@ -51,14 +51,18 @@ export const Model = S.Struct({
     currentFrame: S.Int,
     worldHeight: S.Number,
     worldWidth: S.Number,
+    screenHeight: S.Number,
+    screenWidth: S.Number,
     isOver: S.Boolean,
     })
 export type Model = typeof Model.Type
 
 const Settings = S.Struct({
     fps: S.Number,
-    width: S.Number,
-    height: S.Number,
+    screenWidth: S.Number,
+    screenHeight: S.Number,
+    worldWidth: S.Number,
+    worldHeight: S.Number,
     playerEggHp: S.Number,
     playerEggWidth: S.Number,
     playerEggHeight: S.Number,
