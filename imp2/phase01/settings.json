@@ -1,0 +1,16 @@
+{
+  "fps": 30,
+  "screenWidth": 1500,
+  "screenHeight": 1500,
+  "worldWidth": 300,
+  "worldHeight": 300,
+  "playerEggHp": 20,
+  "playerEggWidth": 10,
+  "playerEggHeight": 20,
+  "playerEggRange": 30,
+  "eggnemyCount": 5,
+  "eggnemyWidth": 5,
+  "eggnemyHeight": 5,
+  "playerEggSpeed": 3,
+  "eggnemySpeed": 1
+}
