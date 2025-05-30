@@ -20,11 +20,19 @@ class GameSettings:
     screen_height: int
 
 @dataclass
+class EgghancementSettings:
+    xp_needed: int
+    inc_max_hp: int
+    inc_atk: int
+    inc_spd: int
+
+@dataclass
 class EggInfo:
     width: int
     height: int
     max_hp: int
     current_hp: int
+    atk: int
     speed: int
 
 @dataclass
@@ -60,7 +68,6 @@ class Egg(ABC):
 class PlayerEgg(Egg):
     def __init__(self, egginfo: EggInfo, center: Point, damage: int, attack_radius: int):
         super().__init__(egginfo, center)
-        self.player_attack_damage = damage
         self.player_attack_radius = attack_radius
 
 class Eggnemy(Egg):

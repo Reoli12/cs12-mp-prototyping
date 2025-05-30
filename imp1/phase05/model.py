@@ -1,11 +1,12 @@
 from __future__ import annotations
-from project_types import Eggnemy, PlayerEgg, Boss, Point, GameSettings, EggInfo
+from project_types import Eggnemy, PlayerEgg, Boss, Point, GameSettings, EggInfo, EgghancementSettings
+from typing import Literal
 from copy import deepcopy
 import random
 
 
 class Model:
-    def __init__(self, player_egg: PlayerEgg, settings: GameSettings, eggnemy_count: int, eggnemy_info: EggInfo, boss_info: EggInfo, boss_spawn_rate: int):
+    def __init__(self, player_egg: PlayerEgg, settings: GameSettings, eggnemy_count: int, eggnemy_info: EggInfo, boss_info: EggInfo, boss_spawn_rate: int, egghancement: EgghancementSettings):
         #Stored parameters
         self._param_player_egg = player_egg
         self._param_settings = settings
@@ -13,13 +14,14 @@ class Model:
         self._param_eggnemy_info = eggnemy_info
         self._param_boss_info = boss_info
         self._param_boss_spawn_rate = boss_spawn_rate
+        self._param_egghancement = egghancement
         self._leaderboards: list[tuple[int, int]] = []
         self._leaderboards_str: list[str] = []
         self._is_time_get: bool = False
 
         self.restart()
 
-    def update(self, is_forward_pressed: bool, is_left_pressed: bool, is_down_pressed: bool, is_right_pressed: bool, is_attack_pressed: bool):
+    def update(self, is_forward_pressed: bool, is_left_pressed: bool, is_down_pressed: bool, is_right_pressed: bool, is_attack_pressed: bool, egghancement_pressed: Literal[1, 2, 3]):
         player_egg: PlayerEgg = self._player_egg
 
         #game over state
@@ -270,6 +272,7 @@ class Model:
         self._min: int = 0
 
         self._player_egg: PlayerEgg = deepcopy(self._param_player_egg)
+        self._egghancement: EgghancementSettings = deepcopy(self._param_egghancement)
 
         self._eggnemies: list[Eggnemy] = []
         self._overlapping_player_eggnemy: list[Eggnemy] = []
@@ -327,6 +330,16 @@ class Model:
                 run_str: str = f'    {i}   --:--'
                 runs_str.append(run_str)
 
+    def egghancement_stats(self, egghancement_pressed: Literal[1, 2, 3]):
+        match egghancement_pressed:
+            case 1:
+                self._player_egg.stats.current_hp += self._egghancement.inc_max_hp
+                self._player_egg.stats.max_hp += self._egghancement.inc_max_hp
+            case 2:
+                self._player_egg.player_attack_damage
+
+
+
 
     @property
     def param_player_egg(self) -> PlayerEgg:
@@ -351,6 +364,10 @@ class Model:
     @property
     def param_boss_spawn_rate(self) -> int:
         return self._param_boss_spawn_rate
+    
+    @property
+    def param_egghancement(self) -> EgghancementSettings:
+        return self._param_egghancement
 
     @property
     def leaderboards(self) -> list[tuple[int, int]]:
@@ -399,6 +416,10 @@ class Model:
     @property
     def player_egg(self) -> PlayerEgg:
         return self._player_egg
+    
+    @property
+    def egghancement(self) -> EgghancementSettings:
+        return self._egghancement
     
     @property
     def eggnemies(self) -> list[Eggnemy]:
