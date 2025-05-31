@@ -47,10 +47,6 @@ class Model:
             self.eggnemy_spawn()
 
             self.boss_movement()
-
-            if (self._num_defeated_eggnemies != 0 and 
-                self._num_defeated_eggnemies % self._boss_spawn_rate == 0):
-                self._is_boss_to_be_spawned: bool = True
             self.boss_spawn()
                 
             #damage
@@ -64,7 +60,6 @@ class Model:
                     self._sec = 0
 
             self._frame_count += 1
-            print(self.is_boss_to_be_spawned)
         
         else:
             self.egghancement_stats(egghancement_pressed)
@@ -142,6 +137,8 @@ class Model:
                             break
                         if eggnemy in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(eggnemy)
+
+                    self._prev_wave_done = True if self._num_defeated_eggnemies % self._boss_spawn_rate and not self._boss_egg else False
             
             boss: None | Boss = self._boss_egg
             if boss:
@@ -150,8 +147,8 @@ class Model:
                     boss.stats.current_hp -= damage
 
                     if boss.stats.current_hp <= 0:
-                        self._boss_egg: None | Boss = None
                         self._wave_count += 1
+                        self._boss_egg: None | Boss = None
                         self._is_boss_spawned: bool = False
                         if boss in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(boss)
@@ -225,14 +222,14 @@ class Model:
 
     def boss_spawn(self):
         if (not self._is_game_over and 
-            self._is_boss_to_be_spawned and
+            self._prev_wave_done and
             not self._boss_egg and 
             self.num_defeated_eggnemies != 0 and 
-            self._num_defeated_eggnemies % self._boss_spawn_rate == 0 ):
+            self._num_defeated_eggnemies % self._boss_spawn_rate == 0):
             
             print("spawning boss")
             self._is_boss_spawned: bool = True
-            self._is_boss_to_be_spawned: bool = False
+            self._prev_wave_done: bool = False
             boss_width: int = self._boss_width
             boss_height: int = self._boss_height
             boss_center: None | Point = None
@@ -332,7 +329,6 @@ class Model:
 
 
         self._is_boss_spawned: bool = False
-        self._is_boss_to_be_spawned: bool = False
         self._prev_wave_done: bool = False
 
         self._wave_count: int = 0
@@ -593,11 +589,7 @@ class Model:
         return self._is_boss_spawned
     
     @property
-    def is_boss_to_be_spawned(self) -> bool:
-        return self._is_boss_to_be_spawned
-    
-    @property
-    def is_prev_wave_done(self) -> bool:
+    def prev_wave_done(self) -> bool:
         return self._prev_wave_done
 
     @property
