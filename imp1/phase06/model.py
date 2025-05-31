@@ -65,7 +65,7 @@ class Model:
             self.egghancement_stats(egghancement_pressed)
 
 
-    def is_overlapping_entities(self, entity_a: PlayerEgg | Eggnemy | Boss, entity_b: PlayerEgg | Eggnemy | Boss):
+    def is_overlapping_entities(self, entity_a: PlayerEgg | Eggnemy | Boss, entity_b: PlayerEgg | Eggnemy | Boss) -> bool:
         left_bounds: float = entity_a.leftmost_point
         right_bounds: float = entity_a.rightmost_point
         top_bounds: float = entity_a.topmost_point
@@ -149,7 +149,6 @@ class Model:
                     if boss.stats.current_hp <= 0:
                         self._wave_count += 1
                         self._boss_egg: None | Boss = None
-                        self._is_boss_spawned: bool = False
                         if boss in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(boss)
    
@@ -227,8 +226,6 @@ class Model:
             self.num_defeated_eggnemies != 0 and 
             self._num_defeated_eggnemies % self._boss_spawn_rate == 0):
             
-            print("spawning boss")
-            self._is_boss_spawned: bool = True
             self._prev_wave_done: bool = False
             boss_width: int = self._boss_width
             boss_height: int = self._boss_height
@@ -256,7 +253,6 @@ class Model:
                 if (not self.is_overlapping_entities(self.player_egg, self._boss_egg) and
                     not any(self.is_overlapping_entities(self._boss_egg, eggnemy) for eggnemy in self._eggnemies)):
                     break
-            print("spawned boss")
     
     def boss_movement(self):
         if self._boss_egg:
@@ -327,12 +323,8 @@ class Model:
         self._base_boss_atk: int = self._boss_info.atk
         self._boss_atk: int = self._base_boss_atk
 
-
-        self._is_boss_spawned: bool = False
         self._prev_wave_done: bool = False
-
         self._wave_count: int = 0
-
         self._is_game_over: bool = False
 
     def update_leaderboards(self, min: int, sec: int):
@@ -583,11 +575,7 @@ class Model:
     @property
     def boss_atk(self) -> int:
         return self._boss_atk
-    
-    @property
-    def is_boss_spawned(self) -> bool:
-        return self._is_boss_spawned
-    
+
     @property
     def prev_wave_done(self) -> bool:
         return self._prev_wave_done
