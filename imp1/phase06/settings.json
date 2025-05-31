@@ -22,10 +22,12 @@
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,
   "eggnemySpeed": 1,
+  "eggnemyAttackDamage": 1,
 
   "bossSpawnRate": 20, 
   "bossInitialHp": 50,          
   "bossWidth": 20,             
   "bossHeight": 40,
-  "bossSpeed": 3
+  "bossSpeed": 3,
+  "bossAttackDamage": 3
 }

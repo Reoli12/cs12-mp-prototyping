@@ -30,7 +30,7 @@ class Model:
             if player_egg.stats.current_hp <= 0:
                 self._is_game_over: bool = True
 
-            if self._is_game_over or self._is_game_won:
+            if self._is_game_over:
                 return
             
             #player movement, position and attack
@@ -52,7 +52,7 @@ class Model:
             self.player_takes_damage()
 
             #time and frame
-            if self._frame_count % self._fps == 0 and not(self._is_game_over or self._is_game_won):
+            if self._frame_count % self._fps == 0 and not self._is_game_over:
                 self._sec += 1
                 if self._sec % 60 == 0:
                     self._min += 1
@@ -144,9 +144,12 @@ class Model:
                     boss.stats.current_hp -= damage
 
                     if boss.stats.current_hp <= 0:
-                        self._num_defeated_eggnemies += 1
                         self._boss_egg: None | Boss = None
-                        self._is_game_won: bool = True 
+                        self._wave_count += 1
+
+                        if self.num_defeated_eggnemies != 0 and self._num_defeated_eggnemies % self._boss_spawn_rate != 0: 
+                            self._is_boss_spawned: bool = False
+
                         if boss in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(boss)
    
@@ -214,12 +217,14 @@ class Model:
                 self.return_to_world_bounds(eggnemy)
 
     def boss_spawn(self):
-        if (not(self._is_game_won or self._is_game_over) and 
+        if (not self._is_game_over and 
+            not self._is_boss_spawned and
             not self._boss_egg and 
             self.num_defeated_eggnemies != 0 and 
-            self._num_defeated_eggnemies - self._boss_spawn_rate >= 0 ):
+            self._num_defeated_eggnemies % self._boss_spawn_rate == 0 ):
             
             print("spawning boss")
+            self._is_boss_spawned: bool = True
             boss_width: int = self._boss_width
             boss_height: int = self._boss_height
             boss_center: None | Point = None
@@ -304,16 +309,18 @@ class Model:
         self._boss_speed: int = self._boss_info.speed
         self._boss_max_hp: int = self._boss_info.max_hp
         self._boss_atk: int = self._boss_info.atk
+        self._is_boss_spawned: bool = False
+
+        self._wave_count: int = 0
 
         self._is_game_over: bool = False
-        self._is_game_won: bool = False
 
     def update_leaderboards(self, min: int, sec: int):
         self._is_time_get: bool = True
         self._leaderboards.append((min, sec))
 
         #in terms of seconds
-        self._leaderboards.sort(key=lambda time: time[0] * 60 + time[1])
+        self._leaderboards.sort(key=lambda time: time[0] * 60 + time[1], reverse=True)
         self._leaderboards: list[tuple[int, int]] = self._leaderboards [:3]
         self.leaderboards_stringify()
     
@@ -535,9 +542,13 @@ class Model:
         return self._boss_atk
     
     @property
+    def is_boss_spawned(self) -> bool:
+        return self._is_boss_spawned
+
+    @property
+    def wave_count(self) -> int:
+        return self._wave_count
+
+    @property
     def is_game_over(self) -> bool:
         return self._is_game_over
-    
-    @property
-    def is_game_won(self) -> bool:
-        return self._is_game_won

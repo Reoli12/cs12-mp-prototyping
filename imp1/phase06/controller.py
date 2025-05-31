@@ -11,8 +11,8 @@ class Controller:
         self._view: View = view
 
     def update(self):
-        if self._model.is_game_over or self._model.is_game_won:
-            if not self._model.is_time_get and self._model.is_game_won:
+        if self._model.is_game_over:
+            if not self._model.is_time_get:
                 min = deepcopy(self._model.min)
                 sec = deepcopy(self._model.sec)
                 self._model.update_leaderboards(min, sec)
@@ -175,7 +175,7 @@ class Controller:
             time)
 
         #leaderboards
-        if self._model.is_game_over or self._model.is_game_won:
+        if self._model.is_game_over:
             runs_str: list[str] = self._model.leaderboards_str
 
             leaderboard_x_pos: int = 7
@@ -206,16 +206,16 @@ class Controller:
             )
         
         #end state messages
-        if self._model.is_game_won:
+        '''if self._model.is_game_won:
             win_x_pos: int = int((player_x_pos - int((player_width / 2) * 2)))
             win_y_pos: int = int(player_y_pos - int(player_height))
 
             #win message
             self._view.text_win_message(
             win_x_pos - camera_x_pos, 
-            win_y_pos - camera_y_pos)
+            win_y_pos - camera_y_pos)'''
 
-        if self._model.is_game_over or self._model.is_game_won:
+        if self._model.is_game_over:
             restart_x_pos: int = player_hp_x_pos - 13
             restart_y_pos: int = int(player_y_pos + int(player_height * 2))
 

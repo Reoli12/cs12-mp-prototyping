@@ -50,13 +50,14 @@ def main():
     eggnemy_width: int = data["eggnemyWidth"]
     eggnemy_height: int = data["eggnemyHeight"]
     eggnemy_speed: int = data["eggnemySpeed"]
+    eggnemy_damage: int = data["eggnemyAttackDamage"]
 
     eggnemy_info = EggInfo(
         eggnemy_width,
         eggnemy_height,
         eggnemy_hp,
         eggnemy_hp,
-        1,
+        eggnemy_damage,
         eggnemy_speed
     )
 
@@ -66,13 +67,14 @@ def main():
     boss_width: int = data["bossWidth"]
     boss_height: int = data["bossHeight"]
     boss_speed: int = data["bossSpeed"]
+    boss_damage: int = data["bossAttackDamage"]
 
     boss_info = EggInfo(
         boss_width,
         boss_height,
         boss_hp,
         boss_hp,
-        3,
+        boss_damage,
         boss_speed
     )
 
