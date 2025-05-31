@@ -38,20 +38,43 @@ export const Eggnemy = S.TaggedStruct("Eggnemy", {
     speed: S.Number,
     currentHp: S.Number,
     totalHp: S.Number,
+    damage: S.Number,
 })
 export type Eggnemy = typeof Eggnemy.Type
+
+export const Boss = S.TaggedStruct("Boss", {
+    centerCoords: Point,
+    height: S.Number,
+    width: S.Number,
+    color: S.String,
+    speed: S.Number,
+    currentHp: S.Number,
+    totalHp: S.Number,
+    damage: S.Number,
+})
+export type Boss = typeof Boss.Type
 
 export const Egg = S.Union(
     PlayerEgg,
     Eggnemy,
+    Boss,
 )
 export type Egg = typeof Egg.Type
+
+export const BadEgg = S.Union(
+    Eggnemy,
+    Boss
+)
+export type BadEgg = typeof BadEgg.Type
 
 export const Model = S.Struct({
     playerEgg: PlayerEgg,
     eggnemies: S.Array(Eggnemy),
     eggnemiesDefeated: S.Number,
+    eggnemiesToKillBeforeBoss: S.Number,
+    bosses: S.Array(Boss),
     fps: S.Int,
+    isBossActive: S.Boolean,
     currentFrame: S.Int,
     worldHeight: S.Number,
     worldWidth: S.Number,
@@ -59,7 +82,12 @@ export const Model = S.Struct({
     worldBoundaryWidth: S.Number,
     screenHeight: S.Number,
     screenWidth: S.Number,
-    isOver: S.Boolean,
+    gameState: S.Union(
+        S.Literal("Ongoing"),
+        S.Literal("PlayerWin"),
+        S.Literal("PlayerLose")
+    ),
+
     })
 export type Model = typeof Model.Type
 
@@ -70,15 +98,24 @@ const Settings = S.Struct({
     worldWidth: S.Number,
     worldHeight: S.Number,
     worldBoundaryWidth: S.Number,
+
     playerEggHp: S.Number,
     playerEggWidth: S.Number,
     playerEggHeight: S.Number,
     playerEggRange: S.Number,
+    playerEggSpeed: S.Number,
+
     initialEggnemyCount: S.Number,
     eggnemyWidth: S.Number,
     eggnemyHeight: S.Number,
-    playerEggSpeed: S.Number,
     eggnemySpeed: S.Number,
     eggnemyInitialHp: S.Number,
+    eggnemyDamage: S.Number,
+
+    eggnemiesToKillBeforeBoss: S.Number,
+    bossInitialHp: S.Number,
+    bossWidth: S.Number,
+    bossHeight: S.Number,
+    bossSpeed: S.Number,
 })
 export type Settings = typeof Settings.Type

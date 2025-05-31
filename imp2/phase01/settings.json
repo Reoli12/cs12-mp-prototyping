@@ -5,14 +5,24 @@
   "worldWidth": 400,
   "worldHeight": 400,
   "worldBoundaryWidth": 3,
+
   "playerEggHp": 20,
   "playerEggWidth": 10,
   "playerEggHeight": 20,
-  "playerEggRange": 30,
-  "eggnemyCount": 5,
+  "playerEggSpeed": 5,
+  "playerEggRange": 0,
+
+  "initialEggnemyCount": 5,
+
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,
-  "playerEggSpeed": 3,
   "eggnemySpeed": 1,
-  "eggnemyInitialHp": 5
+  "eggnemyInitialHp": 5,
+  "eggnemyDamage": 1,
+
+  "eggnemiesToKillBeforeBoss": 20,
+  "bossInitialHp": 50,
+  "bossWidth": 15,
+  "bossHeight": 40,
+  "bossSpeed": 1
 }

@@ -1,4 +1,4 @@
-import { Model, Egg, Point, Settings, EggSides,PlayerEgg, Eggnemy } from "./projectTypes"
+import { BadEgg, Boss, Model, Egg, Point, Settings, EggSides,PlayerEgg, Eggnemy } from "./projectTypes"
 import { Array, Schema as S, Match, Option, pipe, String } from "effect"
 import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
@@ -12,17 +12,16 @@ const update = (msg: Msg, model: Model): Model =>
     Match.value(msg).pipe(
         Match.tag("Canvas.MsgKeyDown", ({ key }) =>
             // pipe(console.log(model), () => false)? model :
-            model.isOver? model : 
+            model.gameState != "Ongoing"? model : 
             (key == 'l' || key == 'L') ? 
             pipe(
-                modelDamageToEggnemies(model),
+                modelDamageToBadEggs(model),
                 (newModel) => updateEggnemyKillCount(
                     newModel, absDifference(
                             Array.length(model.eggnemies),
                             Array.length(newModel.eggnemies)
                         )
-                )
-                    
+                )      
             ) :
             pipe(
                 getModelAfterEverythingMoved(model, key, model.playerEgg.speed),
@@ -37,14 +36,19 @@ const update = (msg: Msg, model: Model): Model =>
 
         ),
         Match.tag('Canvas.MsgTick', () => 
+            model.isBossActive && Array.length(model.bosses) === 0?
+            Model.make({...model, gameState: "PlayerWin"}):
+            model.eggnemiesDefeated >= model.eggnemiesToKillBeforeBoss &&
+            Array.length(model.bosses) === 0? // Array.isEmptyArray doesnt work for some reason
+            spawnBoss(model) :
             model.playerEgg.currentHp <= 0 ? Model.make({
                 ...model,
-                isOver: true,
+                gameState: "PlayerLose",
             }) :
             // !isPlayerInBounds(model)?
             // returnPlayerToBounds(model):
-            model.isOver? model :
-            Array.some(model.eggnemies, (eggnemy) => isInContact(model.playerEgg, eggnemy)) ? Model.make({
+            model.gameState !== "Ongoing"? model :
+            shouldPlayerBeReceivingDamage(model) ? Model.make({
                 // with collision
                 ...model,
                 currentFrame: (model.currentFrame + 1) % model.fps,
@@ -57,7 +61,13 @@ const update = (msg: Msg, model: Model): Model =>
                         Match.tag("Some", (frameCountSinceLastDamaged) => (
                             // if more than one frame has passed since last dmg, decrement 1
                             frameCountSinceLastDamaged.value < model.fps? 
-                            model.playerEgg.currentHp : model.playerEgg.currentHp - 1
+                            model.playerEgg.currentHp : 
+                            inContactWithBoss(model) && inContactWithEggnemy(model)?
+                            model.playerEgg.currentHp -4 : // contact with boss AND normal eggnemy 
+                            inContactWithBoss(model)? 
+                            model.playerEgg.currentHp - 3 :  
+                            model.playerEgg.currentHp - 1
+
                         )),
                         Match.exhaustive,
                     ),
@@ -70,9 +80,15 @@ const update = (msg: Msg, model: Model): Model =>
                         Match.exhaustive
                     )
             }),
-            eggnemies: Array.map(model.eggnemies, (eggnemy) => Eggnemy.make({
-                ...eggnemy,
-                centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
+            eggnemies: Array.map(model.eggnemies, (eggnemy) => 
+                Eggnemy.make({
+                    ...eggnemy,
+                    centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, eggnemy.speed)
+                })
+            ),
+            bosses: Array.map(model.bosses, (boss) => Boss.make({
+                ...boss,
+                centerCoords: getNewEggnemyCoords(boss.centerCoords, model.playerEgg.centerCoords, boss.speed)
             })),
             }) : Model.make({
                 // no collision 
@@ -92,28 +108,66 @@ const update = (msg: Msg, model: Model): Model =>
                         model.eggnemies,
                         Array.map((eggnemy) => Eggnemy.make({
                             ...eggnemy,
-                            centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
+                            centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, 
+                                model.playerEgg.centerCoords, eggnemy.speed)
                         })),
-                        (movedEggnemies) => randomAddEggnemies(movedEggnemies, 1)
+                        (movedEggnemies) => randomAddEggnemies(movedEggnemies, 2)
             ),
+                    bosses: Array.map(model.bosses, (boss) => Boss.make({
+                        ...boss,
+                        centerCoords: getNewEggnemyCoords(boss.centerCoords, model.playerEgg.centerCoords, boss.speed)
+            }))
                 
             }),
         ),
         Match.orElse(() => model)
     )
 
+const shouldPlayerBeReceivingDamage = (model): boolean => 
+    inContactWithBoss(model) || inContactWithEggnemy(model)
+
+const inContactWithEggnemy = (model: Model): boolean =>
+    Array.some(model.eggnemies, (eggnemy) => isInContact(model.playerEgg, eggnemy))
+
+const inContactWithBoss = (model: Model): boolean => 
+    Array.some(model.bosses, (boss) => isInContact(model.playerEgg, boss))
+    
+
+const spawnBoss = (model: Model) => 
+    Model.make({
+        ...model,
+        bosses: Array.append(model.bosses, Boss.make({
+            centerCoords: Point.make({
+                x: Math.random() * model.screenWidth,
+                y: Math.random() * model.screenHeight,
+            }),
+            height: settings.bossHeight,
+            width: settings.bossWidth,
+            color: "tan",
+            currentHp: settings.bossInitialHp,
+            totalHp: settings.bossInitialHp,
+            damage: 3,
+            speed: settings.bossSpeed,
+        }) ),
+        isBossActive: true
+    })
+
+// const moveEgg = (egg: Egg) =>
+//     Match.value(egg).pipe(
+//         Match.tag("Eggnemy", (eggnemy) => Eggnemy.make({
+            
+//         }))
+//     )
+
 const randomAddEggnemies = (eggnemies: Eggnemy[], chance: number): Eggnemy[] => {
     if (Math.random() * 100 > chance) {
         return eggnemies
     }
-
     const numAdded = pipe(
         Math.random() * 10,
         Math.floor
     )
-
     let currentEggnemies = eggnemies
-
     for (let i = 0; i < numAdded; i++) {
         currentEggnemies = Array.append(currentEggnemies, Eggnemy.make({
             centerCoords: Point.make({
@@ -126,6 +180,7 @@ const randomAddEggnemies = (eggnemies: Eggnemy[], chance: number): Eggnemy[] => 
             speed: settings.eggnemySpeed,
             currentHp: settings.eggnemyInitialHp,
             totalHp: settings.eggnemyInitialHp,
+            damage: settings.eggnemyDamage
         }))
     }
 
@@ -139,37 +194,52 @@ const updateEggnemyKillCount = (model: Model, additionalCount) =>
         eggnemiesDefeated: model.eggnemiesDefeated + additionalCount
     })
 
-
-const moveWordBorderRelativeToPlayer = (model: Model, key: string) =>
-    Model.make({
-        ...model,
-        worldCenter: moveRelativeToPlayer(
-                    model.worldCenter,
-                    String.toLowerCase(key),
-                    model.playerEgg.speed,
-                )
-    })
-
 const getModelAfterEverythingMoved = (model: Model, key: string, distance: number) =>
     Model.make({
                 ...model,
                 eggnemies: pipe(
                     model.eggnemies,
-                    Array.map((eggnemy) => Eggnemy.make({
+                    Array.map((badEgg) => moveEggRelativeToPlayer(
+                        badEgg, key, distance
+                    ) as Eggnemy,   
+                )),
+                worldCenter: moveRelativeToPlayer(
+                    model.worldCenter,
+                    String.toLowerCase(key),
+                    distance,
+                ),
+                bosses: pipe(
+                    model.bosses,
+                    Array.map((boss) => moveEggRelativeToPlayer(
+                        boss, key, distance
+                    ) as Boss)
+                )
+            })
+
+const moveEggRelativeToPlayer = (egg: BadEgg, key: string, distance: number) => 
+    Match.value(egg).pipe(
+        Match.tag('Eggnemy', (eggnemy) => 
+            Eggnemy.make({
                         ...eggnemy,
                         centerCoords: moveRelativeToPlayer(
                             eggnemy.centerCoords,
                             String.toLowerCase(key),
                             distance,
                         ),
-                    }),   
-                )),
-                worldCenter: moveRelativeToPlayer(
-                    model.worldCenter,
-                    String.toLowerCase(key),
-                    distance,
-                )
-            })
+                    })
+        ),
+        Match.tag("Boss", (boss) =>
+            Boss.make({
+                        ...boss,
+                        centerCoords: moveRelativeToPlayer(
+                            boss.centerCoords,
+                            String.toLowerCase(key),
+                            distance,
+                        ),
+                    })
+        ),
+        Match.exhaustive
+    )
 
 const moveRelativeToPlayer = (point: Point, key: string, playerSpeed): Point =>
     key == 'w' ? Point.make({...point, y: point.y + playerSpeed}) :
@@ -182,33 +252,50 @@ const modelDefeatedEggnemies = (model: Model): Model =>
     Model.make({
         ...model,
         eggnemies: Array.map(model.eggnemies, 
-            (eggnemy) => withinPlayerRange(model.playerEgg, eggnemy) ?
+            (eggnemy) => (withinPlayerRange(model.playerEgg, eggnemy) ?
                          takeDamage(model.playerEgg, eggnemy):
-                         eggnemy
+                         eggnemy) as Eggnemy
         )
     }) 
 
-const modelDamageToEggnemies = (model: Model): Model =>
+const modelDamageToBadEggs = (model: Model): Model =>
     Model.make({
         ...model,
         eggnemies: pipe(
             model.eggnemies,
-            Array.map((eggnemy) => takeDamage(model.playerEgg, eggnemy)),
-            Array.filter((eggnemy) => eggnemy.currentHp > 0)
+            Array.map((eggnemy) => (takeDamage(model.playerEgg, eggnemy)) as Eggnemy),
+            Array.filter((eggnemy) => eggnemy.currentHp > 0),
         ),
-    })
-
-const takeDamage = (source: PlayerEgg, victim: Eggnemy) => 
-    Eggnemy.make({
-        ...victim,
-        currentHp: Math.max(
-            victim.currentHp - source.damage,
-            0
+        bosses: pipe(
+            model.bosses,
+            Array.map((boss) => (takeDamage(model.playerEgg, boss)) as Boss),
+            Array.filter((boss) => boss.currentHp > 0)
         )
+        ,
     })
 
+const takeDamage = (source: PlayerEgg, victim: BadEgg ) => 
+    Match.value(victim).pipe(
+        Match.tag('Eggnemy', (eggnemy) =>
+            Eggnemy.make({
+                ...eggnemy,
+                currentHp: Math.max(
+                victim.currentHp - source.damage,
+                0
+            )})
+        ),
+        Match.tag("Boss", (boss) => 
+        Boss.make({
+            ...boss,
+            currentHp: Math.max(
+                victim.currentHp - source.damage,
+                0
+            )})
 
-const withinPlayerRange = (player: PlayerEgg, eggnemy: Eggnemy): boolean =>
+        ), Match.exhaustive)
+
+
+const withinPlayerRange = (player: PlayerEgg, eggnemy: BadEgg): boolean =>
     // no specific definition as to what range was given
     (player.attackRange ** 2) >= 
     (player.centerCoords.x - eggnemy.centerCoords.x) ** 2 + 
@@ -278,7 +365,7 @@ const getSideBoundary = (egg: Egg, side: EggSides) =>
 const view = (model: Model) => 
     pipe(
         model,
-        ({ playerEgg, eggnemies }) => [
+        ({ playerEgg, eggnemies, bosses }) => [
             Canvas.Clear.make({
                 color: "black",
             }),
@@ -290,11 +377,15 @@ const view = (model: Model) =>
                 color: "white",
                 lineWidth: model.worldBoundaryWidth,
             }),
-            ...(model.isOver? Array.empty(): viewEgg(playerEgg, "white")), // spread empty array
+            ...pipe(
+                Array.map(bosses, (boss) => viewEgg(boss, boss.color)),
+                Array.flatten
+            ),
             ...pipe(
                 Array.map(eggnemies, (eggnemy) => viewEgg(eggnemy, "grey")),
                 Array.flatten
             ),
+            ...(model.gameState == "PlayerLose"? Array.empty(): viewEgg(playerEgg, "white")), // spread empty array
             Canvas.Text.make({
                 x: 50,
                 y: 50,
@@ -302,6 +393,13 @@ const view = (model: Model) =>
                 fontSize: 30,
                 color: "white",
             }),
+            model.gameState === "PlayerWin"? Canvas.Text.make({
+                x: getSideBoundary(model.playerEgg, "left") - 10,
+                y: getSideBoundary(model.playerEgg, "top") - 20,
+                text: "You win!",
+                color: "white",
+                fontSize: 20,
+            }): Canvas.NullElement.make({})
         ],
 
     )
@@ -367,6 +465,7 @@ function main() {
                 speed: settings.eggnemySpeed,
                 currentHp: settings.eggnemyInitialHp,
                 totalHp: settings.eggnemyInitialHp,
+                damage: settings.eggnemyDamage
             }),
             Eggnemy.make({
                 centerCoords: Point.make({x: 100, y: 250}),
@@ -376,6 +475,7 @@ function main() {
                 speed: settings.eggnemySpeed,
                 currentHp: settings.eggnemyInitialHp,
                 totalHp: settings.eggnemyInitialHp,
+                damage: settings.eggnemyDamage
             }),
             Eggnemy.make({
                 centerCoords: Point.make({x: 200, y: 200}),
@@ -385,9 +485,13 @@ function main() {
                 speed: settings.eggnemySpeed,
                 currentHp: settings.eggnemyInitialHp,
                 totalHp: settings.eggnemyInitialHp,
+                damage: settings.eggnemyDamage
             }),
         ),
+        bosses: Array.empty(),
+        isBossActive: false,
         eggnemiesDefeated: 0,
+        eggnemiesToKillBeforeBoss: settings.eggnemiesToKillBeforeBoss,
         worldHeight: settings.worldHeight,
         worldWidth: settings.worldWidth,
         worldCenter: Point.make({
@@ -399,7 +503,7 @@ function main() {
         screenWidth: settings.screenWidth,
         fps: settings.fps,
         currentFrame: 0,
-        isOver: false,
+        gameState: "Ongoing",
     })
 
     startSimple(root, initModel, update, canvasView(
@@ -461,3 +565,13 @@ main()
 //     ]),
 //     Match.exhaustive
 //     )
+
+// const moveWordBorderRelativeToPlayer = (model: Model, key: string) =>
+//     Model.make({
+//         ...model,
+//         worldCenter: moveRelativeToPlayer(
+//                     model.worldCenter,
+//                     String.toLowerCase(key),
+//                     model.playerEgg.speed,
+//                 )
+//     })
