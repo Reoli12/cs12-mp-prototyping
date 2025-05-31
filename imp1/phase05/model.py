@@ -144,7 +144,6 @@ class Model:
                     boss.stats.current_hp -= damage
 
                     if boss.stats.current_hp <= 0:
-                        self._num_defeated_eggnemies += 1
                         self._boss_egg: None | Boss = None
                         self._is_game_won: bool = True 
                         if boss in self._overlapping_player_eggnemy:
