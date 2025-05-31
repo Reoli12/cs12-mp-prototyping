@@ -5,6 +5,8 @@ import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
 import * as Canvas from "cs12242-mvu/src/canvas"
 import data from "./settings.json" 
 
+const settings = data as unknown as Settings // idk why but ts says to convert as unknwon first
+
 type Msg = typeof CanvasMsg.Type // update strictly only takes in Msg
 const update = (msg: Msg, model: Model): Model => 
     Match.value(msg).pipe(
@@ -12,7 +14,16 @@ const update = (msg: Msg, model: Model): Model =>
             // pipe(console.log(model), () => false)? model :
             model.isOver? model : 
             (key == 'l' || key == 'L') ? 
-            modelDefeatedEggnemies(model) :
+            pipe(
+                modelDamageToEggnemies(model),
+                (newModel) => updateEggnemyKillCount(
+                    newModel, absDifference(
+                            Array.length(model.eggnemies),
+                            Array.length(newModel.eggnemies)
+                        )
+                )
+                    
+            ) :
             pipe(
                 getModelAfterEverythingMoved(model, key, model.playerEgg.speed),
                 (model) =>  !isPlayerInBounds(model)? 
@@ -26,10 +37,6 @@ const update = (msg: Msg, model: Model): Model =>
 
         ),
         Match.tag('Canvas.MsgTick', () => 
-            pipe(
-                console.log(model.worldCenter),
-                () => false
-            )? model :
             model.playerEgg.currentHp <= 0 ? Model.make({
                 ...model,
                 isOver: true,
@@ -81,15 +88,56 @@ const update = (msg: Msg, model: Model): Model =>
                     Match.exhaustive
                 )
                 }),
-                    eggnemies: Array.map(model.eggnemies, (eggnemy) => Eggnemy.make({
-                        ...eggnemy,
-                        centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
-                })),
+                    eggnemies: pipe(
+                        model.eggnemies,
+                        Array.map((eggnemy) => Eggnemy.make({
+                            ...eggnemy,
+                            centerCoords: getNewEggnemyCoords(eggnemy.centerCoords, model.playerEgg.centerCoords, 1)
+                        })),
+                        (movedEggnemies) => randomAddEggnemies(movedEggnemies, 1)
+            ),
                 
             }),
         ),
         Match.orElse(() => model)
     )
+
+const randomAddEggnemies = (eggnemies: Eggnemy[], chance: number): Eggnemy[] => {
+    if (Math.random() * 100 > chance) {
+        return eggnemies
+    }
+
+    const numAdded = pipe(
+        Math.random() * 10,
+        Math.floor
+    )
+
+    let currentEggnemies = eggnemies
+
+    for (let i = 0; i < numAdded; i++) {
+        currentEggnemies = Array.append(currentEggnemies, Eggnemy.make({
+            centerCoords: Point.make({
+                x: Math.random() * settings.screenWidth,
+                y: Math.random() * settings.screenHeight,
+            }),
+            height: settings.eggnemyHeight,
+            width: settings.eggnemyWidth,
+            color: "grey",
+            speed: settings.eggnemySpeed,
+            currentHp: settings.eggnemyInitialHp,
+            totalHp: settings.eggnemyInitialHp,
+        }))
+    }
+
+    return currentEggnemies
+}
+    
+
+const updateEggnemyKillCount = (model: Model, additionalCount) =>
+    Model.make({
+        ...model,
+        eggnemiesDefeated: model.eggnemiesDefeated + additionalCount
+    })
 
 
 const moveWordBorderRelativeToPlayer = (model: Model, key: string) =>
@@ -133,9 +181,32 @@ const moveRelativeToPlayer = (point: Point, key: string, playerSpeed): Point =>
 const modelDefeatedEggnemies = (model: Model): Model => 
     Model.make({
         ...model,
-        eggnemies: Array.filter(model.eggnemies, 
-            (eggnemy) => withinPlayerRange(model.playerEgg, eggnemy))
+        eggnemies: Array.map(model.eggnemies, 
+            (eggnemy) => withinPlayerRange(model.playerEgg, eggnemy) ?
+                         takeDamage(model.playerEgg, eggnemy):
+                         eggnemy
+        )
     }) 
+
+const modelDamageToEggnemies = (model: Model): Model =>
+    Model.make({
+        ...model,
+        eggnemies: pipe(
+            model.eggnemies,
+            Array.map((eggnemy) => takeDamage(model.playerEgg, eggnemy)),
+            Array.filter((eggnemy) => eggnemy.currentHp > 0)
+        ),
+    })
+
+const takeDamage = (source: PlayerEgg, victim: Eggnemy) => 
+    Eggnemy.make({
+        ...victim,
+        currentHp: Math.max(
+            victim.currentHp - source.damage,
+            0
+        )
+    })
+
 
 const withinPlayerRange = (player: PlayerEgg, eggnemy: Eggnemy): boolean =>
     // no specific definition as to what range was given
@@ -224,6 +295,13 @@ const view = (model: Model) =>
                 Array.map(eggnemies, (eggnemy) => viewEgg(eggnemy, "grey")),
                 Array.flatten
             ),
+            Canvas.Text.make({
+                x: 50,
+                y: 50,
+                text: `${model.eggnemiesDefeated}`,
+                fontSize: 30,
+                color: "white",
+            }),
         ],
 
     )
@@ -262,8 +340,6 @@ const getNewEggnemyCoords = (eggnemyCoords: Point, playerEggCoords: Point, eggne
 function main() {
     const root = document.getElementById("root")!
 
-    const settings = data as unknown as Settings // idk why but ts says to convert as unknwon first
-
     const playerEgg = PlayerEgg.make({
         centerCoords: Point.make({
             x: settings.screenWidth / 2,
@@ -276,7 +352,8 @@ function main() {
         color: "white",
         speed: settings.playerEggSpeed,
         attackRange: settings.playerEggRange,
-        frameCountSinceLastDamaged: Option.none()
+        frameCountSinceLastDamaged: Option.none(),
+        damage: 3,
     })
 
     const initModel = Model.make({
@@ -310,6 +387,7 @@ function main() {
                 totalHp: settings.eggnemyInitialHp,
             }),
         ),
+        eggnemiesDefeated: 0,
         worldHeight: settings.worldHeight,
         worldWidth: settings.worldWidth,
         worldCenter: Point.make({
