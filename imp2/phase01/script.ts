@@ -1,4 +1,4 @@
-import { BadEgg, Boss, Model, Egg, Point, Settings, EggSides,PlayerEgg, Eggnemy } from "./projectTypes"
+import { BadEgg, Boss, Model, Egg, Point, Settings, EggSides,PlayerEgg, Eggnemy, minsSecs } from "./projectTypes"
 import { Array, Schema as S, Match, Option, pipe, String } from "effect"
 import { Cmd, startModelCmd, startSimple } from "cs12242-mvu/src"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
@@ -51,7 +51,8 @@ const update = (msg: Msg, model: Model): Model =>
             shouldPlayerBeReceivingDamage(model) ? Model.make({
                 // with collision
                 ...model,
-                currentFrame: (model.currentFrame + 1) % model.fps,
+                timeInSeconds: Math.floor(model.currentFrame / model.fps),
+                currentFrame: model.currentFrame + 1,
                 playerEgg: PlayerEgg.make({
                     ...model.playerEgg,
                     currentHp: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
@@ -93,6 +94,8 @@ const update = (msg: Msg, model: Model): Model =>
             }) : Model.make({
                 // no collision 
                 ...model,
+                timeInSeconds: Math.floor(model.currentFrame / model.fps),
+                currentFrame: model.currentFrame + 1,
                 playerEgg: PlayerEgg.make({
                     ...model.playerEgg,
                     frameCountSinceLastDamaged: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
@@ -121,6 +124,18 @@ const update = (msg: Msg, model: Model): Model =>
             }),
         ),
         Match.orElse(() => model)
+    )
+
+const getTimer = (frameCount: number, fps: number): string =>
+    pipe(
+        frameCount / fps,
+        Math.floor,
+        (secs) => minsSecs.make({
+            mins: Math.floor(secs / 60),
+            secs: secs % 60
+        }),
+        ({mins, secs}) =>   `${pipe(`${mins}`, String.padStart(2, "0"))}` + ':' +
+                            `${pipe(`${secs}`, String.padStart(2, "0"))}`
     )
 
 const shouldPlayerBeReceivingDamage = (model): boolean => 
@@ -399,7 +414,14 @@ const view = (model: Model) =>
                 text: "You win!",
                 color: "white",
                 fontSize: 20,
-            }): Canvas.NullElement.make({})
+            }): Canvas.NullElement.make({}),
+            Canvas.Text.make({
+                x: settings.screenWidth - 150,
+                y: 50,
+                text: getTimer(model.currentFrame, model.fps),
+                color: "white",
+                fontSize: 20,
+            })
         ],
 
     )
@@ -503,6 +525,7 @@ function main() {
         screenWidth: settings.screenWidth,
         fps: settings.fps,
         currentFrame: 0,
+        timeInSeconds: 0,
         gameState: "Ongoing",
     })
 

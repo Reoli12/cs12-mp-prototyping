@@ -76,6 +76,7 @@ export const Model = S.Struct({
     fps: S.Int,
     isBossActive: S.Boolean,
     currentFrame: S.Int,
+    timeInSeconds: S.Int,
     worldHeight: S.Number,
     worldWidth: S.Number,
     worldCenter: Point,
@@ -119,3 +120,9 @@ const Settings = S.Struct({
     bossSpeed: S.Number,
 })
 export type Settings = typeof Settings.Type
+
+export const minsSecs = S.Struct({
+    mins: S.Int,
+    secs: S.Int,
+})
+export type minsSecs = typeof minsSecs.Type
