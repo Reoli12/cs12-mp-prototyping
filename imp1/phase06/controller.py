@@ -30,9 +30,6 @@ class Controller:
             egghancement_pressed_indices: list[int] = [
                 i for (i, chosen) in enumerate(egghancement_pressed, 1) if chosen
             ]
-            print(egghancement_pressed)
-            print(egghancement_pressed_indices)
-            print(egghancement_chosen)
             
             if len(egghancement_pressed_indices) == 1:
                 [egghancement_checker] = egghancement_pressed_indices

@@ -3,6 +3,7 @@ from project_types import Eggnemy, PlayerEgg, Boss, Point, GameSettings, EggInfo
 from typing import Literal
 from copy import deepcopy
 import random
+import math
 
 
 class Model:
@@ -46,6 +47,10 @@ class Model:
             self.eggnemy_spawn()
 
             self.boss_movement()
+
+            if (self._num_defeated_eggnemies != 0 and 
+                self._num_defeated_eggnemies % self._boss_spawn_rate == 0):
+                self._is_boss_to_be_spawned: bool = True
             self.boss_spawn()
                 
             #damage
@@ -59,6 +64,7 @@ class Model:
                     self._sec = 0
 
             self._frame_count += 1
+            print(self.is_boss_to_be_spawned)
         
         else:
             self.egghancement_stats(egghancement_pressed)
@@ -146,10 +152,7 @@ class Model:
                     if boss.stats.current_hp <= 0:
                         self._boss_egg: None | Boss = None
                         self._wave_count += 1
-
-                        if self.num_defeated_eggnemies != 0 and self._num_defeated_eggnemies % self._boss_spawn_rate != 0: 
-                            self._is_boss_spawned: bool = False
-
+                        self._is_boss_spawned: bool = False
                         if boss in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(boss)
    
@@ -167,10 +170,14 @@ class Model:
             eggnemy_width: int = self._eggnemy_width
             eggnemy_height: int = self._eggnemy_height
             eggnemy_center: None | Point = None
+            self._eggnemy_max_hp: int = int(self._base_eggnemy_max_hp * (4) ** (self._wave_count))
+            self._eggnemy_atk: int = int(self._base_eggnemy_atk * (1.05) ** self._wave_count)
+            self._eggnemy_speed: int = int(self._base_eggnemy_speed + (2 * (math.log10(self._wave_count + 1))))
+
             while True:
                 test_eggnemy_x: int = random.randint(eggnemy_width, self._world_width - eggnemy_width)
                 test_eggnemy_y: int = random.randint(eggnemy_height, self._world_height - eggnemy_height)
-                
+
                 eggnemy_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
                 new_eggnemy: Eggnemy = Eggnemy(
                     EggInfo(
@@ -179,7 +186,7 @@ class Model:
                         self._eggnemy_max_hp,
                         self._eggnemy_max_hp,
                         self._eggnemy_atk,
-                        self.eggnemy_speed
+                        self._eggnemy_speed
                     ),
                     eggnemy_center,
                     )
@@ -218,16 +225,21 @@ class Model:
 
     def boss_spawn(self):
         if (not self._is_game_over and 
-            not self._is_boss_spawned and
+            self._is_boss_to_be_spawned and
             not self._boss_egg and 
             self.num_defeated_eggnemies != 0 and 
             self._num_defeated_eggnemies % self._boss_spawn_rate == 0 ):
             
             print("spawning boss")
             self._is_boss_spawned: bool = True
+            self._is_boss_to_be_spawned: bool = False
             boss_width: int = self._boss_width
             boss_height: int = self._boss_height
             boss_center: None | Point = None
+            self._boss_max_hp: int = int(self._base_boss_max_hp * (4) ** self._wave_count)
+            self._boss_atk: int = int(self._base_boss_atk * (1.5) ** self._wave_count)
+            self._boss_speed: int = int(self._base_boss_speed + (4 * (math.log10(self._wave_count + 1))))
+
             while True:
                 test_eggnemy_x: int = random.randint(boss_width, self._world_width - boss_width)
                 test_eggnemy_y: int = random.randint(boss_height, self._world_height - boss_height)
@@ -240,7 +252,7 @@ class Model:
                         self._boss_max_hp,
                         self._boss_max_hp,
                         self._boss_atk,
-                        self.boss_speed
+                        self._boss_speed
                         ),
                     boss_center,
                     )
@@ -297,19 +309,31 @@ class Model:
         self._eggnemy_info: EggInfo = deepcopy(self._param_eggnemy_info)
         self._eggnemy_width: int = self._eggnemy_info.width
         self._eggnemy_height: int = self._eggnemy_info.height
-        self._eggnemy_max_hp: int = self._eggnemy_info.max_hp
-        self._eggnemy_atk: int = self._eggnemy_info.atk
-        self._eggnemy_speed: int = self._eggnemy_info.speed
+
+        self._base_eggnemy_speed: int = self._eggnemy_info.speed
+        self._eggnemy_speed: int = self._base_eggnemy_speed
+        self._base_eggnemy_max_hp: int = self._eggnemy_info.max_hp
+        self._eggnemy_max_hp: int = self._base_eggnemy_max_hp
+        self._base_eggnemy_atk: int = self._eggnemy_info.atk
+        self._eggnemy_atk: int = self._base_eggnemy_atk
         
         self._boss_egg: None | Boss = None
         self._boss_info: EggInfo = deepcopy(self._param_boss_info)
         self._boss_spawn_rate: int = self._param_boss_spawn_rate
         self._boss_width: int = self._boss_info.width
         self._boss_height: int = self._boss_info.height
-        self._boss_speed: int = self._boss_info.speed
-        self._boss_max_hp: int = self._boss_info.max_hp
-        self._boss_atk: int = self._boss_info.atk
+
+        self._base_boss_speed: int = self._boss_info.speed
+        self._boss_speed: int = self._base_boss_speed
+        self._base_boss_max_hp: int = self._boss_info.max_hp
+        self._boss_max_hp: int = self._base_boss_max_hp
+        self._base_boss_atk: int = self._boss_info.atk
+        self._boss_atk: int = self._base_boss_atk
+
+
         self._is_boss_spawned: bool = False
+        self._is_boss_to_be_spawned: bool = False
+        self._prev_wave_done: bool = False
 
         self._wave_count: int = 0
 
@@ -374,7 +398,6 @@ class Model:
 
     def egghance_check(self):
         if not self._got_egghanced and self._cur_xp != 0 and self._cur_xp % self._egghancement.xp_needed == 0:
-            print("level up")
             self._is_to_be_egghanced: bool = True
 
     @property
@@ -498,12 +521,24 @@ class Model:
         return self._eggnemy_height
     
     @property
+    def base_eggnemy_speed(self) -> int:
+        return self._base_eggnemy_speed
+    
+    @property
     def eggnemy_speed(self) -> int:
         return self._eggnemy_speed
 
     @property
+    def base_eggnemy_max_hp(self) -> int:
+        return self._base_eggnemy_max_hp
+    
+    @property
     def eggnemy_max_hp(self) -> int:
         return self._eggnemy_max_hp
+    
+    @property
+    def base_eggnemy_atk(self) -> int:
+        return self._base_eggnemy_atk
     
     @property
     def eggnemy_atk(self) -> int:
@@ -530,12 +565,24 @@ class Model:
         return self._boss_height
     
     @property
+    def base_boss_speed(self) -> int:
+        return self._base_boss_speed
+    
+    @property
     def boss_speed(self) -> int:
         return self._boss_speed
     
     @property
+    def base_boss_max_hp(self) -> int:
+        return self._base_boss_max_hp
+    
+    @property
     def boss_max_hp(self) -> int:
         return self._boss_max_hp
+    
+    @property
+    def base_boss_atk(self) -> int:
+        return self._base_boss_atk
     
     @property
     def boss_atk(self) -> int:
@@ -544,6 +591,14 @@ class Model:
     @property
     def is_boss_spawned(self) -> bool:
         return self._is_boss_spawned
+    
+    @property
+    def is_boss_to_be_spawned(self) -> bool:
+        return self._is_boss_to_be_spawned
+    
+    @property
+    def is_prev_wave_done(self) -> bool:
+        return self._prev_wave_done
 
     @property
     def wave_count(self) -> int:

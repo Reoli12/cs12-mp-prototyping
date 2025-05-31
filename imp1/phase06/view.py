@@ -30,7 +30,7 @@ class View:
         )
 
     def draw_egghance_ui(self, x_pos: int, y_pos: int, width: int, height: int):
-        pyxel.rectb(
+        pyxel.rect(
             x_pos,
             y_pos,
             width,
