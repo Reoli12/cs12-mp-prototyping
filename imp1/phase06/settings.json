@@ -17,7 +17,7 @@
   "attackEgghancement": 1,
   "speedEgghancement": 1,
 
-  "eggnemInitialHp": 10,         
+  "eggnemInitialHp": 2,         
   "eggnemyInitialCount": 10,
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,
@@ -25,9 +25,9 @@
   "eggnemyAttackDamage": 1,
 
   "bossSpawnRate": 20, 
-  "bossInitialHp": 50,          
+  "bossInitialHp": 20,          
   "bossWidth": 20,             
   "bossHeight": 40,
-  "bossSpeed": 3,
+  "bossSpeed": 2,
   "bossAttackDamage": 3
 }
