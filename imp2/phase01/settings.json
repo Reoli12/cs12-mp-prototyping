@@ -13,5 +13,6 @@
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,
   "playerEggSpeed": 3,
-  "eggnemySpeed": 1
+  "eggnemySpeed": 1,
+  "eggnemyInitialHp": 5
 }

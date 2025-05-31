@@ -18,8 +18,8 @@ export const PlayerEgg = S.TaggedStruct("PlayerEgg", {
     centerCoords: Point,
     height: S.Number,
     width: S.Number,
-    total_hp: S.Number,
-    current_hp: S.Number,
+    totalHp: S.Number,
+    currentHp: S.Number,
     color: S.String,
     speed: S.Number,
     attackRange: S.Number,
@@ -34,7 +34,9 @@ export const Eggnemy = S.TaggedStruct("Eggnemy", {
     height: S.Number,
     width: S.Number,
     color: S.String,
-    speed: S.Number
+    speed: S.Number,
+    currentHp: S.Number,
+    totalHp: S.Number,
 })
 export type Eggnemy = typeof Eggnemy.Type
 
@@ -75,5 +77,6 @@ const Settings = S.Struct({
     eggnemyHeight: S.Number,
     playerEggSpeed: S.Number,
     eggnemySpeed: S.Number,
+    eggnemyInitialHp: S.Number,
 })
 export type Settings = typeof Settings.Type

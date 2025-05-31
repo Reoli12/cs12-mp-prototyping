@@ -18,8 +18,9 @@ const update = (msg: Msg, model: Model): Model =>
                 (model) =>  !isPlayerInBounds(model)? 
                             pipe(   
                                 returnPlayerToBounds(model),
-                                (newModel) => moveWordBorderRelativeToPlayer(newModel, key)
-                            ): 
+                                () => getModelAfterEverythingMoved(
+                                    model, key, -model.playerEgg.speed
+                                )): 
                             model
             )
 
@@ -29,7 +30,7 @@ const update = (msg: Msg, model: Model): Model =>
                 console.log(model.worldCenter),
                 () => false
             )? model :
-            model.playerEgg.current_hp <= 0 ? Model.make({
+            model.playerEgg.currentHp <= 0 ? Model.make({
                 ...model,
                 isOver: true,
             }) :
@@ -42,18 +43,14 @@ const update = (msg: Msg, model: Model): Model =>
                 currentFrame: (model.currentFrame + 1) % model.fps,
                 playerEgg: PlayerEgg.make({
                     ...model.playerEgg,
-                    // centerCoords:   handleBoundsBehavior( model.playerEgg,
-                    //                                     model.worldWidth,
-                    //                                     model.worldHeight
-                    // ),
-                    current_hp: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
-                        Match.tag("None", () => model.playerEgg.current_hp),
+                    currentHp: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
+                        Match.tag("None", () => model.playerEgg.currentHp),
                             // if we decrement immediately after a new collision, the next tick will
                             // decrement as well, leading to a double decrement
                         Match.tag("Some", (frameCountSinceLastDamaged) => (
                             // if more than one frame has passed since last dmg, decrement 1
                             frameCountSinceLastDamaged.value < model.fps? 
-                            model.playerEgg.current_hp : model.playerEgg.current_hp - 1
+                            model.playerEgg.currentHp : model.playerEgg.currentHp - 1
                         )),
                         Match.exhaustive,
                     ),
@@ -75,10 +72,6 @@ const update = (msg: Msg, model: Model): Model =>
                 ...model,
                 playerEgg: PlayerEgg.make({
                     ...model.playerEgg,
-                    // centerCoords: handleBoundsBehavior( model.playerEgg,
-                    //                                     model.worldWidth,
-                    //                                     model.worldHeight
-                    // ),
                     frameCountSinceLastDamaged: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
                         Match.tag("None", () => Option.none()),
                         Match.tag("Some", (frameCount) => 
@@ -98,7 +91,6 @@ const update = (msg: Msg, model: Model): Model =>
         Match.orElse(() => model)
     )
 
-// const getMinDistanceToMove = (model: Model, key: string): number =>
 
 const moveWordBorderRelativeToPlayer = (model: Model, key: string) =>
     Model.make({
@@ -151,11 +143,6 @@ const withinPlayerRange = (player: PlayerEgg, eggnemy: Eggnemy): boolean =>
     (player.centerCoords.x - eggnemy.centerCoords.x) ** 2 + 
     (player.centerCoords.y - eggnemy.centerCoords.y) ** 2 
 
-// const handleBoundsBehavior = (egg: Egg, width: number, height: number): Point =>
-//     !isInBounds(egg, width, height) ? 
-//     returnToBounds( egg, width, height)! :
-//     egg.centerCoords
-
 const absDifference = (a: number, b: number): number =>
     Math.abs(a - b)
 
@@ -174,30 +161,27 @@ const returnPlayerToBounds = (model: Model): Model =>
     Model.make({
         ...model,
         worldCenter: (
-            (model.playerEgg.centerCoords.x + model.playerEgg.width / 2) 
+            getSideBoundary(model.playerEgg, 'right')
             >= (model.worldCenter.x + model.worldWidth / 2) ?
             // to right   
             Point.make({...model.worldCenter, 
                         x: model.playerEgg.centerCoords.x - model.worldWidth / 2 
                         + model.playerEgg.width / 2
                     }) :
-            (model.playerEgg.centerCoords.x - model.playerEgg.width / 2) 
+            getSideBoundary(model.playerEgg, 'left')
             <= (model.worldCenter.x - model.worldWidth / 2) ?
-            // to left
             Point.make({...model.worldCenter, 
                         x: model.playerEgg.centerCoords.x + model.worldWidth / 2  
                         - model.playerEgg.width / 2
                     }) :
-            (model.playerEgg.centerCoords.y - model.playerEgg.height / 2) 
+            getSideBoundary(model.playerEgg, 'top')
             <= (model.worldCenter.y - model.worldHeight / 2) ?
-            // above
             Point.make({...model.worldCenter, 
                         y: model.playerEgg.centerCoords.y + model.worldHeight / 2  
                         - model.playerEgg.height / 2
                     }) :
-            (model.playerEgg.centerCoords.y + model.playerEgg.height / 2) 
+            getSideBoundary(model.playerEgg, 'bottom') 
             >= (model.worldCenter.y + model.worldHeight / 2) ?
-            // below
             Point.make({...model.worldCenter, 
                         y: model.playerEgg.centerCoords.y - model.worldHeight / 2  
                         + model.playerEgg.height / 2
@@ -219,15 +203,6 @@ const getSideBoundary = (egg: Egg, side: EggSides) =>
     side == "left" ? egg.centerCoords.x - egg.width / 2 :
     egg.centerCoords.x + egg.width / 2
 
-const stepOnce = (key: string, pointFrom: Point, stepLength: number): Point =>
-    Point.make({
-        x:  key == "d"? pointFrom.x + stepLength :
-            key == "a"? pointFrom.x - stepLength :
-            pointFrom.x,
-        y:  key == "s"? pointFrom.y + stepLength :
-            key == "w"? pointFrom.y - stepLength :
-            pointFrom.y,
-    })
 
 const view = (model: Model) => 
     pipe(
@@ -254,34 +229,23 @@ const view = (model: Model) =>
     )
 
 const viewEgg = (egg: Egg , color: string) => 
-    Match.value(egg).pipe(
-        Match.tag('PlayerEgg', (playerEgg) => [
+    [
         Canvas.SolidRectangle.make({
-                    x: playerEgg.centerCoords.x - (playerEgg.width / 2),
-                    y: playerEgg.centerCoords.y - (playerEgg.height / 2),
-                    width: playerEgg.width,
-                    height: playerEgg.height,
+                    x: egg.centerCoords.x - (egg.width / 2),
+                    y: egg.centerCoords.y - (egg.height / 2),
+                    width: egg.width,
+                    height: egg.height,
                     color: color,
         }),
         Canvas.Text.make({
-            x: playerEgg.centerCoords.x - playerEgg.width,
-            y: getSideBoundary(playerEgg, "bottom") + 10,
-            text: `${playerEgg.current_hp}/${playerEgg.total_hp}`,
-            color: playerEgg.color,
+            x: egg.centerCoords.x - egg.width,
+            y: getSideBoundary(egg, "bottom") + 10,
+            text: `${egg.currentHp}/${egg.totalHp}`,
+            color: egg.color,
             fontSize: 12,
         })
-    ]),
-    Match.tag("Eggnemy", (eggnemy) => [
-        Canvas.SolidRectangle.make({
-            x: eggnemy.centerCoords.x - (eggnemy.width / 2),
-            y: eggnemy.centerCoords.y - (eggnemy.height / 2),
-            width: eggnemy.width,
-            height:eggnemy.height,
-            color: color,
-        }),
-    ]),
-    Match.exhaustive
-    )
+    ]
+
     
 
 const getNewEggnemyCoords = (eggnemyCoords: Point, playerEggCoords: Point, eggnemySpeed: number): Point => 
@@ -307,8 +271,8 @@ function main() {
         }),
         height: 20,
         width: 10,
-        total_hp: 20,
-        current_hp: 20,
+        totalHp: 20,
+        currentHp: 20,
         color: "white",
         speed: settings.playerEggSpeed,
         attackRange: settings.playerEggRange,
@@ -324,6 +288,8 @@ function main() {
                 width: settings.eggnemyWidth,
                 color: "gray",
                 speed: settings.eggnemySpeed,
+                currentHp: settings.eggnemyInitialHp,
+                totalHp: settings.eggnemyInitialHp,
             }),
             Eggnemy.make({
                 centerCoords: Point.make({x: 100, y: 250}),
@@ -331,6 +297,8 @@ function main() {
                 width: settings.eggnemyWidth,
                 color: "gray",
                 speed: settings.eggnemySpeed,
+                currentHp: settings.eggnemyInitialHp,
+                totalHp: settings.eggnemyInitialHp,
             }),
             Eggnemy.make({
                 centerCoords: Point.make({x: 200, y: 200}),
@@ -338,6 +306,8 @@ function main() {
                 width: settings.eggnemyWidth,
                 color: "gray",
                 speed: settings.eggnemySpeed,
+                currentHp: settings.eggnemyInitialHp,
+                totalHp: settings.eggnemyInitialHp,
             }),
         ),
         worldHeight: settings.worldHeight,
@@ -365,3 +335,51 @@ function main() {
 }
 
 main()
+
+// const stepOnce = (key: string, pointFrom: Point, stepLength: number): Point =>
+//     Point.make({
+//         x:  key == "d"? pointFrom.x + stepLength :
+//             key == "a"? pointFrom.x - stepLength :
+//             pointFrom.x,
+//         y:  key == "s"? pointFrom.y + stepLength :
+//             key == "w"? pointFrom.y - stepLength :
+//             pointFrom.y,
+//     })
+
+// const viewEgg = (egg: Egg , color: string) => 
+    
+//     Match.value(egg).pipe(
+//         Match.tag('PlayerEgg', (playerEgg) => [
+//         Canvas.SolidRectangle.make({
+//                     x: playerEgg.centerCoords.x - (playerEgg.width / 2),
+//                     y: playerEgg.centerCoords.y - (playerEgg.height / 2),
+//                     width: playerEgg.width,
+//                     height: playerEgg.height,
+//                     color: color,
+//         }),
+//         Canvas.Text.make({
+//             x: playerEgg.centerCoords.x - playerEgg.width,
+//             y: getSideBoundary(playerEgg, "bottom") + 10,
+//             text: `${playerEgg.currentHp}/${playerEgg.totalHp}`,
+//             color: playerEgg.color,
+//             fontSize: 12,
+//         })
+//     ]),
+//     Match.tag("Eggnemy", (eggnemy) => [
+//         Canvas.SolidRectangle.make({
+//             x: eggnemy.centerCoords.x - (eggnemy.width / 2),
+//             y: eggnemy.centerCoords.y - (eggnemy.height / 2),
+//             width: eggnemy.width,
+//             height:eggnemy.height,
+//             color: color,
+//         }),
+//         Canvas.Text.make({
+//             x: eggnemy.centerCoords.x - eggnemy.width,
+//             y: getSideBoundary(eggnemy, "bottom") + 10,
+//             text: `${eggnemy.currentHp}/${eggnemy.totalHp}`,
+//             color: eggnemy.color,
+//             fontSize: 12,
+//         })
+//     ]),
+//     Match.exhaustive
+//     )
