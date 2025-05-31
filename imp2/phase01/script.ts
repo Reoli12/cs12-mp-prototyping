@@ -13,15 +13,28 @@ const update = (msg: Msg, model: Model): Model =>
             model.isOver? model : 
             (key == 'l' || key == 'L') ? 
             modelDefeatedEggnemies(model) :
-            willNewStepBeInsideBounds(key, model, model.playerEgg.speed) ?  
-            getModelAfterEverythingMoved(model, key, model.playerEgg.speed) :
-            model // replace with move minimum dist
+            pipe(
+                getModelAfterEverythingMoved(model, key, model.playerEgg.speed),
+                (model) =>  !isPlayerInBounds(model)? 
+                            pipe(   
+                                returnPlayerToBounds(model),
+                                (newModel) => moveWordBorderRelativeToPlayer(newModel, key)
+                            ): 
+                            model
+            )
+
         ),
         Match.tag('Canvas.MsgTick', () => 
+            pipe(
+                console.log(model.worldCenter),
+                () => false
+            )? model :
             model.playerEgg.current_hp <= 0 ? Model.make({
                 ...model,
                 isOver: true,
             }) :
+            // !isPlayerInBounds(model)?
+            // returnPlayerToBounds(model):
             model.isOver? model :
             Array.some(model.eggnemies, (eggnemy) => isInContact(model.playerEgg, eggnemy)) ? Model.make({
                 // with collision
@@ -85,20 +98,17 @@ const update = (msg: Msg, model: Model): Model =>
         Match.orElse(() => model)
     )
 
-const willNewStepBeInsideBounds = (key: string, model: Model, distance: number): boolean =>
-    // true
-    key == 'a' ?    Math.abs(model.worldCenter.x - model.playerEgg.centerCoords.x) + 
-                    model.playerEgg.width / 2 + - model.worldBoundaryWidth +distance 
-                    <= model.worldWidth / 2:
-    key == 'd' ?    Math.abs(model.worldCenter.x - model.playerEgg.centerCoords.x) + 
-                    model.playerEgg.width / 2 + - model.worldBoundaryWidth +distance 
-                    <= model.worldWidth / 2:
+// const getMinDistanceToMove = (model: Model, key: string): number =>
 
-    key == 's' || key == 'w'?   Math.abs(model.worldCenter.y - model.playerEgg.centerCoords.y) + 
-                                model.playerEgg.height / 2 + distance
-                                <= model.worldHeight / 2 :
-    false   
-
+const moveWordBorderRelativeToPlayer = (model: Model, key: string) =>
+    Model.make({
+        ...model,
+        worldCenter: moveRelativeToPlayer(
+                    model.worldCenter,
+                    String.toLowerCase(key),
+                    model.playerEgg.speed,
+                )
+    })
 
 const getModelAfterEverythingMoved = (model: Model, key: string, distance: number) =>
     Model.make({
@@ -141,10 +151,10 @@ const withinPlayerRange = (player: PlayerEgg, eggnemy: Eggnemy): boolean =>
     (player.centerCoords.x - eggnemy.centerCoords.x) ** 2 + 
     (player.centerCoords.y - eggnemy.centerCoords.y) ** 2 
 
-const handleBoundsBehavior = (egg: Egg, width: number, height: number): Point =>
-    !isInBounds(egg, width, height) ? 
-    returnToBounds( egg, width, height)! :
-    egg.centerCoords
+// const handleBoundsBehavior = (egg: Egg, width: number, height: number): Point =>
+//     !isInBounds(egg, width, height) ? 
+//     returnToBounds( egg, width, height)! :
+//     egg.centerCoords
 
 const absDifference = (a: number, b: number): number =>
     Math.abs(a - b)
@@ -153,20 +163,55 @@ const isInContact = (egg1: Egg, egg2: Egg): boolean =>
     absDifference(egg1.centerCoords.x, egg2.centerCoords.x) < (egg1.width + egg2.width) / 2 &&
     absDifference(egg1.centerCoords.y, egg2.centerCoords.y) < (egg1.height + egg2.height) / 2
     
-const isInBounds = (egg: Egg, width: number, height: number) => 
-    getSideBoundary(egg, "left") < 0 ||
-    getSideBoundary(egg, "right") > width ||
-    getSideBoundary(egg, "top") < 0 || 
-    getSideBoundary(egg, "bottom") > height ?
-    false : true
+// const isInBounds = (egg: Egg, width: number, height: number): boolean => 
+//     getSideBoundary(egg, "left") < 0 ||
+//     getSideBoundary(egg, "right") > width ||
+//     getSideBoundary(egg, "top") < 0 || 
+//     getSideBoundary(egg, "bottom") > height ?
+//     false : true
 
-const returnToBounds = (egg: Egg, width: number, height: number): Point | null =>
-    // maybe better to use tagged structs
-    getSideBoundary(egg, "left") < 0 ? Point.make({...egg.centerCoords, x: egg.width / 2}) :
-    getSideBoundary(egg, "right") > width ? Point.make({...egg.centerCoords, x: width - egg.width / 2}) :
-    getSideBoundary(egg, "top") < 0 ? Point.make({...egg.centerCoords, y: egg.height / 2}) :
-    getSideBoundary(egg, "bottom") > height ? Point.make({...egg.centerCoords, y: height - egg.height / 2}) :
-    null
+const returnPlayerToBounds = (model: Model): Model =>
+    Model.make({
+        ...model,
+        worldCenter: (
+            (model.playerEgg.centerCoords.x + model.playerEgg.width / 2) 
+            >= (model.worldCenter.x + model.worldWidth / 2) ?
+            // to right   
+            Point.make({...model.worldCenter, 
+                        x: model.playerEgg.centerCoords.x - model.worldWidth / 2 
+                        + model.playerEgg.width / 2
+                    }) :
+            (model.playerEgg.centerCoords.x - model.playerEgg.width / 2) 
+            <= (model.worldCenter.x - model.worldWidth / 2) ?
+            // to left
+            Point.make({...model.worldCenter, 
+                        x: model.playerEgg.centerCoords.x + model.worldWidth / 2  
+                        - model.playerEgg.width / 2
+                    }) :
+            (model.playerEgg.centerCoords.y - model.playerEgg.height / 2) 
+            <= (model.worldCenter.y - model.worldHeight / 2) ?
+            // above
+            Point.make({...model.worldCenter, 
+                        y: model.playerEgg.centerCoords.y + model.worldHeight / 2  
+                        - model.playerEgg.height / 2
+                    }) :
+            (model.playerEgg.centerCoords.y + model.playerEgg.height / 2) 
+            >= (model.worldCenter.y + model.worldHeight / 2) ?
+            // below
+            Point.make({...model.worldCenter, 
+                        y: model.playerEgg.centerCoords.y - model.worldHeight / 2  
+                        + model.playerEgg.height / 2
+                    }) :
+            model.worldCenter
+        ),
+    })
+
+const isPlayerInBounds = (model: Model): boolean =>
+    absDifference(model.worldCenter.x, model.playerEgg.centerCoords.x) + 
+    model.playerEgg.width / 2 <= model.worldWidth / 2 &&
+    absDifference(model.worldCenter.y, model.playerEgg.centerCoords.y) + 
+    model.playerEgg.height / 2 <= model.worldHeight / 2
+
 
 const getSideBoundary = (egg: Egg, side: EggSides) =>
     side == "bottom" ? egg.centerCoords.y + egg.height / 2 :
