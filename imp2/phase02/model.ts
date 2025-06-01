@@ -50,38 +50,7 @@ export const playerEgg = PlayerEgg.make({
 
 export const initModel = Model.make({
         playerEgg: playerEgg,
-        eggnemies: Array.make(
-            Eggnemy.make({
-                centerCoords: Point.make({x: 20, y: 20}),
-                height: settings.eggnemyHeight,
-                width: settings.eggnemyWidth,
-                color: "gray",
-                speed: settings.eggnemySpeed,
-                currentHp: settings.eggnemyInitialHp,
-                totalHp: settings.eggnemyInitialHp,
-                damage: settings.eggnemyDamage
-            }),
-            Eggnemy.make({
-                centerCoords: Point.make({x: 100, y: 250}),
-                height: settings.eggnemyHeight,
-                width: settings.eggnemyWidth,
-                color: "gray",
-                speed: settings.eggnemySpeed,
-                currentHp: settings.eggnemyInitialHp,
-                totalHp: settings.eggnemyInitialHp,
-                damage: settings.eggnemyDamage
-            }),
-            Eggnemy.make({
-                centerCoords: Point.make({x: 200, y: 200}),
-                height: settings.eggnemyHeight,
-                width: settings.eggnemyWidth,
-                color: "gray",
-                speed: settings.eggnemySpeed,
-                currentHp: settings.eggnemyInitialHp,
-                totalHp: settings.eggnemyInitialHp,
-                damage: settings.eggnemyDamage
-            }),
-        ),
+        eggnemies: generateInitialEggnemies(settings.initialEggnemyCount),
         bosses: Array.empty(),
         isBossActive: false,
         eggnemiesDefeated: 0,
@@ -103,3 +72,23 @@ export const initModel = Model.make({
         }),
         gameState: "Ongoing",
     })
+
+function generateInitialEggnemies(num: number): Eggnemy[] {
+    let ret: Eggnemy[] = Array.empty()
+    for (let i = 0; i < num; i++) {
+        ret = Array.append(ret, Eggnemy.make({
+            centerCoords: Point.make({
+                x: Math.random() * settings.screenWidth,
+                y: Math.random() * settings.screenHeight
+            }),
+            height: settings.eggnemyHeight,
+            width: settings.eggnemyWidth,
+            color: "gray",
+            speed: settings.eggnemySpeed,
+            damage: 1,
+            currentHp: settings.eggnemyInitialHp,
+            totalHp: settings.eggnemyInitialHp,
+        }))
+    }
+    return ret
+}

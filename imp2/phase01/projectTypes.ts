@@ -88,7 +88,6 @@ export const Model = S.Struct({
         S.Literal("PlayerWin"),
         S.Literal("PlayerLose")
     ),
-
     })
 export type Model = typeof Model.Type
 

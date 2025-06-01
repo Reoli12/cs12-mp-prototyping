@@ -423,7 +423,6 @@ const view = (model: Model) =>
                 fontSize: 20,
             })
         ],
-
     )
 
 const viewEgg = (egg: Egg , color: string) => 
@@ -456,6 +455,26 @@ const getNewEggnemyCoords = (eggnemyCoords: Point, playerEggCoords: Point, eggne
             eggnemyCoords.y,
     })
 
+function generateInitialEggnemies(num: number): Eggnemy[] {
+    let ret: Eggnemy[] = Array.empty()
+    for (let i = 0; i < num; i++) {
+        ret = Array.append(ret, Eggnemy.make({
+            centerCoords: Point.make({
+                x: Math.random() * settings.screenWidth,
+                y: Math.random() * settings.screenHeight
+            }),
+            height: settings.eggnemyHeight,
+            width: settings.eggnemyWidth,
+            color: "gray",
+            speed: settings.eggnemySpeed,
+            damage: 1,
+            currentHp: settings.eggnemyInitialHp,
+            totalHp: settings.eggnemyInitialHp,
+        }))
+    }
+    return ret
+}
+
 
 function main() {
     const root = document.getElementById("root")!
@@ -478,38 +497,7 @@ function main() {
 
     const initModel = Model.make({
         playerEgg: playerEgg,
-        eggnemies: Array.make(
-            Eggnemy.make({
-                centerCoords: Point.make({x: 20, y: 20}),
-                height: settings.eggnemyHeight,
-                width: settings.eggnemyWidth,
-                color: "gray",
-                speed: settings.eggnemySpeed,
-                currentHp: settings.eggnemyInitialHp,
-                totalHp: settings.eggnemyInitialHp,
-                damage: settings.eggnemyDamage
-            }),
-            Eggnemy.make({
-                centerCoords: Point.make({x: 100, y: 250}),
-                height: settings.eggnemyHeight,
-                width: settings.eggnemyWidth,
-                color: "gray",
-                speed: settings.eggnemySpeed,
-                currentHp: settings.eggnemyInitialHp,
-                totalHp: settings.eggnemyInitialHp,
-                damage: settings.eggnemyDamage
-            }),
-            Eggnemy.make({
-                centerCoords: Point.make({x: 200, y: 200}),
-                height: settings.eggnemyHeight,
-                width: settings.eggnemyWidth,
-                color: "gray",
-                speed: settings.eggnemySpeed,
-                currentHp: settings.eggnemyInitialHp,
-                totalHp: settings.eggnemyInitialHp,
-                damage: settings.eggnemyDamage
-            }),
-        ),
+        eggnemies: generateInitialEggnemies(settings.initialEggnemyCount),
         bosses: Array.empty(),
         isBossActive: false,
         eggnemiesDefeated: 0,
@@ -536,65 +524,7 @@ function main() {
         "canvas",
         view,
     ))
-    // startSimple
-}
+    }
 
 main()
 
-// const stepOnce = (key: string, pointFrom: Point, stepLength: number): Point =>
-//     Point.make({
-//         x:  key == "d"? pointFrom.x + stepLength :
-//             key == "a"? pointFrom.x - stepLength :
-//             pointFrom.x,
-//         y:  key == "s"? pointFrom.y + stepLength :
-//             key == "w"? pointFrom.y - stepLength :
-//             pointFrom.y,
-//     })
-
-// const viewEgg = (egg: Egg , color: string) => 
-    
-//     Match.value(egg).pipe(
-//         Match.tag('PlayerEgg', (playerEgg) => [
-//         Canvas.SolidRectangle.make({
-//                     x: playerEgg.centerCoords.x - (playerEgg.width / 2),
-//                     y: playerEgg.centerCoords.y - (playerEgg.height / 2),
-//                     width: playerEgg.width,
-//                     height: playerEgg.height,
-//                     color: color,
-//         }),
-//         Canvas.Text.make({
-//             x: playerEgg.centerCoords.x - playerEgg.width,
-//             y: getSideBoundary(playerEgg, "bottom") + 10,
-//             text: `${playerEgg.currentHp}/${playerEgg.totalHp}`,
-//             color: playerEgg.color,
-//             fontSize: 12,
-//         })
-//     ]),
-//     Match.tag("Eggnemy", (eggnemy) => [
-//         Canvas.SolidRectangle.make({
-//             x: eggnemy.centerCoords.x - (eggnemy.width / 2),
-//             y: eggnemy.centerCoords.y - (eggnemy.height / 2),
-//             width: eggnemy.width,
-//             height:eggnemy.height,
-//             color: color,
-//         }),
-//         Canvas.Text.make({
-//             x: eggnemy.centerCoords.x - eggnemy.width,
-//             y: getSideBoundary(eggnemy, "bottom") + 10,
-//             text: `${eggnemy.currentHp}/${eggnemy.totalHp}`,
-//             color: eggnemy.color,
-//             fontSize: 12,
-//         })
-//     ]),
-//     Match.exhaustive
-//     )
-
-// const moveWordBorderRelativeToPlayer = (model: Model, key: string) =>
-//     Model.make({
-//         ...model,
-//         worldCenter: moveRelativeToPlayer(
-//                     model.worldCenter,
-//                     String.toLowerCase(key),
-//                     model.playerEgg.speed,
-//                 )
-//     })

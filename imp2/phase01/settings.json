@@ -12,7 +12,7 @@
   "playerEggSpeed": 5,
   "playerEggRange": 0,
 
-  "initialEggnemyCount": 5,
+  "initialEggnemyCount": 100,
 
   "eggnemyWidth": 5,
   "eggnemyHeight": 5,
@@ -24,5 +24,5 @@
   "bossInitialHp": 50,
   "bossWidth": 15,
   "bossHeight": 40,
-  "bossSpeed": 1
+  "bossSpeed": 3
 }
