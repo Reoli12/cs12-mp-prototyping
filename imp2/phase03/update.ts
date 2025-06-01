@@ -1,4 +1,4 @@
-import {Array, Schema as S, pipe, Match, Option, String } from 'effect'
+import {Array, Schema as S, pipe, Match, Option, Order, String } from 'effect'
 import { Model, initModel } from "./model"
 import {
     PlayerEgg,
@@ -248,7 +248,11 @@ export const update = (msg: Msg, model: Model): Model =>
     Match.value(msg).pipe(
         Match.tag("Canvas.MsgKeyDown", ({ key }) =>
             // pipe(console.log(model), () => false)? model :
-            model.gameState != "Ongoing" && key == 'r'? initModel :
+            model.gameState != "Ongoing" && key == 'r'? Model.make({
+                ...initModel,
+                leaderboard: model.leaderboard,
+                hasAddedToLeaderboard: false,
+            }) :
             model.gameState != "Ongoing"? model : 
             (key == 'l' || key == 'L') ? 
             pipe(
@@ -274,7 +278,18 @@ export const update = (msg: Msg, model: Model): Model =>
         ),
         Match.tag('Canvas.MsgTick', () => 
             model.isBossActive && Array.length(model.bosses) === 0?
-            Model.make({...model, gameState: "PlayerWin"}):
+            Model.make({...model, 
+                gameState: "PlayerWin",
+                leaderboard:    !model.hasAddedToLeaderboard?
+                                pipe(
+                                    Array.append(model.leaderboard, model.currentTime),
+                                    Array.sortBy(
+                                        Order.mapInput(Order.number, ({mins, secs}) => mins*60 + secs)
+                                    )
+                                ):
+                                model.leaderboard,
+                hasAddedToLeaderboard: true,
+            }):
             model.eggnemiesDefeated >= model.eggnemiesToKillBeforeBoss &&
             Array.length(model.bosses) === 0? // Array.isEmptyArray doesnt work for some reason
             spawnBoss(model) :
@@ -284,10 +299,15 @@ export const update = (msg: Msg, model: Model): Model =>
             }) :
             // !isPlayerInBounds(model)?
             // returnPlayerToBounds(model):
-            model.gameState !== "Ongoing"? model :
+            model.gameState !== "Ongoing"? model:
             shouldPlayerBeReceivingDamage(model) ? Model.make({
                 // with collision
                 ...model,
+                currentTime: minsSecs.make({
+                    mins: Math.floor(model.currentTime.secs / 60),
+                    secs: model.currentFrame % model.fps == 0? model.currentTime.secs + 1 : model.currentTime.secs ,
+                }),
+                currentFrame: model.currentFrame + 1,
                 playerEgg: PlayerEgg.make({
                     ...model.playerEgg,
                     currentHp: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(

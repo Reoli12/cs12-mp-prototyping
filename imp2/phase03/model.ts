@@ -29,6 +29,8 @@ export const Model = S.Struct({
         S.Literal("PlayerWin"),
         S.Literal("PlayerLose")
     ),
+    leaderboard: S.Array(minsSecs),
+    hasAddedToLeaderboard: S.Boolean,
     })
 export type Model = typeof Model.Type
 
@@ -71,6 +73,8 @@ export const initModel = Model.make({
             secs: 0,
         }),
         gameState: "Ongoing",
+        leaderboard: Array.empty(),
+        hasAddedToLeaderboard: false,
     })
 
 function generateInitialEggnemies(num: number): Eggnemy[] {

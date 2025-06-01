@@ -1,7 +1,8 @@
-import { Array, pipe, String } from 'effect'
+import { Array, Match, Option, pipe, String } from 'effect'
 import { Model } from "./model"
 import * as Canvas from "cs12242-mvu/src/canvas"
 import { settings, Egg, EggUtils, minsSecs } from "./projectTypes"
+import { value } from 'effect/Redacted'
 
 export const view = (model: Model) => 
     pipe(
@@ -48,7 +49,8 @@ export const view = (model: Model) =>
                 text: getTimer(model.currentTime),
                 color: "white",
                 fontSize: 20,
-            })
+            }),
+            ...showLeaderboard(model.leaderboard, 30)
         ],
     )
 
@@ -75,7 +77,7 @@ const getTimer = (time: minsSecs): string =>
         time,
         ({mins, secs}) =>   `${pipe(`${mins}`, String.padStart(2, "0"))}` + ':' +
                             `${pipe(`${secs}`, String.padStart(2, "0"))}`
-    )
+        )
 
 const showRestartPrompt = (model: Model) =>
     Canvas.Text.make({
@@ -85,3 +87,32 @@ const showRestartPrompt = (model: Model) =>
         fontSize: 12,
         color: "white"
     })
+
+const showLeaderboard = (leaderboard: readonly minsSecs[], fontSize: number) =>
+    pipe(
+        // leaderboard,
+        Array.map(leaderboard, (time) => getTimer(time)),
+        (arr) => Array.pad(arr, 3, '--:--'),
+        (arr) => showLeaderboardHelper(arr, fontSize, 0, Array.empty())
+    )
+
+function showLeaderboardHelper(toDisplay: string[], fontSize: number, idx: number, 
+                                res: (typeof Canvas.Text.Type)[]) {
+    if (idx == 3) {
+        return res
+    }
+
+    const newLine = Canvas.Text.make({
+        x: settings.screenWidth / 10,
+        y: settings.screenHeight * 8/10 + fontSize*(idx + 1),
+        text: Array.unsafeGet(toDisplay, idx),
+        color: "white",
+        fontSize: fontSize
+    })
+
+    return showLeaderboardHelper(toDisplay, fontSize, idx + 1,
+        Array.append(res, newLine)
+    )
+}
+
+
