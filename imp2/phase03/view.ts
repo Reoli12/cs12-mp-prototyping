@@ -50,7 +50,11 @@ export const view = (model: Model) =>
                 color: "white",
                 fontSize: 20,
             }),
-            ...showLeaderboard(model.leaderboard, 30)
+            ...showLeaderboardHelper(
+                Array.make("Top 1", "2", "3"), settings.screenWidth / 6, 30, 0, Array.empty()
+            ),
+            ...showLeaderboard(model.leaderboard, (settings.screenWidth / 6) + 100, 30)
+            
         ],
     )
 
@@ -88,29 +92,30 @@ const showRestartPrompt = (model: Model) =>
         color: "white"
     })
 
-const showLeaderboard = (leaderboard: readonly minsSecs[], fontSize: number) =>
+const showLeaderboard = (leaderboard: readonly minsSecs[], x: number, fontSize: number) =>
     pipe(
         // leaderboard,
         Array.map(leaderboard, (time) => getTimer(time)),
-        (arr) => Array.pad(arr, 3, '--:--'),
-        (arr) => showLeaderboardHelper(arr, fontSize, 0, Array.empty())
+        (arr) => Array.pad(arr, 3, '-:--'),
+        (arr) => showLeaderboardHelper(arr, x, fontSize, 0, Array.empty())
     )
 
-function showLeaderboardHelper(toDisplay: string[], fontSize: number, idx: number, 
+function showLeaderboardHelper(toDisplay: string[], x: number, fontSize: number, idx: number, 
                                 res: (typeof Canvas.Text.Type)[]) {
     if (idx == 3) {
         return res
     }
 
     const newLine = Canvas.Text.make({
-        x: settings.screenWidth / 10,
+        x: x,
         y: settings.screenHeight * 8/10 + fontSize*(idx + 1),
         text: Array.unsafeGet(toDisplay, idx),
         color: "white",
-        fontSize: fontSize
+        fontSize: fontSize,
+        textAlign: "right"
     })
 
-    return showLeaderboardHelper(toDisplay, fontSize, idx + 1,
+    return showLeaderboardHelper(toDisplay, x, fontSize, idx + 1,
         Array.append(res, newLine)
     )
 }
