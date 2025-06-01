@@ -2,7 +2,7 @@ import { Array, Match, Option, pipe, String } from 'effect'
 import { Model } from "./model"
 import * as Canvas from "cs12242-mvu/src/canvas"
 import { settings, Egg, EggUtils, minsSecs } from "./projectTypes"
-
+import { value } from 'effect/Redacted'
 
 export const view = (model: Model) => 
     pipe(
