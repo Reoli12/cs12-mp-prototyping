@@ -377,7 +377,9 @@ function generalUpdate(model: Model): Model {
     const modelBossMoves = UpdateEggnemyCoords(model.bosses as BadEgg[], model.playerEgg.centerCoords,
                                                         modelEggnemyMoves.points, )
 
-    if (shouldPlayerBeReceivingDamage(model)) {
+    const hasCollided = shouldPlayerBeReceivingDamage(model)
+    if (hasCollided) {
+        console.log('collision')
         newPlayerHp = Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
                         Match.tag("None", () => model.playerEgg.currentHp),
                             // if we decrement immediately after a new collision, the next tick will
@@ -405,17 +407,25 @@ function generalUpdate(model: Model): Model {
         currentFrame: newFrame,
         playerEgg: PlayerEgg.make({
             ...model.playerEgg,
-            currentHp: newPlayerHp
+            currentHp: newPlayerHp,
+            frameCountSinceLastDamaged: Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
+                Match.tag('None', () => hasCollided? Option.some(0): Option.none()),
+                Match.tag("Some", (countOption) =>  countOption.value < model.fps? 
+                                                    Option.some(countOption.value + 1):
+                                                    Option.none()
+                ),
+                Match.exhaustive
+            ),
         }),
         eggnemies: pipe(
             modelEggnemyMoves.eggnemies,
             (eggArr) => randomAddEggnemies(eggArr, 5)
         ),
         bosses: modelBossMoves.bosses,
-        occupiedPoints: modelBossMoves.points
+        occupiedPoints: modelBossMoves.points,
+
+
     })
-
-
 }
 
 
