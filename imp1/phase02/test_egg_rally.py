@@ -1,5 +1,5 @@
-import pyxel
-import pytest
+#import pyxel
+#import pytest
 from model import Model
 from project_types import Point, PlayerEgg, EggInfo, GameSettings, Eggnemy, Boss
 

@@ -40,7 +40,7 @@ class Model:
 
         #game over state
         if player_egg.stats.current_hp <= 0:
-            self._is_game_over: bool = True
+            self._is_game_over = True
 
         if self._is_game_over or self._is_game_won:
             return
@@ -159,8 +159,8 @@ class Model:
                     boss.stats.current_hp -= damage
 
                     if boss.stats.current_hp <= 0:
-                        self._boss_egg: None | Boss = None
-                        self._is_game_won: bool = True 
+                        self._boss_egg = None
+                        self._is_game_won = True 
                         if boss in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(boss)
                 
@@ -202,7 +202,7 @@ class Model:
                 test_eggnemy_x: int = random.randint(eggnemy_width, self._world_width - eggnemy_width)
                 test_eggnemy_y: int = random.randint(eggnemy_height, self._world_height - eggnemy_height)
                 
-                eggnemy_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
+                eggnemy_center = Point(test_eggnemy_x, test_eggnemy_y)
                 eggnemy: Eggnemy = Eggnemy(
                     EggInfo(
                         eggnemy_width,
@@ -221,13 +221,13 @@ class Model:
     def boss_spawn(self):
         boss_width: int = self._boss_width
         boss_height: int = self._boss_height
-        boss_center: None | Point = None
+        boss_center = None
         while True:
             test_eggnemy_x: int = random.randint(boss_width, self._world_width - boss_width)
             test_eggnemy_y: int = random.randint(boss_height, self._world_height - boss_height)
             
-            boss_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
-            self._boss_egg: None | Boss = Boss(
+            boss_center = Point(test_eggnemy_x, test_eggnemy_y)
+            self._boss_egg = Boss(
                 EggInfo(
                     boss_width,
                     boss_height,

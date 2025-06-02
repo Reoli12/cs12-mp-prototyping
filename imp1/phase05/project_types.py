@@ -47,8 +47,8 @@ class Egg(ABC):
     
 
     def __init__(self, egginfo: EggInfo, center: Point):
-        self.stats: EggInfo = egginfo
-        self.center_position: Point = center
+        self.stats = egginfo
+        self.center_position = center
 
 
     @property
