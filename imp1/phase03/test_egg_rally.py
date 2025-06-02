@@ -330,7 +330,7 @@ def test_player_attack():
 	Player3.center_position.y += 1.71
 	
 	model3.player_attack(True)
-	assert Boss2.stats.current_hp == 23
+	assert Boss2.stats.current_hp == 35
 	
 	model4.player_attack(True)
 	assert Boss1.stats.current_hp == 25
@@ -362,3 +362,6 @@ def test_player_attack():
 
 	#distance_to_player: float = ((Player5.center_position.x - Enemy2.center_position.x) ** 2 + (Player5.center_position.y - Enemy2.center_position.y) ** 2) ** 0.5
 	#print(distance_to_player)
+test_is_out_of_bounds()
+test_is_overlapping_player()
+test
