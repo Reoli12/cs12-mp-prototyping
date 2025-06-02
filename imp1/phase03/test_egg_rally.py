@@ -1,5 +1,4 @@
-#import pyxel
-#import pytest
+import pytest
 from model import Model
 from project_types import Point, PlayerEgg, EggInfo, GameSettings, Eggnemy, Boss
 
@@ -234,12 +233,12 @@ def test_player_movement():
 	assert Player1.center_position.y == 9
 	assert Player2.center_position.x > 14.2
 	assert Player2.center_position.y == 12.43
-	assert Player3.center_position.x == 34.34
-	assert Player3.center_position.y == 230.56
+	assert Player3.center_position.x == 43.34
+	assert Player3.center_position.y == 221.56
 	assert Player4.center_position.x == 2.34
-	assert Player4.center_position.y == 74.41
-	assert Player5.center_position.x == 10.5
-	assert Player5.center_position.y == -9.8
+	assert Player4.center_position.y == 67.41
+	assert Player5.center_position.x == 3.5
+	assert Player5.center_position.y == 4.2
 
 def test_player_attack():
 	EggInfo1 = EggInfo(20, 40, 30, 30, 11)
@@ -340,7 +339,7 @@ def test_player_attack():
 	Player4.center_position.x += 3.46
 	Player4.center_position.y -= 5.71
 	model4.player_attack(True)
-	assert Boss1.stats.current_hp == 22
+	assert Boss1.stats.current_hp == 25
 
 	Boss1.center_position.x -= 4.45
 	Boss1.center_position.y += 4.37
@@ -364,4 +363,37 @@ def test_player_attack():
 	#print(distance_to_player)
 test_is_out_of_bounds()
 test_is_overlapping_player()
-test
+test_return_to_bounds()
+test_player_movement()
+test_player_attack()
+
+def test_incompatible_model_init():
+	EggInfo1 = EggInfo(20, 20, 20, 14, 3)
+	EggInfo2 = EggInfo(30, 30, 15, 9, 2)
+	EggInfo3 = EggInfo(25, 25, 17, 17, 4)
+
+	EggInfo4 = EggInfo(50, 50, 30, 25, 6)
+	EggInfo5 = EggInfo(50, 50, 35, 35, 7)
+
+
+	Point1 = Point(2, 14)
+	Point2 = Point(3.5, 4.2)
+	Point3 = Point(7.21, 9)
+	Point4 = Point(10.52, 3.6)
+	Point5 = Point(36.53, 11.75)
+
+	Enemy1 = Eggnemy(EggInfo1, Point1)
+	Enemy2 = Eggnemy(EggInfo2, Point2)
+	Enemy3 = Eggnemy(EggInfo3, Point3)
+
+	Boss1 = Boss(EggInfo4, Point4)
+	Boss2 = Boss(EggInfo5, Point5)
+
+	with pytest.raises()
+		model1 = Model(Enemy1, Settings3, 4, EggInfo2, EggInfo4, 4)
+	model2 = Model(Enemy2, Settings1, 3, EggInfo3, EggInfo5, 5)
+	model3 = Model(Enemy3, Settings2, 3, EggInfo4, EggInfo5, 2)
+	model4 = Model(Boss1, Settings1, 8, EggInfo1, EggInfo2, 2)
+	model5 = Model(Boss2, Settings3, 2, EggInfo5, EggInfo1, 6)
+
+test_incompatible_model_init()

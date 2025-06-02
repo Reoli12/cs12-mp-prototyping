@@ -1,5 +1,4 @@
-#import pyxel
-#import pytest
+import pytest
 from model import Model
 from project_types import Point, PlayerEgg, EggInfo, GameSettings, Eggnemy, Boss
 
@@ -16,13 +15,6 @@ AtkRad4 = 3
 AtkRad5 = 4
 
 
-'''Functions to Test:
-is_out_of_bounds
-return_to_bounds
-is_overlapping_player
-player_movement
-player_attack
-'''
 Settings1 = GameSettings(30, 200, 300, 100, 150)
 Settings2 = GameSettings(50, 400, 500, 150, 200)
 Settings3 = GameSettings(50, 350, 450, 120, 180)
@@ -362,3 +354,8 @@ def test_player_attack():
 
 	#distance_to_player: float = ((Player5.center_position.x - Enemy2.center_position.x) ** 2 + (Player5.center_position.y - Enemy2.center_position.y) ** 2) ** 0.5
 	#print(distance_to_player)
+test_is_out_of_bounds()
+test_is_overlapping_player()
+test_return_to_bounds()
+test_player_movement()
+test_player_attack()

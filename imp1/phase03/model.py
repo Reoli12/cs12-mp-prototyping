@@ -274,7 +274,7 @@ class Model:
         self._boss_speed: int = self._boss_info.speed
         self._boss_max_hp: int = self._boss_info.max_hp
 
-        self._is_game_over: bool = False
+        self._is_game_over = False
         self._is_game_won = False
 
     def update_leaderboards(self, min: int, sec: int):
