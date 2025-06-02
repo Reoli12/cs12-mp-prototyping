@@ -9,7 +9,7 @@ type Msg = typeof CanvasMsg.Type // update strictly only takes in Msg
 const update = (msg: Msg, model: Model): Model => 
     Match.value(msg).pipe(
         Match.tag("Canvas.MsgKeyDown", ({ key }) =>
-            // pipe(console.log(model), () => false)? model :
+            pipe(console.log(key), () => false)? model :
             model.isOver? model : 
             (key == 'l' || key == 'L') ? 
             modelDefeatedEggnemies(model) :
