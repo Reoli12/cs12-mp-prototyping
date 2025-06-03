@@ -226,7 +226,6 @@ def test_player_movement():
 	assert Player5.center_position.x == 10.5
 	assert Player5.center_position.y == -9.8
 	
-
 def test_player_attack():
 	EggInfo1 = deepcopy(TestEggInfo1)
 	EggInfo2 = deepcopy(TestEggInfo2)
