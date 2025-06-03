@@ -16,6 +16,13 @@ class Model:
         self._leaderboards: list[tuple[int, int]] = []
         self._leaderboards_str: list[str] = []
         self._is_time_get: bool = False
+        '''
+        Note: The isinstance code below is for testing purposes only. We are aware the code below does not improve the code's functionality.
+        During testing, it was found that even though an Eggnemy or Boss was passed onto the player_egg parameter, the model would work perfectly fine.
+        Pyright does flag it, but it should not work. Therefore, the code below was added for testing.
+        '''
+        if not isinstance(self._param_player_egg, PlayerEgg):
+           raise TypeError("This is not a PlayerEgg type.")
 
         self.restart()
 
@@ -79,6 +86,8 @@ class Model:
         eggnemy_bottom: float = eggnemy.bottom_point
         eggnemy_top: float = eggnemy.topmost_point
 
+        if not isinstance(eggnemy, Eggnemy | Boss):
+            raise TypeError("This is not an eggnemy type.")
         return not (left_bounds > eggnemy_right or 
                 right_bounds < eggnemy_left or
                 top_bounds > eggnemy_bottom or
@@ -169,7 +178,7 @@ class Model:
                 self.return_to_bounds(eggnemy)
                     
     def eggnemy_overlap_check(self, eggnemy: Eggnemy):
-        is_overlap: bool = self.is_overlapping_player(eggnemy) 
+        is_overlap: bool = self.is_overlapping_player(eggnemy)
 
         if is_overlap and eggnemy not in self._overlapping_player_eggnemy:
             self._overlapping_player_eggnemy.append(eggnemy)

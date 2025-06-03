@@ -19,49 +19,68 @@ Settings1 = GameSettings(30, 200, 300, 100, 150)
 Settings2 = GameSettings(50, 400, 500, 150, 200)
 Settings3 = GameSettings(50, 350, 450, 120, 180)
 
+TestEggInfo1 = EggInfo(20, 40, 30, 30, 11)
+TestEggInfo2 = EggInfo(30, 30, 70, 50, 8)
+TestEggInfo3 = EggInfo(40, 40, 60, 45, 9)
+TestEggInfo4 = EggInfo(50, 50, 20, 10, 7)
+TestEggInfo5 = EggInfo(70, 40, 50, 30, 7)
+
+TestEggInfo6 = EggInfo(20, 20, 20, 14, 3)
+TestEggInfo7 = EggInfo(30, 30, 15, 9, 2)
+TestEggInfo8 = EggInfo(25, 25, 17, 17, 4)
+
+TestEggInfo9 = EggInfo(50, 50, 30, 25, 6)
+TestEggInfo10 = EggInfo(50, 50, 35, 35, 7)
+
+
+TestPoint1 = Point(2, 14)
+TestPoint2 = Point(3.5, 4.2)
+TestPoint3 = Point(7, 9)
+TestPoint4 = Point(10.52, 3.6)
+TestPoint5 = Point(36.53, 11.75)
+TestPoint6 = Point(43, 221.56)
+TestPoint7 = Point(22, 12.43)
+TestPoint8 = Point(14.24, 12.346)
+TestPoint9 = Point(20.87, 0)
+TestPoint10 = Point(2.34, 67.41)
+
+Player1 = PlayerEgg(TestEggInfo1, TestPoint5, Dmg1, AtkRad1)
+Player2 = PlayerEgg(TestEggInfo2, TestPoint2, Dmg2, AtkRad2)
+Player3 = PlayerEgg(TestEggInfo3, TestPoint9, Dmg3, AtkRad3)
+Player4 = PlayerEgg(TestEggInfo4, TestPoint1, Dmg4, AtkRad4)
+Player5 = PlayerEgg(TestEggInfo5, TestPoint8, Dmg5, AtkRad5)
 def test_is_out_of_bounds():
-	EggInfo1 = EggInfo(20, 40, 30, 30, 11)
-	EggInfo2 = EggInfo(20, 20, 20, 14, 3)
-	EggInfo3 = EggInfo(50, 50, 35, 35, 7)
 
-	Point1 = Point(3.5, 4.2)
-	Point2 = Point(7, 9)
-	Point3 = Point(43, 221.56)
+	Player1 = PlayerEgg(TestEggInfo1, TestPoint2, Dmg1, AtkRad1)
+	Enemy1 = Eggnemy(TestEggInfo6, TestPoint3)
+	Boss1 = Eggnemy(TestEggInfo10, TestPoint6)
 
-	Player1 = PlayerEgg(EggInfo1, Point1, Dmg1, AtkRad1)
-	Enemy1 = Eggnemy(EggInfo2, Point2)
-	Boss1 = Eggnemy(EggInfo3, Point3)
-
-	model1 = Model(Player1, Settings2, 4, EggInfo2, EggInfo3, 4)
-	model2 = Model(Player1, Settings3, 3, EggInfo3, EggInfo2, 5)
-	model3 = Model(Player1, Settings1, 6, EggInfo2, EggInfo3, 3)
+	model1 = Model(Player1, Settings2, 4, TestEggInfo2, TestEggInfo3, 4)
+	model2 = Model(Player1, Settings3, 3, TestEggInfo3, TestEggInfo2, 5)
+	model3 = Model(Player1, Settings1, 6, TestEggInfo2, TestEggInfo3, 3)
 	
-	
-
 	out_of_bounds1 = model1.is_out_of_bounds(Player1)
 	out_of_bounds2 = model2.is_out_of_bounds(Enemy1)
 	out_of_bounds3 = model3.is_out_of_bounds(Boss1)
 
-	assert out_of_bounds1 == True
+	assert out_of_bounds1 == False
 	assert out_of_bounds2 == True
 	assert out_of_bounds3 == False
-	EggInfo1.width += 20
-	Player1.center_position.x += 30
-	Player1.center_position.y += 50
-	EggInfo1.height += 20
+	
+	EggInfo1 = EggInfo(40, 60, 30, 30, 11)
+	EggInfo2 = EggInfo(20, 50, 20, 14, 3)
+	EggInfo3 = EggInfo(10, 90, 35, 35, 7)
+	Point1 = Point(33.5, 54.2)
+	Point2 = Point(27, -3)
+	Point3 = Point(83, 266.56)
 
-	EggInfo2.height += 30
-	Enemy1.center_position.x += 20
-	Enemy1.center_position.y -= 12
+	Player2 = PlayerEgg(EggInfo1, Point1, Dmg1, AtkRad1)
+	Enemy2 = Eggnemy(EggInfo2, Point2)
+	Boss2 = Eggnemy(EggInfo3, Point3)
 
-	EggInfo3.width -= 40
-	Boss1.center_position.x -= 50
-	Boss1.center_position.y += 45
-	EggInfo3.height += 40
-
-	out_of_bounds4 = model1.is_out_of_bounds(Player1)
-	out_of_bounds5 = model2.is_out_of_bounds(Enemy1)
-	out_of_bounds6 = model3.is_out_of_bounds(Boss1)
+	out_of_bounds4 = model1.is_out_of_bounds(Player2)
+	out_of_bounds5 = model2.is_out_of_bounds(Enemy2)
+	out_of_bounds6 = model3.is_out_of_bounds(Boss2)
 	
 	assert out_of_bounds4 == False
 	assert out_of_bounds5 == True

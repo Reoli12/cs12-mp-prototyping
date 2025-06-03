@@ -192,6 +192,10 @@ def test_is_overlapping_player():
 	assert is_overlapping_player9 == False
 	assert is_overlapping_player10 == True
 
+	with pytest.raises(TypeError):
+		is_overlappingplayer11 = model1.is_overlapping_player(Player1)
+	
+test_is_overlapping_player()
 def test_player_movement():
 	EggInfo1 = EggInfo(20, 40, 30, 30, 11)
 	EggInfo2 = EggInfo(30, 30, 70, 50, 8)
@@ -389,11 +393,71 @@ def test_incompatible_model_init():
 	Boss1 = Boss(EggInfo4, Point4)
 	Boss2 = Boss(EggInfo5, Point5)
 
-	with pytest.raises()
-		model1 = Model(Enemy1, Settings3, 4, EggInfo2, EggInfo4, 4)
-	model2 = Model(Enemy2, Settings1, 3, EggInfo3, EggInfo5, 5)
-	model3 = Model(Enemy3, Settings2, 3, EggInfo4, EggInfo5, 2)
-	model4 = Model(Boss1, Settings1, 8, EggInfo1, EggInfo2, 2)
-	model5 = Model(Boss2, Settings3, 2, EggInfo5, EggInfo1, 6)
 
-test_incompatible_model_init()
+	with pytest.raises(ValueError):
+		model1 = Model(Enemy1, Settings3, 4, EggInfo2, EggInfo4, 4)
+		model2 = Model(Enemy2, Settings1, 3, EggInfo3, EggInfo5, 5)
+		model3 = Model(Enemy3, Settings2, 3, EggInfo4, EggInfo5, 2)
+		model4 = Model(Boss1, Settings1, 8, EggInfo1, EggInfo2, 2)
+		model5 = Model(Boss2, Settings3, 2, EggInfo5, EggInfo1, 6)
+	
+'''
+Test:
+Restart, eggnemy overlap check, controller and model gameover, controller and model leaderboards
+'''
+def test_eggnemy_overlap_check():
+	EggInfo1 = EggInfo(20, 40, 30, 30, 11)
+	EggInfo2 = EggInfo(30, 30, 70, 50, 8)
+	EggInfo3 = EggInfo(40, 40, 60, 45, 9)
+	EggInfo4 = EggInfo(50, 50, 20, 10, 7)
+	EggInfo5 = EggInfo(70, 40, 50, 30, 7)
+
+	EggInfo6 = EggInfo(20, 20, 20, 14, 3)
+	EggInfo7 = EggInfo(30, 30, 15, 9, 2)
+	EggInfo8 = EggInfo(25, 25, 17, 17, 4)
+
+	EggInfo9 = EggInfo(50, 50, 30, 25, 6)
+	EggInfo10 = EggInfo(50, 50, 35, 35, 7)
+
+
+	Point1 = Point(2, 14)
+	Point2 = Point(3.5, 4.2)
+	Point3 = Point(7.21, 9)
+	Point4 = Point(10.52, 3.6)
+	Point5 = Point(36.53, 11.75)
+	Point6 = Point(43, 221.56)
+	Point7 = Point(22, 12.43)
+	Point8 = Point(14.24, 12.346)
+	Point9 = Point(20.87, 0)
+	Point10 = Point(2.34, 67.41)
+
+	Player1 = PlayerEgg(EggInfo1, Point5, Dmg1, AtkRad1)
+	Player2 = PlayerEgg(EggInfo2, Point2, Dmg2, AtkRad2)
+	Player3 = PlayerEgg(EggInfo3, Point9, Dmg3, AtkRad3)
+	Player4 = PlayerEgg(EggInfo4, Point1, Dmg4, AtkRad4)
+	Player5 = PlayerEgg(EggInfo5, Point8, Dmg5, AtkRad5)
+
+	Enemy1 = Eggnemy(EggInfo6, Point3)
+	Enemy2 = Eggnemy(EggInfo7, Point7)
+	Enemy3 = Eggnemy(EggInfo8, Point10)
+
+	Boss1 = Boss(EggInfo9, Point4)
+	Boss2 = Boss(EggInfo10, Point6)
+
+	model1 = Model(Player1, Settings3, 4, EggInfo6, EggInfo9, 4)
+	model2 = Model(Player2, Settings1, 3, EggInfo8, EggInfo10, 5)
+	model3 = Model(Player3, Settings2, 3, EggInfo7, EggInfo9, 2)
+	model4 = Model(Player4, Settings1, 8, EggInfo6, EggInfo10, 2)
+	model5 = Model(Player5, Settings3, 2, EggInfo7, EggInfo9, 6)
+
+	is_overlapping_player1 = model1.is_overlapping_player(Enemy1)
+	is_overlapping_player2 = model2.is_overlapping_player(Boss2)
+	is_overlapping_player3 = model3.is_overlapping_player(Enemy3)
+	is_overlapping_player4 = model4.is_overlapping_player(Boss1)
+	is_overlapping_player5 = model5.is_overlapping_player(Enemy2)	
+
+	eggnemy_overlap_check1 = model1.eggnemy_overlap_check(Enemy1)
+	eggnemy_overlap_check4 = model4.eggnemy_overlap_check(Boss2)
+
+def test_restart ():
+	...
