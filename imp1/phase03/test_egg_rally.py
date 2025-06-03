@@ -100,7 +100,6 @@ def test_return_to_bounds():
 	Point1 = Point(13.83, 24.5)
 	Point2 = Point(7.32, 9.41)
 	Point3 = Point(43, 2.56)
-
 	
 	Player1 = PlayerEgg(TestEggInfo5, Point1, Dmg1, AtkRad1)
 	Enemy1 = Eggnemy(TestEggInfo6, Point2)
@@ -202,23 +201,30 @@ def test_player_movement():
 	Player4 = PlayerEgg(TestEggInfo4, Point5, Dmg4, AtkRad4)
 	Player5 = PlayerEgg(TestEggInfo5, Point1, Dmg5, AtkRad5)
 
-	model1 = Model(Player1, Settings3, 4, TestEggInfo6, TestEggInfo9, 4)
-	model2 = Model(Player2, Settings1, 3, TestEggInfo8, TestEggInfo10, 5)
-	model3 = Model(Player3, Settings2, 3, TestEggInfo7, TestEggInfo9, 2)
-	model4 = Model(Player4, Settings1, 8, TestEggInfo6, TestEggInfo10, 2)
-	model5 = Model(Player5, Settings3, 2, TestEggInfo7, TestEggInfo9, 6)
+	model1 = Model(Player1, Settings3, 4, TestEggInfo6, TestEggInfo9, 4) #Spd = 11
+	model2 = Model(Player2, Settings1, 3, TestEggInfo8, TestEggInfo10, 5) #Spd = 8
+	model3 = Model(Player3, Settings2, 3, TestEggInfo7, TestEggInfo9, 2) #Spd = 9
+	model4 = Model(Player4, Settings1, 8, TestEggInfo6, TestEggInfo10, 2) #Spd = 7
+	model5 = Model(Player5, Settings3, 2, TestEggInfo7, TestEggInfo9, 6) #Spd = 7
 
 	model1.player_movement(True, False, False, True)
-	model1.player_movement(True, True, True, False)
 	model2.player_movement(True, False, True, True)
-	model2.player_movement(False, True, True, False)
 	model3.player_movement(False, True, True, True)
-	model3.player_movement(True, True, True, False)
 	model4.player_movement(True, True, False, False)
-	model4.player_movement(False, True, True, True)
 	model5.player_movement(True, False, False, True)
-	model5.player_movement(True, False, True, True)
-
+	
+	#The code above does not move the positions. Di siya gumagalaw WTFFF???
+	print(Player1.center_position.x)
+	print(Player1.center_position.y)
+	print(Player2.center_position.x)
+	print(Player2.center_position.y)
+	print(Player3.center_position.x)
+	print(Player3.center_position.y)
+	print(Player4.center_position.x)
+	print(Player4.center_position.y)
+	print(Player5.center_position.x)
+	print(Player5.center_position.y)
+	
 	assert Player1.center_position.x == 7.21
 	assert Player1.center_position.y == 9
 	assert Player2.center_position.x == 22.1
@@ -229,6 +235,13 @@ def test_player_movement():
 	assert Player4.center_position.y == 67.41
 	assert Player5.center_position.x == 3.5
 	assert Player5.center_position.y == 4.2
+
+	model1.player_movement(True, True, True, False)
+	model2.player_movement(False, True, True, False)
+	model3.player_movement(True, True, True, False)
+	model4.player_movement(False, True, True, True)
+	model5.player_movement(True, False, True, True)
+	
 	print(Player1.center_position.x)
 	print(Player1.center_position.y)
 	print(Player2.center_position.x)
@@ -302,8 +315,9 @@ def test_player_attack():
 	model1.player_attack(True)
 	#distance_to_player: float = ((Player1.center_position.x - Enemy1.center_position.x) ** 2 + (Player1.center_position.y - Enemy1.center_position.y) ** 2) ** 0.5
 	#print(distance_to_player)
-	print(TestEggInfo6.current_hp)
-	print(EggInfo6.current_hp)
+	#print(TestEggInfo6.current_hp)
+	#print(EggInfo6.current_hp)
+	#The following code below works differently as it did on the tests for phase02. WTF??
 	assert Enemy1.stats.current_hp == 14
 	model1.player_attack(False)
 	
@@ -402,7 +416,7 @@ def test_incompatible_model_init():
 	
 '''
 Test:
-Restart, eggnemy overlap check, controller and model gameover, controller and model leaderboards
+controller and model gameover, controller and model leaderboards
 '''
 def test_eggnemy_overlap_check():
 	Point1 = deepcopy(TestPoint1)
@@ -539,8 +553,29 @@ def test_eggnemy_overlap_check():
 	assert len(model5.overlapping_player_eggnemy) == 1 #Since Boss1 does not overlap anymore, it is removed from list of overlapping eggnemies.
 
 def test_restart():
+	model1.player_egg.stats.current_hp -= 451
+	model1.player_egg.stats.height += 482
+	model1.player_egg.stats.width += 127
+	model1.player_egg.stats.max_hp -= 329
+	model1.player_egg.stats.speed -= 32
+	model1.player_egg.center_position.x += 1231
+	model1.player_egg.center_position.y -= 100
 	model1.eggnemies.append(Boss1)
+	model1.overlapping_player_eggnemy.append(Enemy2)
+
+	model1.restart()
+
+	assert len(model1.eggnemies) == 0
+	assert len(model1.overlapping_player_eggnemy) == 0
+	assert model1.player_egg.stats.width == 20
+	assert model1.player_egg.stats.height == 40
+	assert model1.player_egg.stats.max_hp == 30
+	assert model1.player_egg.stats.current_hp == 30
+	assert model1.player_egg.stats.speed == 11
 
 test_player_movement()
 test_player_attack()
-test_restart()
+def test_game_over():
+	...
+def test_leaderboards():
+	...

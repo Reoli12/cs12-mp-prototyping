@@ -205,24 +205,36 @@ def test_player_movement():
 	model5 = Model(Player5, Settings3, 2, TestEggInfo7, TestEggInfo9, 6)
 
 	model1.player_movement(True, False, False, True)
-	model1.player_movement(True, True, True, False)
 	model2.player_movement(True, False, True, True)
-	model2.player_movement(False, True, True, False)
 	model3.player_movement(False, True, True, True)
-	model3.player_movement(True, True, True, False)
 	model4.player_movement(True, True, False, False)
-	model4.player_movement(False, True, True, True)
 	model5.player_movement(True, False, False, True)
+	
+	assert Player1.center_position.x == 18.21
+	assert Player1.center_position.y == -2
+	assert Player2.center_position.x == 22.1
+	assert Player2.center_position.y == 4.43
+	assert Player3.center_position.x == 43.34
+	assert Player3.center_position.y == 230.56
+	assert Player4.center_position.x == 2.34
+	assert Player4.center_position.y == 67.41
+	assert Player5.center_position.x == 10.5
+	assert Player5.center_position.y == -2.8
+
+	model1.player_movement(True, True, True, False)
+	model2.player_movement(False, True, True, False)
+	model3.player_movement(True, True, True, False)
+	model4.player_movement(False, True, True, True)
 	model5.player_movement(True, False, True, True)
 	
 	assert Player1.center_position.x > 7.21
 	assert Player1.center_position.y == -2
 	assert Player2.center_position.x > 14.1
-	assert Player2.center_position.y == 12.43
+	assert Player2.center_position.y  == 12.43
 	assert Player3.center_position.x == 34.34
 	assert Player3.center_position.y == 230.56
 	assert Player4.center_position.x == 2.34
-	assert Player4.center_position.y == 74.41
+	assert Player4.center_position.y  == 74.41
 	assert Player5.center_position.x == 10.5
 	assert Player5.center_position.y == -9.8
 	
