@@ -153,6 +153,29 @@ function modelDamageToBadEggs(model: Model): Model {
             Array.map((boss) => (takeDamage(model.playerEgg, boss)) as Boss),
             Array.filter((boss) => boss.currentHp > 0)
         )
+    // let currentlyOccupiedPoints = model.occupiedPoints
+
+    // let updatedEggnemies = Array.empty()
+    // for (const eggnemy of model.eggnemies) {
+    //     const eggnemyDamaged = takeDamage(model.playerEgg, eggnemy)
+    //     if (eggnemyDamaged.currentHp >= 0) {
+    //         HashSet.remove(currentlyOccupiedPoints, eggnemyDamaged.centerCoords)
+    //     } else {
+    //         Array.append(updatedEggnemies, eggnemyDamaged)
+    //         HashSet.add(currentlyOccupiedPoints, eggnemyDamaged.centerCoords)
+    //     }
+    // }
+
+    // let updatedBosses = Array.empty()
+    // for (const boss of model.eggnemies) {
+    //     const bossDamaged = takeDamage(model.playerEgg, boss)
+    //     if (bossDamaged.currentHp >= 0) {
+    //         HashSet.remove(currentlyOccupiedPoints, bossDamaged.centerCoords)
+    //     } else {
+    //         Array.append(updatedBosses, bossDamaged)
+    //         HashSet.add(currentlyOccupiedPoints, bossDamaged.centerCoords)
+    //     }
+    // }
 
     return Model.make({
         ...model,
@@ -163,6 +186,7 @@ function modelDamageToBadEggs(model: Model): Model {
             Array.union(Array.map(updatedBosses, (boss) => boss.centerCoords)),
             HashSet.fromIterable,
         )
+        // occupiedPoints: currentlyOccupiedPoints
     })
 }
 
@@ -256,7 +280,6 @@ function UpdateEggnemyCoords(eggnemies: BadEgg[], playerEggCoords: Point, curren
     return CoordUpdateHelper(eggnemies, playerEggCoords, 0, currentPoints, Array.empty())
 }
 
-
 function CoordUpdateHelper(eggnemies: BadEgg[], playerEggCoords: Point, idx: number, 
                             currentPoints: HashSet.HashSet<Point>, ret: BadEgg[]): BadEggsAndPoints {
     if (idx == Array.length(eggnemies)) {
@@ -273,21 +296,28 @@ function CoordUpdateHelper(eggnemies: BadEgg[], playerEggCoords: Point, idx: num
         })
     }
     const eggnemy = Array.unsafeGet(eggnemies, idx)
-    const eggnemyCoords = eggnemy.centerCoords
-
+    const eggnemyCoords = pipe(
+        eggnemy.centerCoords,
+        ({x, y}) => Point.make({x: x, y: y})
+    )
     const newPointCandidate = Point.make({
         x:  eggnemyCoords.x < playerEggCoords.x? eggnemyCoords.x + eggnemy.speed :
             eggnemyCoords.x > playerEggCoords.x? eggnemyCoords.x - eggnemy.speed :
             eggnemyCoords.x,
         y:  eggnemyCoords.y < playerEggCoords.y? eggnemyCoords.y + eggnemy.speed :
             eggnemyCoords.y > playerEggCoords.y? eggnemyCoords.y - eggnemy.speed :
-            eggnemyCoords.y,
+            eggnemyCoords.y,    
     })
 
-    const newPoint: Point = !HashSet.has(currentPoints, newPointCandidate)? newPointCandidate : eggnemyCoords
-    const newOccupiedPoints = pipe(
+    const isNewPointOccupied = HashSet.some(currentPoints, 
+            ({x, y}) => x == newPointCandidate.x && y == newPointCandidate.y
+        )
+
+    // console.log(Equal.equals(Data.struct(eggnemyCoords), Data.struct(eggnemyCoords)))
+    const newPoint = !isNewPointOccupied? newPointCandidate : eggnemyCoords
+    const newOccupiedPoints = isNewPointOccupied? currentPoints : pipe(
         currentPoints,
-        HashSet.remove(eggnemyCoords),
+        HashSet.filter((coord) => !(coord.x == eggnemyCoords.x && coord.y == eggnemyCoords.y)), // failed to remove, probably due to Point equality
         HashSet.add(newPoint)
     )
     const newEggnemy =  Match.value(eggnemy).pipe(
@@ -365,17 +395,13 @@ export const update = (msg: Msg, model: Model): Model =>
     )
 
 function generalUpdate(model: Model): Model {
+    const totalSeconds = Math.floor(model.currentFrame / model.fps)
     const newTime = minsSecs.make({
-                    mins: Math.floor(model.currentTime.secs / 60),
-                    secs: model.currentFrame % model.fps == 0? model.currentTime.secs + 1 : model.currentTime.secs ,
+                    mins: Math.floor(totalSeconds / 60),
+                    secs: totalSeconds % 60,
                 })
     const newFrame = model.currentFrame + 1
     let newPlayerHp: number
-
-    const modelEggnemyMoves = UpdateEggnemyCoords(model.eggnemies as BadEgg[], model.playerEgg.centerCoords,
-                                                        model.occupiedPoints)
-    const modelBossMoves = UpdateEggnemyCoords(model.bosses as BadEgg[], model.playerEgg.centerCoords,
-                                                        modelEggnemyMoves.points, )
 
     const hasCollided = shouldPlayerBeReceivingDamage(model)
     if (hasCollided) {
@@ -400,7 +426,7 @@ function generalUpdate(model: Model): Model {
     } else {
         newPlayerHp = model.playerEgg.currentHp
     }
-
+    console.log(model.gameState)
     return Model.make({
         ...model,
         currentTime: newTime,
@@ -418,14 +444,60 @@ function generalUpdate(model: Model): Model {
             ),
         }),
         eggnemies: pipe(
-            modelEggnemyMoves.eggnemies,
+            moveEntities(model.eggnemies, model.playerEgg) as Eggnemy[],
             (eggArr) => randomAddEggnemies(eggArr, 5)
         ),
-        bosses: modelBossMoves.bosses,
-        occupiedPoints: modelBossMoves.points,
-
-
+        bosses: moveEntities(model.bosses, model.playerEgg) as Boss[]
     })
 }
 
+function moveEntities(eggnemies: readonly Egg[], target: PlayerEgg): Egg[] {
+    return moveEntitiesHelper(eggnemies, 0, Array.empty(), target)
+}
 
+function moveEntitiesHelper(eggnemies: readonly Egg[], idx: number, 
+                            ret: Egg[], target: PlayerEgg): Egg[] {
+    if (idx == Array.length(eggnemies)) {
+        return ret
+    }
+
+    const currEntity = Array.unsafeGet(eggnemies, idx)
+    const nextPoint = stepOnce(currEntity, target)
+
+    const isNextPointOccupied: boolean = pipe(
+        ret,
+        // Array.map((eggnemy) => eggnemy.centerCoords),
+        // Array.some(({x, y}) => x == nextPoint.x && y == nextPoint.y)
+        Array.some((entity) => isInContact(entity, currEntity))
+    )
+    const updatedEntity: Egg = Match.value(currEntity).pipe(
+        Match.tag("Boss", (boss) => Boss.make({
+            ...boss,
+            centerCoords: isNextPointOccupied? boss.centerCoords : nextPoint
+        })),
+        Match.tag("Eggnemy", (eggnemy) => Eggnemy.make({
+        ...eggnemy,
+        centerCoords: isNextPointOccupied? eggnemy.centerCoords : nextPoint
+        })),
+        Match.tag("PlayerEgg", (player) => PlayerEgg.make({
+            // SHOULD NOT REACH HERE, but may prove useful later
+            ...player,
+            centerCoords: isNextPointOccupied? player.centerCoords : nextPoint
+        })),
+        Match.exhaustive,
+    )
+
+    const updatedRet = Array.append(ret, updatedEntity)
+
+    return moveEntitiesHelper(eggnemies, idx + 1, updatedRet, target)
+}
+
+const stepOnce = (egg: Egg, target: Egg): Point =>
+    Point.make({
+        x:  egg.centerCoords.x < target.centerCoords.x? egg.centerCoords.x + egg.speed :
+            egg.centerCoords.x > target.centerCoords.x? egg.centerCoords.x - egg.speed :
+            egg.centerCoords.x,
+        y:  egg.centerCoords.y < target.centerCoords.y? egg.centerCoords.y + egg.speed :
+            egg.centerCoords.y > target.centerCoords.y? egg.centerCoords.y - egg.speed :
+            egg.centerCoords.y,    
+    })
