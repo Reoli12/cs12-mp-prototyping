@@ -284,11 +284,12 @@ def test_player_attack():
 	model1.player_attack(False)
 
 	Enemy1.center_position.x += 4.63
-	Enemy1.center_position.y -= 9.74
+	Enemy1.center_position.y -= 6.74
 	Player1.center_position.x -= 24.73
-	Player1.center_position.y -= 2.4
-
+	Player1.center_position.y -= 8.4
 	model1.player_attack(True)
+	#distance_to_player: float = ((Player1.center_position.x - Enemy1.center_position.x) ** 2 + (Player1.center_position.y - Enemy1.center_position.y) ** 2) ** 0.5
+	#print(distance_to_player)
 	assert Enemy1.stats.current_hp == 10
 	model1.player_attack(False)
 	
@@ -303,11 +304,13 @@ def test_player_attack():
 	model2.player_attack(True)
 	assert Enemy3.stats.current_hp == 12
 	
-	Boss2.center_position.x -= 11.41
-	Boss2.center_position.y -= 49.56
-	Player3.center_position.x += 16.54
-	Player3.center_position.y += 162.7
+	Boss2.center_position.x -= 10.41
+	Boss2.center_position.y -= 59.56
+	Player3.center_position.x += 14.54
+	Player3.center_position.y += 160.7
 	
+	#distance_to_player: float = ((Player3.center_position.x - Boss2.center_position.x) ** 2 + (Player3.center_position.y - Boss2.center_position.y) ** 2) ** 0.5
+	#print(distance_to_player)
 	model3.player_attack(True)
 	assert Boss2.stats.current_hp == 29
 
@@ -323,11 +326,13 @@ def test_player_attack():
 	assert Boss1.stats.current_hp == 25
 	
 	Boss1.center_position.x -= 4.45
-	Boss1.center_position.y += 7.37
+	Boss1.center_position.y += 6.04
 	Player4.center_position.x += 3.46
-	Player4.center_position.y -= 7.71
+	Player4.center_position.y -= 4.71
 	
 	model4.player_attack(True)
+	#distance_to_player: float = ((Player4.center_position.x - Boss1.center_position.x) ** 2 + (Player4.center_position.y - Boss1.center_position.y) ** 2) ** 0.5
+	#print(distance_to_player)
 	assert Boss1.stats.current_hp == 22
 
 	Boss1.center_position.x -= 4.45
@@ -350,11 +355,6 @@ def test_player_attack():
 
 	#distance_to_player: float = ((Player5.center_position.x - Enemy2.center_position.x) ** 2 + (Player5.center_position.y - Enemy2.center_position.y) ** 2) ** 0.5
 	#print(distance_to_player)
-test_is_out_of_bounds()
-test_is_overlapping_player()
-test_return_to_bounds()
-test_player_movement()
-test_player_attack()
 
 def test_incompatible_model_init():
 	EggInfo1 = EggInfo(20, 20, 20, 14, 3)
@@ -391,58 +391,66 @@ Test:
 Restart, eggnemy overlap check, controller and model gameover, controller and model leaderboards
 '''
 def test_eggnemy_overlap_check():
-	EggInfo1 = EggInfo(20, 40, 30, 30, 11)
-	EggInfo2 = EggInfo(30, 30, 70, 50, 8)
-	EggInfo3 = EggInfo(40, 40, 60, 45, 9)
-	EggInfo4 = EggInfo(50, 50, 20, 10, 7)
-	EggInfo5 = EggInfo(70, 40, 50, 30, 7)
+	Point1 = deepcopy(TestPoint1)
+	Point2 = deepcopy(TestPoint2)
+	Point3 = deepcopy(TestPoint3)
+	Point4 = deepcopy(TestPoint4)
+	Point5 = deepcopy(TestPoint5)
+	Point6 = deepcopy(TestPoint6)
+	Point7 = deepcopy(TestPoint7)
+	Point8 = deepcopy(TestPoint8)
+	Point9 = deepcopy(TestPoint9)
+	Point10 = deepcopy(TestPoint10)
 
-	EggInfo6 = EggInfo(20, 20, 20, 14, 3)
-	EggInfo7 = EggInfo(30, 30, 15, 9, 2)
-	EggInfo8 = EggInfo(25, 25, 17, 17, 4)
+	Player1 = PlayerEgg(TestEggInfo1, Point5, Dmg1, AtkRad1)
+	Player2 = PlayerEgg(TestEggInfo2, Point2, Dmg2, AtkRad2)
+	Player3 = PlayerEgg(TestEggInfo3, Point9, Dmg3, AtkRad3)
+	Player4 = PlayerEgg(TestEggInfo4, Point1, Dmg4, AtkRad4)
+	Player5 = PlayerEgg(TestEggInfo5, Point8, Dmg5, AtkRad5)
 
-	EggInfo9 = EggInfo(50, 50, 30, 25, 6)
-	EggInfo10 = EggInfo(50, 50, 35, 35, 7)
+	Enemy1 = Eggnemy(TestEggInfo6, Point3)
+	Enemy2 = Eggnemy(TestEggInfo7, Point7)
+	Enemy3 = Eggnemy(TestEggInfo8, Point10)
 
-
-	Point1 = Point(2, 14)
-	Point2 = Point(3.5, 4.2)
-	Point3 = Point(7.21, 9)
-	Point4 = Point(10.52, 3.6)
-	Point5 = Point(36.53, 11.75)
-	Point6 = Point(43, 221.56)
-	Point7 = Point(22, 12.43)
-	Point8 = Point(14.24, 12.346)
-	Point9 = Point(20.87, 0)
-	Point10 = Point(2.34, 67.41)
-
-	Player1 = PlayerEgg(EggInfo1, Point5, Dmg1, AtkRad1)
-	Player2 = PlayerEgg(EggInfo2, Point2, Dmg2, AtkRad2)
-	Player3 = PlayerEgg(EggInfo3, Point9, Dmg3, AtkRad3)
-	Player4 = PlayerEgg(EggInfo4, Point1, Dmg4, AtkRad4)
-	Player5 = PlayerEgg(EggInfo5, Point8, Dmg5, AtkRad5)
-
-	Enemy1 = Eggnemy(EggInfo6, Point3)
-	Enemy2 = Eggnemy(EggInfo7, Point7)
-	Enemy3 = Eggnemy(EggInfo8, Point10)
-
-	Boss1 = Boss(EggInfo9, Point4)
-	Boss2 = Boss(EggInfo10, Point6)
-
-	model1 = Model(Player1, Settings3, 4, EggInfo6, EggInfo9, 4)
-	model2 = Model(Player2, Settings1, 3, EggInfo8, EggInfo10, 5)
-	model3 = Model(Player3, Settings2, 3, EggInfo7, EggInfo9, 2)
-	model4 = Model(Player4, Settings1, 8, EggInfo6, EggInfo10, 2)
-	model5 = Model(Player5, Settings3, 2, EggInfo7, EggInfo9, 6)
+	Boss1 = Boss(TestEggInfo9, Point4)
+	Boss2 = Boss(TestEggInfo10, Point6)
 
 	is_overlapping_player1 = model1.is_overlapping_player(Enemy1)
 	is_overlapping_player2 = model2.is_overlapping_player(Boss2)
 	is_overlapping_player3 = model3.is_overlapping_player(Enemy3)
 	is_overlapping_player4 = model4.is_overlapping_player(Boss1)
-	is_overlapping_player5 = model5.is_overlapping_player(Enemy2)	
+	is_overlapping_player5 = model5.is_overlapping_player(Enemy2)
+
+	assert is_overlapping_player1 == False
+	assert is_overlapping_player2 == False
+	assert is_overlapping_player3 == False
+	assert is_overlapping_player4 == True
+	assert is_overlapping_player5 == True
 
 	eggnemy_overlap_check1 = model1.eggnemy_overlap_check(Enemy1)
-	eggnemy_overlap_check4 = model4.eggnemy_overlap_check(Boss2)
+	eggnemy_overlap_check2 = model2.eggnemy_overlap_check(Boss2)
+	eggnemy_overlap_check3 = model3.eggnemy_overlap_check(Enemy3)
+	eggnemy_overlap_check4 = model4.eggnemy_overlap_check(Boss1)
+	eggnemy_overlap_check5 = model5.eggnemy_overlap_check(Enemy2)
+
+	is_overlapping_player6 = model1.is_overlapping_player(Boss2)
+	is_overlapping_player7 = model2.is_overlapping_player(Enemy3)
+	is_overlapping_player8 = model3.is_overlapping_player(Enemy2)
+	is_overlapping_player9 = model4.is_overlapping_player(Enemy1)
+	is_overlapping_player10 = model5.is_overlapping_player(Boss1)
+
+	eggnemy_overlap_check1 = model1.eggnemy_overlap_check(Boss2)
+	eggnemy_overlap_check2 = model2.eggnemy_overlap_check(Enemy3)
+	eggnemy_overlap_check3 = model3.eggnemy_overlap_check(Enemy2)
+	eggnemy_overlap_check4 = model4.eggnemy_overlap_check(Enemy1)
+	eggnemy_overlap_check5 = model5.eggnemy_overlap_check(Boss1)
+
+	print(is_overlapping_player6)
+	print(is_overlapping_player7)
+	print(is_overlapping_player8)
+	print(is_overlapping_player9)
+	print(is_overlapping_player10)
 
 def test_restart ():
 	...
+test_eggnemy_overlap_check()

@@ -88,6 +88,7 @@ class Model:
 
         if not isinstance(eggnemy, Eggnemy | Boss):
             raise TypeError("This is not an eggnemy type.")
+            
         return not (left_bounds > eggnemy_right or 
                 right_bounds < eggnemy_left or
                 top_bounds > eggnemy_bottom or
