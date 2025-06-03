@@ -167,7 +167,7 @@ class Model:
                 test_eggnemy_x: int = random.randint(eggnemy_width, self._world_width - eggnemy_width)
                 test_eggnemy_y: int = random.randint(eggnemy_height, self._world_height - eggnemy_height)
                 
-                eggnemy_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
+                eggnemy_center = Point(test_eggnemy_x, test_eggnemy_y)
                 new_eggnemy: Eggnemy = Eggnemy(
                     EggInfo(
                         eggnemy_width,
@@ -226,8 +226,8 @@ class Model:
                 test_eggnemy_x: int = random.randint(boss_width, self._world_width - boss_width)
                 test_eggnemy_y: int = random.randint(boss_height, self._world_height - boss_height)
                 
-                boss_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
-                self._boss_egg: None | Boss = Boss(
+                boss_center = Point(test_eggnemy_x, test_eggnemy_y)
+                self._boss_egg = Boss(
                     EggInfo(
                         boss_width,
                         boss_height,
@@ -267,7 +267,7 @@ class Model:
                 self.return_to_world_bounds(self._boss_egg)
 
     def restart(self):
-        self._is_time_get: bool = False
+        self._is_time_get = False
         
         self._screen_width: int = self._param_settings.screen_width
         self._screen_height: int = self._param_settings.screen_height
@@ -281,7 +281,7 @@ class Model:
         self._player_egg: PlayerEgg = deepcopy(self._param_player_egg)
         self._egghancement: EgghancementSettings = deepcopy(self._param_egghancement)
         self._is_to_be_egghanced: bool = False
-        self._got_egghanced: bool = False
+        self._got_egghanced = False
         self._cur_xp: int = 0
 
         self._eggnemies: list[Eggnemy] = []
@@ -295,7 +295,7 @@ class Model:
         self._eggnemy_atk: int = self._eggnemy_info.atk
         self._eggnemy_speed: int = self._eggnemy_info.speed
         
-        self._boss_egg: None | Boss = None
+        self._boss_egg = None
         self._boss_info: EggInfo = deepcopy(self._param_boss_info)
         self._boss_spawn_rate: int = self._param_boss_spawn_rate
         self._boss_width: int = self._boss_info.width
@@ -304,21 +304,21 @@ class Model:
         self._boss_max_hp: int = self._boss_info.max_hp
         self._boss_atk: int = self._boss_info.atk
 
-        self._is_game_over: bool = False
-        self._is_game_won: bool = False
+        self._is_game_over = False
+        self._is_game_won = False
 
     def update_leaderboards(self, min: int, sec: int):
-        self._is_time_get: bool = True
+        self._is_time_get = True
         self._leaderboards.append((min, sec))
 
         #in terms of seconds
         self._leaderboards.sort(key=lambda time: time[0] * 60 + time[1])
-        self._leaderboards: list[tuple[int, int]] = self._leaderboards [:3]
+        self._leaderboards = self._leaderboards [:3]
         self.leaderboards_stringify()
     
     def leaderboards_stringify(self):
         runs: list[tuple[int, int]] = self.leaderboards
-        self._leaderboards_str: list[str] = []
+        self._leaderboards_str = []
         runs_str: list[str] = self._leaderboards_str
             
         for i, (min, sec) in enumerate(runs, 1):
@@ -332,14 +332,14 @@ class Model:
                 run_str: str = f'Top 1   {time_str}'
                 runs_str.append(run_str)
             else:
-                run_str: str = f'    {i}   {time_str}'
+                run_str = f'    {i}   {time_str}'
                 runs_str.append(run_str)
 
         if len(runs_str) < 3:
             # 2 missing, len(runs_str) = 1, [2, 3]
             # 1 missing, len(runs_str) = 2, [3,]
             for i in range(len(runs_str) + 1, 4):
-                run_str: str = f'    {i}   --:--'
+                run_str = f'    {i}   --:--'
                 runs_str.append(run_str)
 
     def egghancement_stats(self, egghancement_pressed: Literal[1, 2, 3, None]):
@@ -354,8 +354,8 @@ class Model:
             case _:
                 return
         
-        self._is_to_be_egghanced: bool = False
-        self._got_egghanced: bool = True
+        self._is_to_be_egghanced = False
+        self._got_egghanced = True
 
     def player_takes_damage(self):
         if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
@@ -367,7 +367,7 @@ class Model:
     def egghance_check(self):
         if not self._got_egghanced and self._cur_xp != 0 and self._cur_xp % self._egghancement.xp_needed == 0:
             print("level up")
-            self._is_to_be_egghanced: bool = True
+            self._is_to_be_egghanced = True
 
     @property
     def param_player_egg(self) -> PlayerEgg:

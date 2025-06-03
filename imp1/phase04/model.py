@@ -166,7 +166,7 @@ class Model:
                 test_eggnemy_x: int = random.randint(eggnemy_width, self._world_width - eggnemy_width)
                 test_eggnemy_y: int = random.randint(eggnemy_height, self._world_height - eggnemy_height)
                 
-                eggnemy_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
+                eggnemy_center = Point(test_eggnemy_x, test_eggnemy_y)
                 new_eggnemy: Eggnemy = Eggnemy(
                     EggInfo(
                         eggnemy_width,
@@ -218,8 +218,8 @@ class Model:
             test_eggnemy_x: int = random.randint(boss_width, self._world_width - boss_width)
             test_eggnemy_y: int = random.randint(boss_height, self._world_height - boss_height)
             
-            boss_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
-            self._boss_egg: None | Boss = Boss(
+            boss_center = Point(test_eggnemy_x, test_eggnemy_y)
+            self._boss_egg = Boss(
                 EggInfo(
                     boss_width,
                     boss_height,
@@ -257,7 +257,7 @@ class Model:
                 self.return_to_world_bounds(self._boss_egg)
 
     def restart(self):
-        self._is_time_get: bool = False
+        self._is_time_get = False
         
         self._screen_width: int = self._param_settings.screen_width
         self._screen_height: int = self._param_settings.screen_height
@@ -280,7 +280,7 @@ class Model:
         self._eggnemy_speed: int = self._eggnemy_info.speed
         self._eggnemy_max_hp: int = self._eggnemy_info.max_hp
         
-        self._boss_egg: None | Boss = None
+        self._boss_egg = None
         self._boss_info: EggInfo = deepcopy(self._param_boss_info)
         self._boss_spawn_rate: int = self._param_boss_spawn_rate
         self._boss_width: int = self._boss_info.width
@@ -288,8 +288,8 @@ class Model:
         self._boss_speed: int = self._boss_info.speed
         self._boss_max_hp: int = self._boss_info.max_hp
 
-        self._is_game_over: bool = False
-        self._is_game_won: bool = False
+        self._is_game_over = False
+        self._is_game_won = False
 
     def update_leaderboards(self, min: int, sec: int):
         self._is_time_get = True
@@ -316,14 +316,14 @@ class Model:
                 run_str: str = f'Top 1   {time_str}'
                 runs_str.append(run_str)
             else:
-                run_str: str = f'    {i}   {time_str}'
+                run_str = f'    {i}   {time_str}'
                 runs_str.append(run_str)
 
         if len(runs_str) < 3:
             # 2 missing, len(runs_str) = 1, [2, 3]
             # 1 missing, len(runs_str) = 2, [3,]
             for i in range(len(runs_str) + 1, 4):
-                run_str: str = f'    {i}   --:--'
+                run_str = f'    {i}   --:--'
                 runs_str.append(run_str)
 
 

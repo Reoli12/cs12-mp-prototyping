@@ -16,6 +16,13 @@ class Model:
         self._leaderboards: list[tuple[int, int]] = []
         self._leaderboards_str: list[str] = []
         self._is_time_get: bool = False
+        '''
+        Note: The isinstance code below is for testing purposes only. We are aware the code below does not improve the code's functionality.
+        During testing, it was found that even though an Eggnemy or Boss was passed onto the player_egg parameter, the model would work perfectly fine.
+        Pyright does flag it, but it should not work. Therefore, the code below was added for testing.
+        '''
+        if not isinstance(self._param_player_egg, PlayerEgg):
+           raise TypeError("This is not a PlayerEgg type.")
 
         self.restart()
 
@@ -79,6 +86,9 @@ class Model:
         eggnemy_bottom: float = eggnemy.bottom_point
         eggnemy_top: float = eggnemy.topmost_point
 
+        if not isinstance(eggnemy, Eggnemy | Boss):
+            raise TypeError("This is not an eggnemy type.")
+            
         return not (left_bounds > eggnemy_right or 
                 right_bounds < eggnemy_left or
                 top_bounds > eggnemy_bottom or
@@ -169,7 +179,7 @@ class Model:
                 self.return_to_bounds(eggnemy)
                     
     def eggnemy_overlap_check(self, eggnemy: Eggnemy):
-        is_overlap: bool = self.is_overlapping_player(eggnemy) 
+        is_overlap: bool = self.is_overlapping_player(eggnemy)
 
         if is_overlap and eggnemy not in self._overlapping_player_eggnemy:
             self._overlapping_player_eggnemy.append(eggnemy)
@@ -186,7 +196,7 @@ class Model:
                 test_eggnemy_x: int = random.randint(eggnemy_width, self._world_width - eggnemy_width)
                 test_eggnemy_y: int = random.randint(eggnemy_height, self._world_height - eggnemy_height)
                 
-                eggnemy_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
+                eggnemy_center = Point(test_eggnemy_x, test_eggnemy_y)
                 eggnemy: Eggnemy = Eggnemy(
                     EggInfo(
                         eggnemy_width,
@@ -210,8 +220,8 @@ class Model:
             test_eggnemy_x: int = random.randint(boss_width, self._world_width - boss_width)
             test_eggnemy_y: int = random.randint(boss_height, self._world_height - boss_height)
             
-            boss_center: None | Point = Point(test_eggnemy_x, test_eggnemy_y)
-            self._boss_egg: None | Boss = Boss(
+            boss_center = Point(test_eggnemy_x, test_eggnemy_y)
+            self._boss_egg = Boss(
                 EggInfo(
                     boss_width,
                     boss_height,
@@ -243,7 +253,7 @@ class Model:
                 self.return_to_bounds(self._boss_egg)
 
     def restart(self):
-        self._is_time_get: bool = False
+        self._is_time_get = False
         
         self._screen_width: int = self._param_settings.screen_width
         self._screen_height: int = self._param_settings.screen_height
@@ -266,7 +276,7 @@ class Model:
         self._eggnemy_speed: int = self._eggnemy_info.speed
         self._eggnemy_max_hp: int = self._eggnemy_info.max_hp
         
-        self._boss_egg: None | Boss = None
+        self._boss_egg = None
         self._boss_info: EggInfo = deepcopy(self._param_boss_info)
         self._boss_spawn_rate: int = self._param_boss_spawn_rate
         self._boss_width: int = self._boss_info.width
@@ -274,8 +284,8 @@ class Model:
         self._boss_speed: int = self._boss_info.speed
         self._boss_max_hp: int = self._boss_info.max_hp
 
-        self._is_game_over: bool = False
-        self._is_game_won: bool = False
+        self._is_game_over = False
+        self._is_game_won = False
 
     def update_leaderboards(self, min: int, sec: int):
         self._is_time_get = True
@@ -302,14 +312,14 @@ class Model:
                 run_str: str = f'Top 1   {time_str}'
                 runs_str.append(run_str)
             else:
-                run_str: str = f'    {i}   {time_str}'
+                run_str = f'    {i}   {time_str}'
                 runs_str.append(run_str)
 
         if len(runs_str) < 3:
             # 2 missing, len(runs_str) = 1, [2, 3]
             # 1 missing, len(runs_str) = 2, [3,]
             for i in range(len(runs_str) + 1, 4):
-                run_str: str = f'    {i}   --:--'
+                run_str = f'    {i}   --:--'
                 runs_str.append(run_str)
 
 
