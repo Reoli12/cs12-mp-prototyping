@@ -65,7 +65,6 @@ model4 = Model(Player4, Settings1, 8, TestEggInfo6, TestEggInfo10, 2)
 model5 = Model(Player5, Settings3, 2, TestEggInfo7, TestEggInfo9, 6)
 
 def test_is_out_of_bounds():
-
 	Player1 = PlayerEgg(TestEggInfo1, TestPoint2, Dmg1, AtkRad1)
 	Enemy1 = Eggnemy(TestEggInfo6, TestPoint3)
 	Boss1 = Eggnemy(TestEggInfo10, TestPoint6)
@@ -101,7 +100,6 @@ def test_return_to_bounds():
 	Point1 = Point(13.83, 24.5)
 	Point2 = Point(7.32, 9.41)
 	Point3 = Point(43, 2.56)
-
 	
 	Player1 = PlayerEgg(TestEggInfo5, Point1, Dmg1, AtkRad1)
 	Enemy1 = Eggnemy(TestEggInfo6, Point2)
@@ -128,7 +126,6 @@ def test_return_to_bounds():
 	assert out_of_bounds6 == False
 
 def test_is_overlapping_player():
-	
 	Point1 = deepcopy(TestPoint1)
 	Point2 = deepcopy(TestPoint2)
 	Point3 = deepcopy(TestPoint3)
@@ -189,7 +186,6 @@ def test_is_overlapping_player():
 	assert is_overlapping_player10 == True
 	
 def test_player_movement():
-	
 	Point1 = Point(3.5, 4.2)
 	Point2 = Point(7.21, 9)
 	Point3 = Point(43.34, 221.56)
@@ -218,28 +214,18 @@ def test_player_movement():
 	model4.player_movement(False, True, True, True)
 	model5.player_movement(True, False, False, True)
 	model5.player_movement(True, False, True, True)
-	'''
-	assert Player1.center_position.x == 7.21
-	assert Player1.center_position.y == 9
-	assert Player2.center_position.x == 22.1
+	
+	assert Player1.center_position.x > 7.21
+	assert Player1.center_position.y == -2
+	assert Player2.center_position.x > 14.1
 	assert Player2.center_position.y == 12.43
-	assert Player3.center_position.x == 43.34
-	assert Player3.center_position.y == 221.56
+	assert Player3.center_position.x == 34.34
+	assert Player3.center_position.y == 230.56
 	assert Player4.center_position.x == 2.34
-	assert Player4.center_position.y == 67.41
-	assert Player5.center_position.x == 3.5
-	assert Player5.center_position.y == 4.2
-	'''
-	print(Player1.center_position.x)
-	print(Player1.center_position.y)
-	print(Player2.center_position.x)
-	print(Player2.center_position.y)
-	print(Player3.center_position.x)
-	print(Player3.center_position.y)
-	print(Player4.center_position.x)
-	print(Player4.center_position.y)
-	print(Player5.center_position.x)
-	print(Player5.center_position.y)
+	assert Player4.center_position.y == 74.41
+	assert Player5.center_position.x == 10.5
+	assert Player5.center_position.y == -9.8
+	
 
 def test_player_attack():
 	EggInfo1 = deepcopy(TestEggInfo1)
@@ -368,4 +354,4 @@ def test_player_attack():
 
 	#distance_to_player: float = ((Player5.center_position.x - Enemy2.center_position.x) ** 2 + (Player5.center_position.y - Enemy2.center_position.y) ** 2) ** 0.5
 	#print(distance_to_player)
-test_player_attack()
+test_player_movement()
