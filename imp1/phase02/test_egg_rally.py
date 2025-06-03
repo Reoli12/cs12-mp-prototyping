@@ -192,11 +192,11 @@ def test_player_movement():
 	Point4 = Point(22.1, 12.43)
 	Point5 = Point(2.34, 67.41)
 
-	Player1 = PlayerEgg(TestEggInfo1, Point2, Dmg1, AtkRad1)
-	Player2 = PlayerEgg(TestEggInfo2, Point4, Dmg2, AtkRad2)
-	Player3 = PlayerEgg(TestEggInfo3, Point3, Dmg3, AtkRad3)
-	Player4 = PlayerEgg(TestEggInfo4, Point5, Dmg4, AtkRad4)
-	Player5 = PlayerEgg(TestEggInfo5, Point1, Dmg5, AtkRad5)
+	Player1 = PlayerEgg(TestEggInfo1, Point2, Dmg1, AtkRad1) #Spd = 11
+	Player2 = PlayerEgg(TestEggInfo2, Point4, Dmg2, AtkRad2) #Spd = 8
+	Player3 = PlayerEgg(TestEggInfo3, Point3, Dmg3, AtkRad3) #Spd = 9
+	Player4 = PlayerEgg(TestEggInfo4, Point5, Dmg4, AtkRad4) #Spd = 7
+	Player5 = PlayerEgg(TestEggInfo5, Point1, Dmg5, AtkRad5) #Spd = 7
 
 	model1 = Model(Player1, Settings3, 4, TestEggInfo6, TestEggInfo9, 4)
 	model2 = Model(Player2, Settings1, 3, TestEggInfo8, TestEggInfo10, 5)

@@ -447,17 +447,18 @@ def test_eggnemy_overlap_check():
 	eggnemy_overlap_check4 = model4.eggnemy_overlap_check(Boss1)
 	eggnemy_overlap_check5 = model5.eggnemy_overlap_check(Enemy2)
 
+	assert len(model1.overlapping_player_eggnemy) == 0
+	assert len(model2.overlapping_player_eggnemy) == 0
+	#Note: The following assertion below passes. If pyright somehow flags it just like it does for me, ignore it.
+	assert len(model3.overlapping_player_eggnemy) == 0
+	assert len(model4.overlapping_player_eggnemy) == 1
+	assert len(model5.overlapping_player_eggnemy) == 1
+
 	is_overlapping_player6 = model1.is_overlapping_player(Boss2)
 	is_overlapping_player7 = model2.is_overlapping_player(Enemy3)
 	is_overlapping_player8 = model3.is_overlapping_player(Enemy2)
 	is_overlapping_player9 = model4.is_overlapping_player(Enemy1)
 	is_overlapping_player10 = model5.is_overlapping_player(Boss1)
-
-	eggnemy_overlap_check6 = model1.eggnemy_overlap_check(Boss2)
-	eggnemy_overlap_check7 = model2.eggnemy_overlap_check(Enemy3)
-	eggnemy_overlap_check8 = model3.eggnemy_overlap_check(Enemy2)
-	eggnemy_overlap_check9 = model4.eggnemy_overlap_check(Enemy1)
-	eggnemy_overlap_check10 = model5.eggnemy_overlap_check(Boss1)
 
 	assert is_overlapping_player6 == False
 	assert is_overlapping_player7 == False
@@ -465,8 +466,81 @@ def test_eggnemy_overlap_check():
 	assert is_overlapping_player9 == True
 	assert is_overlapping_player10 == True
 
-def test_restart ():
-	...
+	eggnemy_overlap_check6 = model1.eggnemy_overlap_check(Boss2)
+	eggnemy_overlap_check7 = model2.eggnemy_overlap_check(Enemy3)
+	eggnemy_overlap_check8 = model3.eggnemy_overlap_check(Enemy2)
+	eggnemy_overlap_check9 = model4.eggnemy_overlap_check(Enemy1)
+	eggnemy_overlap_check10 = model5.eggnemy_overlap_check(Boss1)
+
+	assert len(model1.overlapping_player_eggnemy) == 0
+	assert len(model2.overlapping_player_eggnemy) == 0
+	assert len(model3.overlapping_player_eggnemy) == 1
+	assert len(model4.overlapping_player_eggnemy) == 2
+	assert len(model5.overlapping_player_eggnemy) == 2
+
+
+	Player1.center_position.x += 30
+	Enemy1.center_position.y += 23
+	Player2.center_position.y += 43.7
+	Enemy2.center_position.y += 24.4
+	Player3.center_position.x += 24.5
+	Enemy3.center_position.y += 32.3
+	Player4.center_position.y += 25.6
+	Boss1.center_position.y -= 45.3
+	Player5.center_position.x += 34.73
+	Boss2.center_position.x -= 45.3
+	
+	is_overlapping_player11 = model1.is_overlapping_player(Enemy1)
+	is_overlapping_player12 = model2.is_overlapping_player(Boss2)
+	is_overlapping_player13 = model3.is_overlapping_player(Enemy3)
+	is_overlapping_player14 = model4.is_overlapping_player(Boss1)
+	is_overlapping_player15 = model5.is_overlapping_player(Enemy2)
+
+	assert is_overlapping_player11 == False
+	assert is_overlapping_player12 == False
+	assert is_overlapping_player13 == False
+	assert is_overlapping_player14 == False
+	assert is_overlapping_player15 == True
+
+	eggnemy_overlap_check11 = model1.eggnemy_overlap_check(Enemy1)
+	eggnemy_overlap_check12 = model2.eggnemy_overlap_check(Boss2)
+	eggnemy_overlap_check13 = model3.eggnemy_overlap_check(Enemy3)
+	eggnemy_overlap_check14 = model4.eggnemy_overlap_check(Boss1)
+	eggnemy_overlap_check15 = model5.eggnemy_overlap_check(Enemy2)
+
+	assert len(model1.overlapping_player_eggnemy) == 0
+	assert len(model2.overlapping_player_eggnemy) == 0
+	assert len(model3.overlapping_player_eggnemy) == 1
+	assert len(model4.overlapping_player_eggnemy) == 1 #Since Boss1 does not overlap anymore, it is removed from the list of overlapping eggnemies.
+	assert len(model5.overlapping_player_eggnemy) == 2 #List of overlapping eggnemies remains unchanged since Enemy2 still overlaps.
+
+	is_overlapping_player16 = model1.is_overlapping_player(Boss2)
+	is_overlapping_player17 = model2.is_overlapping_player(Enemy3)
+	is_overlapping_player18 = model3.is_overlapping_player(Enemy2)
+	is_overlapping_player19 = model4.is_overlapping_player(Enemy1)
+	is_overlapping_player20 = model5.is_overlapping_player(Boss1)
+
+	assert is_overlapping_player16 == False
+	assert is_overlapping_player17 == False
+	assert is_overlapping_player18 == False
+	assert is_overlapping_player19 == True
+	assert is_overlapping_player20 == False
+
+	eggnemy_overlap_check16 = model1.eggnemy_overlap_check(Boss2)
+	eggnemy_overlap_check17 = model2.eggnemy_overlap_check(Enemy3)
+	eggnemy_overlap_check18 = model3.eggnemy_overlap_check(Enemy2)
+	eggnemy_overlap_check19 = model4.eggnemy_overlap_check(Enemy1)
+	eggnemy_overlap_check20 = model5.eggnemy_overlap_check(Boss1)
+
+	assert len(model1.overlapping_player_eggnemy) == 0
+	assert len(model2.overlapping_player_eggnemy) == 0
+	assert len(model3.overlapping_player_eggnemy) == 0
+	assert len(model4.overlapping_player_eggnemy) == 1
+	assert len(model5.overlapping_player_eggnemy) == 1 #Since Boss1 does not overlap anymore, it is removed from list of overlapping eggnemies.
+
+def test_restart():
+	model1.eggnemies.append(Boss1)
+
 test_player_movement()
 test_player_attack()
-test_eggnemy_overlap_check()
+test_restart()
