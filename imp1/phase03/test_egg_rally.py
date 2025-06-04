@@ -315,8 +315,7 @@ def test_player_attack():
 	model1.player_attack(True)
 	#distance_to_player: float = ((Player1.center_position.x - Enemy1.center_position.x) ** 2 + (Player1.center_position.y - Enemy1.center_position.y) ** 2) ** 0.5
 	#print(distance_to_player)
-	#print(TestEggInfo6.current_hp)
-	#print(EggInfo6.current_hp)
+
 	#The following code below works differently as it did on the tests for phase02. WTF??
 	assert Enemy1.stats.current_hp == 14
 	model1.player_attack(False)
@@ -407,7 +406,7 @@ def test_incompatible_model_init():
 	Boss2 = Boss(EggInfo5, Point5)
 
 
-	with pytest.raises(ValueError):
+	with pytest.raises(TypeError):
 		model1 = Model(Enemy1, Settings3, 4, EggInfo2, EggInfo4, 4)
 		model2 = Model(Enemy2, Settings1, 3, EggInfo3, EggInfo5, 5)
 		model3 = Model(Enemy3, Settings2, 3, EggInfo4, EggInfo5, 2)
@@ -575,7 +574,34 @@ def test_restart():
 
 test_player_movement()
 test_player_attack()
-def test_game_over():
-	...
+def test_game_finished():
+	Point1 = deepcopy(TestPoint1)
+	Point2 = deepcopy(TestPoint2)
+	Point3 = deepcopy(TestPoint3)
+	Point4 = deepcopy(TestPoint4)
+	Point5 = deepcopy(TestPoint5)
+
+	EggInfo1 = deepcopy(TestEggInfo1)
+	EggInfo2 = deepcopy(TestEggInfo2)
+
+	EggInfo3 = deepcopy(TestEggInfo6)
+	EggInfo4 = deepcopy(TestEggInfo7)
+	EggInfo5 = deepcopy(TestEggInfo8)
+
+	EggInfo6 = deepcopy(TestEggInfo9)
+	EggInfo7 = deepcopy(TestEggInfo10)
+
+	Player1 = PlayerEgg(EggInfo1, Point5, Dmg1, AtkRad1)
+	Player2 = PlayerEgg(EggInfo2, Point2, Dmg2, AtkRad2)
+
+	Enemy1 = Eggnemy(EggInfo3, Point3)
+	Enemy2 = Eggnemy(EggInfo4, Point1)
+	Enemy3 = Eggnemy(EggInfo5, Point4)
+
+	Boss1 = Boss(EggInfo6, Point3)
+	Boss2 = Boss(EggInfo7, Point4)
+
+
+
 def test_leaderboards():
 	...
