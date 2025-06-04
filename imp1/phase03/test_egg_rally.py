@@ -213,7 +213,7 @@ def test_player_movement():
 	model4.player_movement(True, True, False, False)
 	model5.player_movement(True, False, False, True)
 	
-	#The code above does not move the positions. Di siya gumagalaw WTFFF???
+	#The code above does not move the positions unlike sa tests sa phase02. Di siya gumagalaw WTFFF???
 	print(Player1.center_position.x)
 	print(Player1.center_position.y)
 	print(Player2.center_position.x)

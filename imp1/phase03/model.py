@@ -86,6 +86,11 @@ class Model:
         eggnemy_bottom: float = eggnemy.bottom_point
         eggnemy_top: float = eggnemy.topmost_point
 
+        '''
+        Note: The isinstance code below is for testing purposes only. We are aware the code below does not improve the code's functionality.
+        During testing, it was found that even though a Player was passed onto the eggnemy parameter, the method would work perfectly fine.
+        Pyright does flag it, but it should not work. Therefore, the code below was added for testing.
+        '''
         if not isinstance(eggnemy, Eggnemy | Boss):
             raise TypeError("This is not an eggnemy type.")
             
