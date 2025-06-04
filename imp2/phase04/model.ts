@@ -89,7 +89,7 @@ function generateInitialEggnemies(num: number): Eggnemy[] {
     let ret: Eggnemy[] = Array.empty()
     for (let i = 0; i < num; i++) {
         ret = Array.append(ret, Eggnemy.make({
-            centerCoords: Data.struct({
+            centerCoords: Point.make({
                 x: pipe( 
                     Math.random() * settings.screenWidth,
                     Math.floor
