@@ -27,11 +27,16 @@ export const Model = S.Struct({
     gameState: S.Union(
         S.Literal("Ongoing"),
         S.Literal("PlayerWin"),
-        S.Literal("PlayerLose")
+        S.Literal("PlayerLose"),
+        S.Literal("ChoosingEgghancement")
     ),
     leaderboard: S.Array(minsSecs),
     hasAddedToLeaderboard: S.Boolean,
-    occupiedPoints: S.HashSet(Point),
+    eggxperienceNeededForEgghancement: S. Number,
+    deltaHp: S. Number,
+    deltaAttack: S. Number,
+    deltaSpeed: S. Number,
+
     })
 export type Model = typeof Model.Type
 
@@ -48,7 +53,9 @@ export const playerEgg = PlayerEgg.make({
         speed: settings.playerEggSpeed,
         attackRange: settings.playerEggRange,
         frameCountSinceLastDamaged: Option.none(),
-        damage: 3,
+        attack: 1,
+        eggxperience: 0,
+        currentNetExp: 0,
     })
 
 const initEggnemies = generateInitialEggnemies(settings.initialEggnemyCount)
@@ -78,18 +85,17 @@ export const initModel = Model.make({
         gameState: "Ongoing",
         leaderboard: Array.empty(),
         hasAddedToLeaderboard: false,
-        occupiedPoints: pipe(
-            initEggnemies,
-            Array.map((eggnemy) => eggnemy.centerCoords),
-            HashSet.fromIterable
-        )
+        eggxperienceNeededForEgghancement: settings.eggxperienceNeededForEgghancement,
+        deltaAttack: settings.deltaAttack,
+        deltaHp: settings.deltaHp,
+        deltaSpeed: settings.deltaSpeed,
     })
 
 function generateInitialEggnemies(num: number): Eggnemy[] {
     let ret: Eggnemy[] = Array.empty()
     for (let i = 0; i < num; i++) {
         ret = Array.append(ret, Eggnemy.make({
-            centerCoords: Point.make({
+            centerCoords: Data.struct({
                 x: pipe( 
                     Math.random() * settings.screenWidth,
                     Math.floor
