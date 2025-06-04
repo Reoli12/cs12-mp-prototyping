@@ -73,7 +73,7 @@ export const initModel = Model.make({
         gameState: "Ongoing",
     })
 
-function generateInitialEggnemies(num: number): Eggnemy[] {
+export function generateInitialEggnemies(num: number): Eggnemy[] {
     let ret: Eggnemy[] = Array.empty()
     for (let i = 0; i < num; i++) {
         ret = Array.append(ret, Eggnemy.make({
@@ -92,3 +92,5 @@ function generateInitialEggnemies(num: number): Eggnemy[] {
     }
     return ret
 }
+
+console.log(Array.length(generateInitialEggnemies(7)))
