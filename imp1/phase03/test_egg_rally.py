@@ -656,4 +656,37 @@ def test_game_finished():
 	assert Model3.is_game_won == True
 	
 def test_leaderboards():
-	...
+	Model1 = Model(Player1, Settings3, 4, TestEggInfo6, TestEggInfo9, 4)
+	
+	Model1.update_leaderboards(12, 45)
+	assert len(Model1.leaderboards_str) == 3
+	assert len(Model1.leaderboards) == 1
+
+	Model1.update_leaderboards(11, 63)
+	assert Model1.leaderboards[0] == (11, 63)
+	assert len(Model1.leaderboards) == 2
+	assert len(Model1.leaderboards_str) == 3
+	
+	Model1.update_leaderboards(1, 23)
+	assert Model1.leaderboards[0] == (1, 23)
+	
+	Model1.update_leaderboards(10, 53)
+	assert len(Model1.leaderboards_str) == 3
+	
+	Model1.update_leaderboards(4, 1)
+	assert Model1.leaderboards[2] == (10, 53)
+	assert len(Model1.leaderboards) == 3
+	
+	Model1.update_leaderboards(30, 51)
+	Model1.update_leaderboards(15, 3)
+	Model1.update_leaderboards(2, 3)
+	Model1.update_leaderboards(1, 2)
+	Model1.update_leaderboards(3, 7)
+	Filter1 = [*filter((lambda x: x == (3, 7)), Model1.leaderboards)]
+	assert len(Filter1) == 0
+	assert Model1.leaderboards[1] == (1, 23)
+	Filter2 = [*filter((lambda x: x == (4, 15)), Model1.leaderboards)]
+	assert len(Filter2) == 0
+	Model1.update_leaderboards(1, 23)
+	Filter3 = [*filter((lambda x: x == (1, 23)), Model1.leaderboards)]
+	assert len(Filter3) == 2

@@ -302,7 +302,7 @@ class Model:
         self.leaderboards_stringify()
     
     def leaderboards_stringify(self):
-        runs: list[tuple[int, int]] = self.leaderboards
+        runs: list[tuple[int, int]] = self._leaderboards
         self._leaderboards_str = []
         runs_str: list[str] = self._leaderboards_str
             
