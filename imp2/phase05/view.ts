@@ -63,7 +63,7 @@ export const view = (model: Model) =>
                 30),
             ...printRowHelper(
                 Array.make("Atk", "Spd", "Exp"), 
-                settings.screenHeight * (9/10), 
+                settings.screenWidth * (9/10), 
                 (settings.screenHeight * (8/10)),
                 30, 0, Array.empty()
             ),
@@ -71,7 +71,7 @@ export const view = (model: Model) =>
                 Array.make( `${model.playerEgg.attack}`, 
                             `${model.playerEgg.speed}`, 
                             `${model.playerEgg.eggxperience}`), 
-                settings.screenHeight * (9.5/10), 
+                settings.screenWidth * (9.5/10), 
                 (settings.screenHeight * (8/10)),
                 30, 0, Array.empty()
             ),
@@ -92,7 +92,7 @@ export const view = (model: Model) =>
 const showEgghancementPrompt = (model : Model, center: Point, width: number, height: number) => Array.make(
     Canvas.SolidRectangle.make({
         x: center.x - width/2,
-        y: center.y - width/2,
+        y: center.y - height/2,
         width: width,
         height: height,
         color: "black"

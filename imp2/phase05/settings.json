@@ -1,7 +1,7 @@
 {
   "fps": 30,
-  "screenWidth": 1080,
-  "screenHeight": 920,
+  "screenWidth": 1300,
+  "screenHeight": 600,
   "worldWidth": 400,
   "worldHeight": 400,
   "worldBoundaryWidth": 3,
