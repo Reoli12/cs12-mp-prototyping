@@ -1,4 +1,4 @@
-import { Array, HashSet, Option, pipe, Schema as S } from 'effect'
+import { Array, HashSet, Option, pipe, Schema as S, Data  } from 'effect'
 import {
     PlayerEgg,
     Eggnemy,
@@ -89,9 +89,15 @@ function generateInitialEggnemies(num: number): Eggnemy[] {
     let ret: Eggnemy[] = Array.empty()
     for (let i = 0; i < num; i++) {
         ret = Array.append(ret, Eggnemy.make({
-            centerCoords: Point.make({
-                x: Math.random() * settings.screenWidth,
-                y: Math.random() * settings.screenHeight
+            centerCoords: Data.struct({
+                x: pipe( 
+                    Math.random() * settings.screenWidth,
+                    Math.floor
+                    ),
+                y: pipe(
+                    Math.random() * settings.screenHeight,
+                    Math.floor
+                )
             }),
             height: settings.eggnemyHeight,
             width: settings.eggnemyWidth,
