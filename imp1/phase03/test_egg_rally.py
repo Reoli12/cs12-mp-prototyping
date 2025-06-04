@@ -214,27 +214,27 @@ def test_player_movement():
 	model5.player_movement(True, False, False, True)
 	
 	#The code above does not move the positions unlike sa tests sa phase02. Di siya gumagalaw WTFFF???
-	print(Player1.center_position.x)
-	print(Player1.center_position.y)
-	print(Player2.center_position.x)
-	print(Player2.center_position.y)
-	print(Player3.center_position.x)
-	print(Player3.center_position.y)
-	print(Player4.center_position.x)
-	print(Player4.center_position.y)
-	print(Player5.center_position.x)
-	print(Player5.center_position.y)
+	print(model1.player_egg.center_position.x)
+	print(model1.player_egg.center_position.y)
+	print(model2.player_egg.center_position.x)
+	print(model2.player_egg.center_position.y)
+	print(model3.player_egg.center_position.x)
+	print(model3.player_egg.center_position.y)
+	print(model4.player_egg.center_position.x)
+	print(model4.player_egg.center_position.y)
+	print(model5.player_egg.center_position.x)
+	print(model5.player_egg.center_position.y)
 	
-	assert Player1.center_position.x == 7.21
-	assert Player1.center_position.y == 9
-	assert Player2.center_position.x == 22.1
-	assert Player2.center_position.y == 12.43
-	assert Player3.center_position.x == 43.34
-	assert Player3.center_position.y == 221.56
-	assert Player4.center_position.x == 2.34
-	assert Player4.center_position.y == 67.41
-	assert Player5.center_position.x == 3.5
-	assert Player5.center_position.y == 4.2
+	assert model1.player_egg.center_position.x == 18.21
+	assert model1.player_egg.center_position.y == -2
+	assert model2.player_egg.center_position.x == 22.1
+	assert model2.player_egg.center_position.y == 4.43
+	assert model3.player_egg.center_position.x == 43.34
+	assert model3.player_egg.center_position.y == 230.56
+	assert model4.player_egg.center_position.x == 2.34
+	assert model4.player_egg.center_position.y == 67.41
+	assert model5.player_egg.center_position.x == 10.5
+	assert model5.player_egg.center_position.y == -2.8
 
 	model1.player_movement(True, True, True, False)
 	model2.player_movement(False, True, True, False)
@@ -242,16 +242,16 @@ def test_player_movement():
 	model4.player_movement(False, True, True, True)
 	model5.player_movement(True, False, True, True)
 	
-	print(Player1.center_position.x)
-	print(Player1.center_position.y)
-	print(Player2.center_position.x)
-	print(Player2.center_position.y)
-	print(Player3.center_position.x)
-	print(Player3.center_position.y)
-	print(Player4.center_position.x)
-	print(Player4.center_position.y)
-	print(Player5.center_position.x)
-	print(Player5.center_position.y)
+	assert model1.player_egg.center_position.x > 7.21
+	assert model1.player_egg.center_position.y == -2
+	assert model2.player_egg.center_position.x > 14.1
+	assert model2.player_egg.center_position.y  == 12.43
+	assert model3.player_egg.center_position.x == 34.34
+	assert model3.player_egg.center_position.y == 230.56
+	assert model4.player_egg.center_position.x == 2.34
+	assert model4.player_egg.center_position.y  == 74.41
+	assert model5.player_egg.center_position.x == 10.5
+	assert model5.player_egg.center_position.y == -9.8
 
 def test_player_attack():
 	EggInfo1 = deepcopy(TestEggInfo1)
@@ -583,25 +583,32 @@ def test_game_finished():
 
 	EggInfo1 = deepcopy(TestEggInfo1)
 	EggInfo2 = deepcopy(TestEggInfo2)
+	EggInfo3 = deepcopy(TestEggInfo3)
 
-	EggInfo3 = deepcopy(TestEggInfo6)
-	EggInfo4 = deepcopy(TestEggInfo7)
-	EggInfo5 = deepcopy(TestEggInfo8)
+	EggInfo4 = deepcopy(TestEggInfo6)
+	EggInfo5 = deepcopy(TestEggInfo7)
+	EggInfo6 = deepcopy(TestEggInfo8)
 
-	EggInfo6 = deepcopy(TestEggInfo9)
-	EggInfo7 = deepcopy(TestEggInfo10)
+	EggInfo7 = deepcopy(TestEggInfo9)
+	EggInfo8 = deepcopy(TestEggInfo10)
 
 	Player1 = PlayerEgg(EggInfo1, Point5, Dmg1, AtkRad1)
 	Player2 = PlayerEgg(EggInfo2, Point2, Dmg2, AtkRad2)
+	Player3 = PlayerEgg(EggInfo3, Point4, Dmg3, AtkRad3)
 
-	Enemy1 = Eggnemy(EggInfo3, Point3)
-	Enemy2 = Eggnemy(EggInfo4, Point1)
-	Enemy3 = Eggnemy(EggInfo5, Point4)
+	Enemy1 = Eggnemy(EggInfo4, Point3)
+	Enemy2 = Eggnemy(EggInfo5, Point1)
+	Enemy3 = Eggnemy(EggInfo6, Point4)
 
-	Boss1 = Boss(EggInfo6, Point3)
-	Boss2 = Boss(EggInfo7, Point4)
+	Boss1 = Boss(EggInfo7, Point3)
+	Boss2 = Boss(EggInfo8, Point4)
 
+	model1 = Model(Player1, Settings3, 4, TestEggInfo6, TestEggInfo9, 4)
+	model2 = Model(Player2, Settings1, 3, TestEggInfo8, TestEggInfo10, 5)
+	model3 = Model(Player3, Settings2, 3, TestEggInfo7, TestEggInfo9, 2)
 
-
+	Player1.stats.current_hp -= Player1.stats.current_hp
+	assert Player1.stats.current_hp == 0
+	model1.update(False, False, True, True, False)
 def test_leaderboards():
 	...
