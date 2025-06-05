@@ -20,6 +20,14 @@ class Model:
         self._leaderboards_str: list[str] = []
         self._is_time_get: bool = False
 
+        '''
+        Note: The isinstance code below is for testing purposes only. We are aware the code below does not improve the code's functionality.
+        During testing, it was found that even though an Eggnemy or Boss was passed onto the player_egg parameter, the model would work perfectly fine.
+        Pyright does flag it, but it should not work. Therefore, the code below was added for testing.
+        '''
+        if not isinstance(self._param_player_egg, PlayerEgg):
+           raise TypeError("This is not a PlayerEgg type.")
+
         self.restart()
 
     def update(self, is_forward_pressed: bool, is_left_pressed: bool, is_down_pressed: bool, is_right_pressed: bool, is_attack_pressed: bool, egghancement_pressed: Literal[1, 2, 3, None]):

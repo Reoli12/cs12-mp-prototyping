@@ -605,6 +605,7 @@ def test_game_finished():
 
 	#Scenario 2: Tracking states before game over.
 	Model2.player_egg.stats.current_hp -= 47
+	print(Model2.player_egg.stats.current_hp)
 	Model2.overlapping_player_eggnemy.append(Enemy1)
 	Model2.update(False, True, True, False, True)
 	assert Model2.frame_count == 1
@@ -639,8 +640,6 @@ def test_game_finished():
 	#Scenario 3: Game done due to defeated boss.
 	Model3.eggnemies.append(Enemy4)
 	Model3.eggnemies.append(Enemy5)
-	print(Model3.player_egg.center_position.x)
-	print(Model3.player_egg.center_position.y)
 	assert len(Model3.eggnemies) == 2
 	Model3.player_attack(True)
 	Model3.player_attack(True)

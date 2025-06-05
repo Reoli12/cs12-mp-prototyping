@@ -16,6 +16,7 @@ class Model:
         self._leaderboards: list[tuple[int, int]] = []
         self._leaderboards_str: list[str] = []
         self._is_time_get: bool = False
+        
         '''
         Note: The isinstance code below is for testing purposes only. We are aware the code below does not improve the code's functionality.
         During testing, it was found that even though an Eggnemy or Boss was passed onto the player_egg parameter, the model would work perfectly fine.
