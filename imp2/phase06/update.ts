@@ -108,7 +108,7 @@ const getModelAfterEverythingMoved = (model: Model, key: string, distance: numbe
                 )),
                 worldCenter: moveRelativeToPlayer(
                     model.worldCenter,
-                    String.toLowerCase(key),
+                    key,
                     distance,
                 ),
                 bosses: pipe(
@@ -126,7 +126,7 @@ const moveEggRelativeToPlayer = (egg: BadEgg, key: string, distance: number) =>
                         ...eggnemy,
                         centerCoords: moveRelativeToPlayer(
                             eggnemy.centerCoords,
-                            String.toLowerCase(key),
+                            key,
                             distance,
                         ),
                     })
@@ -136,7 +136,7 @@ const moveEggRelativeToPlayer = (egg: BadEgg, key: string, distance: number) =>
                         ...boss,
                         centerCoords: moveRelativeToPlayer(
                             boss.centerCoords,
-                            String.toLowerCase(key),
+                            key,
                             distance,
                         ),
                     })
@@ -145,10 +145,10 @@ const moveEggRelativeToPlayer = (egg: BadEgg, key: string, distance: number) =>
     )
 
 const moveRelativeToPlayer = (point: Point, key: string, playerSpeed): Point =>
-    key == 'w' ? Point.make({...point, y: point.y + playerSpeed}) :
-    key == 'a' ? Point.make({...point, x: point.x + playerSpeed}) :
-    key == 's' ? Point.make({...point, y: point.y - playerSpeed}) :
-    key == 'd' ? Point.make({...point, x: point.x - playerSpeed}) :
+    key == 'w' || key == "ArrowUp"?     Point.make({...point, y: point.y + playerSpeed}) :
+    key == 'a' || key == "ArrowLeft"?   Point.make({...point, x: point.x + playerSpeed}) :
+    key == 's' || key == "ArrowDown"?   Point.make({...point, y: point.y - playerSpeed}) :
+    key == 'd' || key == "ArrowRight"?  Point.make({...point, x: point.x - playerSpeed}) :
     point
 
 function modelDamageToBadEggs(model: Model): Model {
