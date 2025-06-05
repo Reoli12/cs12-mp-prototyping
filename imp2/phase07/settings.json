@@ -1,0 +1,34 @@
+{
+  "fps": 30,
+  "screenWidth": 1300,
+  "screenHeight": 600,
+  "worldWidth": 400,
+  "worldHeight": 400,
+  "worldBoundaryWidth": 3,
+
+  "playerEggHp": 20,
+  "playerEggWidth": 10,
+  "playerEggHeight": 20,
+  "playerEggSpeed": 5,
+  "playerEggRange": 50,
+
+  "initialEggnemyCount": 10,
+
+  "eggnemyWidth": 5,
+  "eggnemyHeight": 5,
+  "eggnemyInitialSpeed": 1,
+  "eggnemyInitialHp": 3,
+  "eggnemyInitialAttack": 1,
+
+  "eggnemiesToKillBeforeBoss": 5,
+  "bossInitialHp": 50,
+  "bossWidth": 15,
+  "bossHeight": 40,
+  "bossInitialSpeed": 3,
+  "bossInitialAttack": 3,
+
+  "eggxperienceNeededForEgghancement": 15,
+  "deltaHp": 5,
+  "deltaAttack": 1,
+  "deltaSpeed": 1
+}
