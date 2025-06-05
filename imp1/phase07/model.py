@@ -393,7 +393,6 @@ class Model:
         
         self._is_to_be_egghanced: bool = False
         self._got_egghanced: bool = True
-        self._sfx_egghancement: bool = True
 
     def player_takes_damage(self):
         if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
@@ -405,6 +404,7 @@ class Model:
     def egghance_check(self):
         if not self._got_egghanced and self._cur_xp != 0 and self._cur_xp % self._egghancement.xp_needed == 0:
             self._is_to_be_egghanced = True
+            self._sfx_egghancement: bool = True
 
     def sfx_player_dead_played(self):
         self._sfx_player_dead = False
