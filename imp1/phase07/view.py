@@ -193,5 +193,5 @@ class View:
     #start
     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler):
         pyxel.init(self._screen_width, self._screen_height, fps=fps)
-        pyxel.load("my_resource.pyxres", excl_images=True, excl_tilemaps=False, excl_sounds=True, excl_musics=False)
+        pyxel.load("my_resource.pyxres", excl_images=False, excl_tilemaps=True, excl_sounds=False, excl_musics=False)
         pyxel.run(update_handler.update, draw_handler.draw)
