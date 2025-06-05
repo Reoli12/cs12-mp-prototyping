@@ -1,4 +1,4 @@
-import {generateInitialEggnemies} from "./model"
+import {generateInitialEggnemies} from "../model"
 import {
     PlayerEgg,
     Eggnemy,
@@ -10,7 +10,7 @@ import {
     getRight,
     getTop,
     getBottom
-} from "./projectTypes"
+} from "../projectTypes"
 import {Option, Array, Schema as S } from 'effect'
 import {describe, expect, it} from 'vitest'
 

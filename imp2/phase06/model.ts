@@ -108,7 +108,7 @@ export const initModel = Model.make({
         didABossDie: false,
     })
 
-function generateInitialEggnemies(num: number): Eggnemy[] {
+export function generateInitialEggnemies(num: number): Eggnemy[] {
     let ret: Eggnemy[] = Array.empty()
     for (let i = 0; i < num; i++) {
         ret = Array.append(ret, Eggnemy.make({
