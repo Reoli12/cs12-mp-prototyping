@@ -19,8 +19,7 @@ import {
 	randomAddEggnemies,
 	updateEggnemyKillCount,
 	withinPlayerRange,
-	takeDamageIfInRange,
-	givePlayerEgghancement,
+	takeDamage,
 	moveEggRelativeToPlayer,
 } from "../update"
 import {Option, Array, Schema as S } from 'effect'
@@ -33,16 +32,13 @@ const PlayerEgg1 = PlayerEgg.make({
 	}),	
 	height: 20,
 	width: 10,
+	totalHp: 30,
+	currentHp: 20,
 	color: "blue",
-    attackRange: 6,
-    frameCountSinceLastDamaged: Option.none(),
-    attack: 4,
-    totalHp: 30,
-    currentHp: 20,
-    speed: 6,
-    eggxperience: 2,
-    currentNetExp: 3,
-    currentNetEggnemyKillsForBoss: 4
+	speed: 20,
+	attackRange: 5,
+	frameCountSinceLastDamaged: Option.none(),
+	damage: 4
 	})
 
 const Eggnemy1 = Eggnemy.make({
@@ -56,7 +52,7 @@ const Eggnemy1 = Eggnemy.make({
     speed: 5,
     currentHp: 10,
     totalHp: 15,
-    attack: 2,
+    damage: 2,
 	})
 
 const Boss1 = Boss.make({
@@ -70,25 +66,17 @@ const Boss1 = Boss.make({
     speed: 5,
     currentHp: 40,
     totalHp: 45,
-    attack: 5,
+    damage: 5,
 	})
 
 const Model1 = Model.make({
     playerEgg: PlayerEgg1,
     eggnemies: Array.make(Eggnemy1),
     eggnemiesDefeated: 0,
-    eggnemiesToKillBeforeBoss: 7,
-    eggnemySpeed: 5,
-    eggnemyAttack: 2,
-    eggnemyHp: 12,
-    
+    eggnemiesToKillBeforeBoss: 7,   
     bosses: Array.make(Boss1),
-    bossSpeed: 7,
-    bossAttack: 5,
-    bossHp: 30,
-    isBossActive: false,
-
     fps: 30,
+    isBossActive: false,
     currentFrame: 1,
     currentTime: minsSecs.make({
     	mins: 0,
@@ -106,30 +94,16 @@ const Model1 = Model.make({
     gameState: "Ongoing",
     leaderboard: Array.empty(),
     hasAddedToLeaderboard: false,
-
-    eggxperienceNeededForEgghancement: 8,
-    deltaHp: 4,
-    deltaAttack: 2,
-    deltaSpeed: 3,
-    newStatIncreaseCount: 3
 })
 
 const Model2 = Model.make({
-    playerEgg: PlayerEgg1,
+     playerEgg: PlayerEgg1,
     eggnemies: Array.make(Eggnemy1),
     eggnemiesDefeated: 0,
-    eggnemiesToKillBeforeBoss: 7,
-    eggnemySpeed: 5,
-    eggnemyAttack: 2,
-    eggnemyHp: 12,
-    
+    eggnemiesToKillBeforeBoss: 7,   
     bosses: Array.make(Boss1),
-    bossSpeed: 7,
-    bossAttack: 5,
-    bossHp: 30,
-    isBossActive: false,
-
     fps: 30,
+    isBossActive: false,
     currentFrame: 1,
     currentTime: minsSecs.make({
     	mins: 0,
@@ -144,26 +118,19 @@ const Model2 = Model.make({
     worldBoundaryWidth: 50,
     screenHeight: 200,
     screenWidth: 200,
-    gameState: "GameOver",
+    gameState: "PlayerWin",
     leaderboard: Array.empty(),
     hasAddedToLeaderboard: false,
-
-    eggxperienceNeededForEgghancement: 8,
-    deltaHp: 4,
-    deltaAttack: 2,
-    deltaSpeed: 3,
-    newStatIncreaseCount: 3
 })
 
 const spawnBoss1 = spawnBoss(Model1)
 const addEggnemies1 = randomAddEggnemies(Model1.eggnemies, 45, Model1)
-const updateKillCount1 = updateEggnemyKillCount(Model1, 8)
+const updateKillCount1 = updateEggnemyKillCount(Model1, 9)
+const updateKillCount2 = updateEggnemyKillCount(updateKillCount1, 9)
 const withinPlayerRange1 = withinPlayerRange(Model1.playerEgg, Model1.eggnemies[0])
 const withinPlayerRange2 = withinPlayerRange(Model1.playerEgg, Model1.bosses[0])
-const takeDamageIfInRange1 = takeDamageIfInRange(Model1.playerEgg, Model1.eggnemies[0])
-const takeDamageIfInRange2 = takeDamageIfInRange(Model1.playerEgg, Model1.bosses[0])
-const giveEgghancement1 = givePlayerEgghancement(Model1, '1')
-const giveEgghancement2 = givePlayerEgghancement(Model2, '4')
+const takeDamage1 = takeDamage(Model1.playerEgg, Model1.eggnemies[0])
+const takeDamage2 = takeDamage(Model1.playerEgg, Model1.bosses[0])
 const moveRelativeToPlayer1 = moveEggRelativeToPlayer(Model1.eggnemies[0], "w", 6)
 const moveRelativeToPlayer2 = moveEggRelativeToPlayer(Model2.bosses[0], "d", 6)
 
@@ -259,11 +226,11 @@ describe('#withinPlayerRange', () => {
 
 describe('#takeDamageIfInRange', () => {
 	it('should not decrease the currentHp', () => {
-		expect(takeDamageIfInRange1.currentHp).toBe(10)
+		expect(takeDamage1.currentHp).toBe(6)
 	})
 
 	it('should decrease the currentHp', () => {
-		expect(takeDamageIfInRange2.currentHp).toBe(36)
+		expect(takeDamage2.currentHp).toBe(36)
 	})
 })
 
@@ -298,29 +265,11 @@ describe('#randomAddEggnemies', () => {
 })
 
 describe('#updateEggnemyKillCount', () => {
-	it('increases currentNetExp of Model1.playerEgg', () => {
-		expect(updateKillCount1.playerEgg.currentNetExp).toBeGreaterThanOrEqual(11)
+	it('increases eggnemiesDefeated of model', () => {
+		expect(updateKillCount1.eggnemiesDefeated).toBe(9)
 	})
 
-	it('increases currentNetEggnemyKillsForBoss of Model1.playerEgg', () => {
-		expect(updateKillCount1.playerEgg.currentNetEggnemyKillsForBoss).toBeGreaterThanOrEqual(12)
-	})
-})
-
-describe('#givePlayerEgghancement', () => {
-	it('increases currentHp and totalHp', () => {
-		expect(giveEgghancement1.playerEgg.currentHp).toBe(24)
-		expect(giveEgghancement1.playerEgg.totalHp).toBe(34)
-		expect(giveEgghancement1.playerEgg.attack).toBe(4)
-		expect(giveEgghancement1.playerEgg.speed).toBe(6)
-		expect(giveEgghancement1.gameState).toBe("Ongoing")
-	})
-
-	it('does not change any of the stats', () => {
-		expect(giveEgghancement2.playerEgg.currentHp).toBe(20)
-		expect(giveEgghancement2.playerEgg.totalHp).toBe(30)
-		expect(giveEgghancement2.playerEgg.attack).toBe(4)
-		expect(giveEgghancement2.playerEgg.speed).toBe(6)
-		expect(giveEgghancement2.gameState).toBe("GameOver")
+	it('increases eggnemiesDefeated of model', () => {
+		expect(updateKillCount2.eggnemiesDefeated).toBe(18)
 	})
 })
