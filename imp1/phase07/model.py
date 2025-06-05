@@ -238,7 +238,6 @@ class Model:
             
             self._prev_wave_done: bool = False
             self._is_boss_dead: bool = False
-            self._sfx_boss: bool = False
             boss_width: int = self._boss_width
             boss_height: int = self._boss_height
             boss_center: None | Point = None
@@ -393,7 +392,7 @@ class Model:
         
         self._is_to_be_egghanced: bool = False
         self._got_egghanced: bool = True
-        self._sfx_egghancement: bool = False
+        self._sfx_egghancement: bool = True
 
     def player_takes_damage(self):
         if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
@@ -408,6 +407,12 @@ class Model:
 
     def sfx_player_dead_played(self):
         self._sfx_player_dead = False
+
+    def sfx_boss_played(self):
+        self._sfx_boss = False
+
+    def sfx_egghancement_played(self):
+        self._sfx_egghancement = False
 
     @property
     def param_player_egg(self) -> PlayerEgg:

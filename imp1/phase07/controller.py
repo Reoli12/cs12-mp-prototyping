@@ -99,7 +99,7 @@ class Controller:
             eggnemy_cur_hp: int = eggnemy.stats.current_hp
             eggnemy_max_hp: int = eggnemy.stats.max_hp
             eggnemy_hp_x: int = int((eggnemy_x_pos -( eggnemy_width / 2) ** 0.5))
-            eggnemy_hp_y: int = int(eggnemy_y_pos + int(eggnemy_height * 1.5))
+            eggnemy_hp_y: int = int(eggnemy_y_pos + int(eggnemy_height * 4))
 
             #eggnemy
             self._view.draw_eggnemy(
@@ -127,7 +127,7 @@ class Controller:
             boss_cur_hp: int = boss.stats.current_hp
             boss_max_hp: int = boss.stats.max_hp
             boss_hp_x: int = int((boss_x_pos - (boss_width / 2) ** 0.5))
-            boss_hp_y: int = int(boss_y_pos + int(boss_height * 1.25))
+            boss_hp_y: int = int(boss_y_pos + int(boss_height))
 
             #boss
             self._view.draw_boss(
@@ -249,11 +249,14 @@ class Controller:
                     egghance_text_y_pos + (i * egghance_spacing),
                     egghancement)
 
+        #sound
         if self._model.is_boss_dead and self._model.sfx_boss:
             self._view.sound_boss_defeated()
+            self._model.sfx_boss_played()
         
         if self._model.is_to_be_egghanced and self._model.sfx_egghancement:
             self._view.sound_egghancement()
+            self._model.sfx_egghancement_played()
         
         if self._model.is_game_over and self._model.sfx_player_dead:
             self._view.sound_player_died()
