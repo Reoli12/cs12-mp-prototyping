@@ -155,6 +155,12 @@ class View:
     def sound_boss_defeated(self):
         pyxel.play(0, 0)
 
+    def sound_egghancement(self):
+        pyxel.play(0, 1)
+
+    def sound_player_died(self):
+        pyxel.play(0, 2)
+
 
     #Inputs
     def is_forward_pressed(self):

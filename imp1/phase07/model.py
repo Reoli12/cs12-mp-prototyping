@@ -156,6 +156,8 @@ class Model:
 
                     if boss.stats.current_hp <= 0:
                         self._wave_count += 1
+                        self._is_boss_dead = True
+                        self._sfx_boss = True
                         self._boss_egg: None | Boss = None
                         if boss in self._overlapping_player_eggnemy:
                             self._overlapping_player_eggnemy.remove(boss)
@@ -235,6 +237,8 @@ class Model:
             self._num_defeated_eggnemies % self._boss_spawn_rate == 0):
             
             self._prev_wave_done: bool = False
+            self._is_boss_dead: bool = False
+            self._sfx_boss: bool = False
             boss_width: int = self._boss_width
             boss_height: int = self._boss_height
             boss_center: None | Point = None
@@ -330,10 +334,15 @@ class Model:
         self._boss_max_hp = self._base_boss_max_hp
         self._base_boss_atk: int = self._boss_info.atk
         self._boss_atk = self._base_boss_atk
+        self._is_boss_dead: bool = False
 
         self._prev_wave_done = False
         self._wave_count: int = 0
         self._is_game_over = False
+
+        self._sfx_boss: bool = False
+        self._sfx_egghancement: bool = False
+        self._sfx_player_dead: bool = False
 
     def update_leaderboards(self, min: int, sec: int):
         self._is_time_get = True
@@ -382,8 +391,9 @@ class Model:
             case _:
                 return
         
-        self._is_to_be_egghanced = False
-        self._got_egghanced = True
+        self._is_to_be_egghanced: bool = False
+        self._got_egghanced: bool = True
+        self._sfx_egghancement: bool = False
 
     def player_takes_damage(self):
         if self._frame_count % self._fps == 0 and len(self._overlapping_player_eggnemy) > 0:
@@ -395,6 +405,9 @@ class Model:
     def egghance_check(self):
         if not self._got_egghanced and self._cur_xp != 0 and self._cur_xp % self._egghancement.xp_needed == 0:
             self._is_to_be_egghanced = True
+
+    def sfx_player_dead_played(self):
+        self._sfx_player_dead = False
 
     @property
     def param_player_egg(self) -> PlayerEgg:
@@ -595,3 +608,19 @@ class Model:
     @property
     def is_game_over(self) -> bool:
         return self._is_game_over
+    
+    @property
+    def is_boss_dead(self) -> bool:
+        return self._is_boss_dead
+
+    @property
+    def sfx_boss(self) -> bool:
+        return self._sfx_boss
+    
+    @property
+    def sfx_egghancement(self) -> bool:
+        return self._sfx_egghancement
+    
+    @property
+    def sfx_player_dead(self) -> bool:
+        return self._sfx_player_dead

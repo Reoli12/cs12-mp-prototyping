@@ -249,6 +249,15 @@ class Controller:
                     egghance_text_y_pos + (i * egghance_spacing),
                     egghancement)
 
+        if self._model.is_boss_dead and self._model.sfx_boss:
+            self._view.sound_boss_defeated()
+        
+        if self._model.is_to_be_egghanced and self._model.sfx_egghancement:
+            self._view.sound_egghancement()
+        
+        if self._model.is_game_over and self._model.sfx_player_dead:
+            self._view.sound_player_died()
+            self._model.sfx_player_dead_played()
         
     def start(self):
         self._view.start(self._model.fps, self, self)
