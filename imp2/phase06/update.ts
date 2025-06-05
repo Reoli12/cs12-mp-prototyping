@@ -37,13 +37,21 @@ const spawnBoss = (model: Model) =>
             color: "tan",
             currentHp: settings.bossInitialHp,
             totalHp: settings.bossInitialHp,
-            damage: 3,
-            speed: settings.bossSpeed,
+            attack: model.bossAttack,
+            speed: model.bossSpeed,
         }) ),
-        isBossActive: true
+        isBossActive: true,
+        playerEgg: PlayerEgg.make({
+            ...model.playerEgg,
+            currentNetEggnemyKillsForBoss: (
+                model.playerEgg.currentNetEggnemyKillsForBoss -
+                model.eggnemiesToKillBeforeBoss
+            )
+        })
     })
 
-const randomAddEggnemies = (eggnemies: readonly Eggnemy[], chance: number): readonly Eggnemy[] => {
+const randomAddEggnemies = (eggnemies: readonly Eggnemy[], 
+                            chance: number, model: Model): readonly Eggnemy[] => {
     if (Math.random() * 100 > chance) {
         return eggnemies
     }
@@ -61,10 +69,10 @@ const randomAddEggnemies = (eggnemies: readonly Eggnemy[], chance: number): read
             height: settings.eggnemyHeight,
             width: settings.eggnemyWidth,
             color: "grey",
-            speed: settings.eggnemySpeed,
-            currentHp: settings.eggnemyInitialHp,
-            totalHp: settings.eggnemyInitialHp,
-            damage: settings.eggnemyDamage
+            speed: model.eggnemySpeed,
+            currentHp: model.eggnemyHp,
+            totalHp: model.eggnemyHp,
+            attack: model.eggnemyAttack,
         }))
     }
 
@@ -80,6 +88,10 @@ const updateEggnemyKillCount = (model: Model, additionalCount) =>
             ...model.playerEgg,
             currentNetExp: (
                 model.playerEgg.currentNetExp + 
+                additionalCount
+            ),
+            currentNetEggnemyKillsForBoss: (
+                model.playerEgg.currentNetEggnemyKillsForBoss +
                 additionalCount
             )
         })
@@ -139,25 +151,15 @@ const moveRelativeToPlayer = (point: Point, key: string, playerSpeed): Point =>
     key == 'd' ? Point.make({...point, x: point.x - playerSpeed}) :
     point
 
-const modelDefeatedEggnemies = (model: Model): Model => 
-    Model.make({
-        ...model,
-        eggnemies: Array.map(model.eggnemies, 
-            (eggnemy) => (withinPlayerRange(model.playerEgg, eggnemy) ?
-                         takeDamage(model.playerEgg, eggnemy):
-                         eggnemy) as Eggnemy
-        )
-    }) 
-
 function modelDamageToBadEggs(model: Model): Model {
     const updatedEggnemies = pipe(
             model.eggnemies,
-            Array.map((eggnemy) => (takeDamage(model.playerEgg, eggnemy)) as Eggnemy),
+            Array.map((eggnemy) => (takeDamageIfInRange(model.playerEgg, eggnemy)) as Eggnemy),
             Array.filter((eggnemy) => eggnemy.currentHp > 0),
         )
     const updatedBosses = pipe(
             model.bosses,
-            Array.map((boss) => (takeDamage(model.playerEgg, boss)) as Boss),
+            Array.map((boss) => (takeDamageIfInRange(model.playerEgg, boss)) as Boss),
             Array.filter((boss) => boss.currentHp > 0)
         )
 
@@ -165,27 +167,33 @@ function modelDamageToBadEggs(model: Model): Model {
         ...model,
         eggnemies: updatedEggnemies,
         bosses: updatedBosses,
-        // occupiedPoints: currentlyOccupiedPoints
+        didABossDie: (
+            Array.length(updatedBosses) < Array.length(model.bosses)
+        )
     })
 }
 
-const takeDamage = (source: PlayerEgg, victim: BadEgg ) => 
+const takeDamageIfInRange = (source: PlayerEgg, victim: BadEgg ) => 
     Match.value(victim).pipe(
         Match.tag('Eggnemy', (eggnemy) =>
             Eggnemy.make({
                 ...eggnemy,
-                currentHp: Math.max(
+                currentHp: withinPlayerRange(source, eggnemy) ? 
+                 Math.max(
                 victim.currentHp - source.attack,
                 0
-            )})
+            ) : eggnemy.currentHp
+        })
         ),
         Match.tag("Boss", (boss) => 
         Boss.make({
             ...boss,
-            currentHp: Math.max(
+            currentHp: withinPlayerRange(source, boss) ? 
+            Math.max(
                 victim.currentHp - source.attack,
                 0
-            )})
+            ) : boss.currentHp
+        })
 
         ), Match.exhaustive)
 
@@ -267,7 +275,7 @@ export const update = (msg: Msg, model: Model): Model =>
                 leaderboard: model.leaderboard,
                 hasAddedToLeaderboard: false,
             }) :
-            model.gameState != "Ongoing"? model : 
+            model.gameState == "GameOver" ? model : 
             (key == 'l' || key == 'L') ? 
             pipe(
                 modelDamageToBadEggs(model),
@@ -290,33 +298,54 @@ export const update = (msg: Msg, model: Model): Model =>
             )
         ),
         Match.tag('Canvas.MsgTick', () => 
+            pipe(
+            console.log(model.didABossDie),
+            () => false
+        ) ? model :
             // model.gameState !== "Ongoing"? model :
-            model.gameState === "PlayerWin" || model.gameState === "PlayerLose"? model:
+            model.gameState === "GameOver" ? model: // block input
             model.gameState === "ChoosingEgghancement" ? model :
-            model.isBossActive && Array.length(model.bosses) === 0?
+            model.didABossDie ? pipe(
+                console.log('bossDied'),
+                () => updateBadEggStats(model)
+            ) :
+            model.playerEgg.currentHp <= 0?
             Model.make({...model, 
-                gameState: "PlayerWin",
+                gameState: "GameOver",
                 leaderboard:    !model.hasAddedToLeaderboard?
                                 pipe(
                                     Array.append(model.leaderboard, model.currentTime),
                                     Array.sortBy(
                                         Order.mapInput(Order.number, ({mins, secs}) => mins*60 + secs)
-                                    )
+                                    ),
+                                    Array.takeRight(3),
+                                    Array.reverse
                                 ):
                                 model.leaderboard,
                 hasAddedToLeaderboard: true,
             }):
             model.eggnemiesDefeated >= model.eggnemiesToKillBeforeBoss &&
-            Array.length(model.bosses) === 0? // Array.isEmptyArray doesnt work for some reason
+            model.playerEgg.currentNetEggnemyKillsForBoss >= model.eggnemiesToKillBeforeBoss? // Array.isEmptyArray doesnt work for some reason
             spawnBoss(model) :
-            model.playerEgg.currentHp <= 0 ? Model.make({
-                ...model,
-                gameState: "PlayerLose",
-            }) :
+            // model.playerEgg.currentHp <= 0 ? Model.make({
+            //     ...model,
+            //     gameState: "GameOver",
+            // }) :
             generalUpdate(model)
         ),
         Match.orElse(() => model)
     )
+
+const updateBadEggStats = (model: Model) => Model.make({
+    ...model,
+    eggnemyAttack: model.eggnemyAttack + 1,
+    eggnemyHp: model.eggnemyHp + 1,
+    eggnemySpeed: model.eggnemySpeed + 1,
+    bossAttack: model.bossAttack + 1,
+    bossHp: model.bossHp * 1.5,
+    bossSpeed: model.bossSpeed + 1,
+    didABossDie: false,
+})
 
 const givePlayerEgghancement = (model: Model, key: string) =>
     Model.make({
@@ -358,7 +387,6 @@ function generalUpdate(model: Model): Model {
 
     const hasCollided = shouldPlayerBeReceivingDamage(model)
     if (hasCollided) {
-        // console.log('collision')
         newPlayerHp = Match.value(model.playerEgg.frameCountSinceLastDamaged).pipe(
                         Match.tag("None", () => model.playerEgg.currentHp),
                             // if we decrement immediately after a new collision, the next tick will
@@ -368,10 +396,13 @@ function generalUpdate(model: Model): Model {
                             frameCountSinceLastDamaged.value < model.fps? 
                             model.playerEgg.currentHp : 
                             inContactWithBoss(model) && inContactWithEggnemy(model)?
-                            model.playerEgg.currentHp -4 : // contact with boss AND normal eggnemy 
+                            model.playerEgg.currentHp - (
+                                // contact with boss AND normal eggnemy 
+                                model.bossAttack + model.eggnemyAttack
+                            ) : 
                             inContactWithBoss(model)? 
-                            model.playerEgg.currentHp - 3 :  
-                            model.playerEgg.currentHp - 1
+                            model.playerEgg.currentHp - model.bossAttack :  
+                            model.playerEgg.currentHp - model.eggnemyAttack
 
                         )),
                         Match.exhaustive,
@@ -379,11 +410,11 @@ function generalUpdate(model: Model): Model {
     } else {
         newPlayerHp = model.playerEgg.currentHp
     }
-    console.log(
-        model.gameState,
-        model.playerEgg.currentNetExp,
-        model.eggxperienceNeededForEgghancement
-    )
+    // console.log(
+    //     model.gameState,
+    //     model.playerEgg.currentNetExp,
+    //     model.eggxperienceNeededForEgghancement
+    // )
     return Model.make({
         ...model,
         gameState: model.playerEgg.currentNetExp >= model.eggxperienceNeededForEgghancement?
@@ -405,7 +436,8 @@ function generalUpdate(model: Model): Model {
         }),
         eggnemies: pipe(
             moveEntities(model.eggnemies, model.playerEgg) as Eggnemy[],
-            (eggArr) => randomAddEggnemies(eggArr, 5)
+            (eggArr) => Array.length(model.eggnemies) < settings.initialEggnemyCount?
+                randomAddEggnemies(eggArr, 5, model) : eggArr
         ),
         bosses: moveEntities(model.bosses, model.playerEgg) as Boss[]
     })
@@ -462,64 +494,3 @@ const stepOnce = (egg: Egg, target: Egg): Point =>
             egg.centerCoords.y,    
     })
 
-
-    
-// function UpdateEggnemyCoords(eggnemies: BadEgg[], playerEggCoords: Point, currentPoints: HashSet.HashSet<Point>,) {
-//     return CoordUpdateHelper(eggnemies, playerEggCoords, 0, currentPoints, Array.empty())
-// }
-
-// function CoordUpdateHelper(eggnemies: BadEgg[], playerEggCoords: Point, idx: number, 
-//                             currentPoints: HashSet.HashSet<Point>, ret: BadEgg[]): BadEggsAndPoints {
-//     if (idx == Array.length(eggnemies)) {
-//         return BadEggsAndPoints.make({
-//             eggnemies: pipe(
-//                 ret as Eggnemy[],
-//                 Array.filter((badEgg) => isEggnemy(badEgg))
-//             ),
-//             bosses: pipe(
-//                 ret as Boss[],
-//                 Array.filter((badEgg) => isBoss(badEgg))
-//             ),
-//             points: currentPoints
-//         })
-//     }
-//     const eggnemy = Array.unsafeGet(eggnemies, idx)
-//     const eggnemyCoords = pipe(
-//         eggnemy.centerCoords,
-//         ({x, y}) => Point.make({x: x, y: y})
-//     )
-//     const newPointCandidate = Point.make({
-//         x:  eggnemyCoords.x < playerEggCoords.x? eggnemyCoords.x + eggnemy.speed :
-//             eggnemyCoords.x > playerEggCoords.x? eggnemyCoords.x - eggnemy.speed :
-//             eggnemyCoords.x,
-//         y:  eggnemyCoords.y < playerEggCoords.y? eggnemyCoords.y + eggnemy.speed :
-//             eggnemyCoords.y > playerEggCoords.y? eggnemyCoords.y - eggnemy.speed :
-//             eggnemyCoords.y,    
-//     })
-
-//     const isNewPointOccupied = HashSet.some(currentPoints, 
-//             ({x, y}) => x == newPointCandidate.x && y == newPointCandidate.y
-//         )
-
-//     // console.log(Equal.equals(Data.struct(eggnemyCoords), Data.struct(eggnemyCoords)))
-//     const newPoint = !isNewPointOccupied? newPointCandidate : eggnemyCoords
-//     const newOccupiedPoints = isNewPointOccupied? currentPoints : pipe(
-//         currentPoints,
-//         HashSet.filter((coord) => !(coord.x == eggnemyCoords.x && coord.y == eggnemyCoords.y)), // failed to remove, probably due to Point equality
-//         HashSet.add(newPoint)
-//     )
-//     const newEggnemy =  Match.value(eggnemy).pipe(
-//         Match.tag("Boss", (boss) => Boss.make({
-//             ...boss,
-//             centerCoords: newPoint
-//         })),
-//         Match.tag("Eggnemy", (eggnemy) =>Eggnemy.make({
-//             ...eggnemy,
-//             centerCoords: newPoint
-//         })),
-//         Match.exhaustive
-//     )
-//     // console.log(newEggnemy)
-//     const newRet = Array.append(ret, newEggnemy)
-//     return CoordUpdateHelper(eggnemies, playerEggCoords, idx + 1, newOccupiedPoints, newRet)
-// }
