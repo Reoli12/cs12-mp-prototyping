@@ -484,13 +484,30 @@ function moveEntitiesHelper(eggnemies: readonly Egg[], idx: number,
     return moveEntitiesHelper(eggnemies, idx + 1, updatedRet, target)
 }
 
-const stepOnce = (egg: Egg, target: Egg): Point =>
-    Point.make({
-        x:  egg.centerCoords.x < target.centerCoords.x? egg.centerCoords.x + egg.speed :
-            egg.centerCoords.x > target.centerCoords.x? egg.centerCoords.x - egg.speed :
-            egg.centerCoords.x,
-        y:  egg.centerCoords.y < target.centerCoords.y? egg.centerCoords.y + egg.speed :
-            egg.centerCoords.y > target.centerCoords.y? egg.centerCoords.y - egg.speed :
-            egg.centerCoords.y,    
+function stepOnce(egg: Egg, target: Egg): Point {
+    const dx = egg.centerCoords.x - target.centerCoords.x
+    const dy = egg.centerCoords.y - target.centerCoords.y
+    const distMagnitude = Math.sqrt(
+        (dx ** 2) + (dy ** 2)
+    )
+
+    const newX = egg.centerCoords.x - ((dx / distMagnitude) * egg.speed)
+    const newY = egg.centerCoords.y - ((dy / distMagnitude) * egg.speed)
+
+    return Point.make({
+        x: newX,
+        y: newY
     })
+
+}
+
+// const stepOnce = (egg: Egg, target: Egg): Point =>
+//     Point.make({
+//         x:  egg.centerCoords.x < target.centerCoords.x? egg.centerCoords.x + egg.speed :
+//             egg.centerCoords.x > target.centerCoords.x? egg.centerCoords.x - egg.speed :
+//             egg.centerCoords.x,
+//         y:  egg.centerCoords.y < target.centerCoords.y? egg.centerCoords.y + egg.speed :
+//             egg.centerCoords.y > target.centerCoords.y? egg.centerCoords.y - egg.speed :
+//             egg.centerCoords.y,    
+//     })
 
