@@ -92,5 +92,3 @@ export function generateInitialEggnemies(num: number): Eggnemy[] {
     }
     return ret
 }
-
-console.log(Array.length(generateInitialEggnemies(7)))
