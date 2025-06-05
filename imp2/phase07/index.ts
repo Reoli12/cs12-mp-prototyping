@@ -1,4 +1,4 @@
-import { startSimple } from 'cs12242-mvu/src'
+import { startSimple, startModelCmd, Cmd } from 'cs12242-mvu/src'
 import { settings } from "./projectTypes"
 import { initModel } from "./model"
 import { view } from "./view"
@@ -8,7 +8,7 @@ import { canvasView } from 'cs12242-mvu/src/canvas'
 function main() {
     const root = document.getElementById("root")!
 
-    startSimple(root, initModel, update, canvasView(
+    startModelCmd(root, initModel, update, canvasView(
     settings.screenWidth, 
     settings.screenHeight,
     settings.fps, 
