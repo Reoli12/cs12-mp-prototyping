@@ -6,7 +6,7 @@
   "worldHeight": 400,
   "worldBoundaryWidth": 3,
 
-  "playerEggHp": 20,
+  "playerEggHp": 100,
   "playerEggWidth": 10,
   "playerEggHeight": 20,
   "playerEggSpeed": 5,
@@ -27,7 +27,7 @@
   "bossInitialSpeed": 3,
   "bossInitialAttack": 3,
 
-  "eggxperienceNeededForEgghancement": 15,
+  "eggxperienceNeededForEgghancement": 1,
   "deltaHp": 5,
   "deltaAttack": 1,
   "deltaSpeed": 1

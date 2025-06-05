@@ -1,0 +1,33 @@
+{
+  "fps": 30,
+  "worldWidth": 400,
+  "worldHeight": 400,
+  "screenWidth": 300,           
+  "screenHeight": 300,          
+
+  "playerEggHp": 20,
+  "playerEggWidth": 10,
+  "playerEggHeight": 20,
+  "playerEggSpeed": 5,
+  "playerAttackDamage": 1,
+  "playerAttackRadius": 50,
+
+  "egghancementNeededXp": 10,
+  "maxHpEgghancement": 5,
+  "attackEgghancement": 1,
+  "speedEgghancement": 1,
+
+  "eggnemInitialHp": 2,         
+  "eggnemyInitialCount": 10,
+  "eggnemyWidth": 5,
+  "eggnemyHeight": 5,
+  "eggnemySpeed": 1,
+  "eggnemyAttackDamage": 1,
+
+  "bossSpawnRate": 20, 
+  "bossInitialHp": 20,          
+  "bossWidth": 20,             
+  "bossHeight": 40,
+  "bossSpeed": 2,
+  "bossAttackDamage": 3
+}

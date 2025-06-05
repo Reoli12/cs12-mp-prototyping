@@ -13,6 +13,8 @@ import {
     EggUtils,
     settings,
 } from "./projectTypes"
+import { Cmd } from 'cs12242-mvu/src'
+import { MsgTick } from 'cs12242-mvu/src/canvas'
 
 const shouldPlayerBeReceivingDamage = (model): boolean => 
     inContactWithBoss(model) || inContactWithEggnemy(model)
@@ -265,12 +267,15 @@ const isBoss = (egg: Egg): boolean =>
     )
 
     
-export const update = (msg: Msg, model: Model): Model => 
+export const update = (msg: Msg, model: Model) => 
     Match.value(msg).pipe(
         Match.tag("Canvas.MsgKeyDown", ({ key }) =>
             // pipe(console.log(model.newStatIncreaseCount), () => false)? model :
             model.gameState === "ChoosingEgghancement"? 
-            givePlayerEgghancement(model, key) :
+            {
+                model: givePlayerEgghancement(model, key).model,
+                cmd: givePlayerEgghancement(model, key).cmd
+             } :
             model.gameState != "Ongoing" && key == 'r'? Model.make({
                 ...initModel,
                 leaderboard: model.leaderboard,
@@ -307,25 +312,37 @@ export const update = (msg: Msg, model: Model): Model =>
             // model.gameState !== "Ongoing"? model :
             model.gameState === "GameOver" ? model: // block input
             model.gameState === "ChoosingEgghancement" ? model :
-            model.newStatIncreaseCount > 0 ? pipe(
-                console.log('bossDied'),
-                () => updateBadEggStats(model)
-            ) :
-            model.playerEgg.currentHp <= 0?
-            Model.make({...model, 
-                gameState: "GameOver",
-                leaderboard:    !model.hasAddedToLeaderboard?
-                                pipe(
-                                    Array.append(model.leaderboard, model.currentTime),
-                                    Array.sortBy(
-                                        Order.mapInput(Order.number, ({mins, secs}) => mins*60 + secs)
-                                    ),
-                                    Array.takeRight(3),
-                                    Array.reverse
-                                ):
-                                model.leaderboard,
-                hasAddedToLeaderboard: true,
-            }):
+            model.newStatIncreaseCount > 0 ? {
+                    model: updateBadEggStats(model),
+                    cmd: Cmd.ofSub<Msg>(async () => {
+                const audio = new Audio("resources/bossDeath.mp3")
+                audio.play()
+            })}      
+        :
+            model.playerEgg.currentHp <= 0? 
+            {
+                model: Model.make({
+                    ...model, 
+                    gameState: "GameOver",
+                    leaderboard:    !model.hasAddedToLeaderboard?
+                                    pipe(
+                                        Array.append(model.leaderboard, model.currentTime),
+                                        Array.sortBy(
+                                            Order.mapInput(Order.number, ({mins, secs}) => mins*60 + secs)
+                                        ),
+                                        Array.takeRight(3),
+                                        Array.reverse
+                                    ):
+                                    model.leaderboard,
+                    hasAddedToLeaderboard: true,
+                    hasPlayedDeathSound: true,
+            }),
+                cmd: !model.hasPlayedDeathSound ? Cmd.ofSub<Msg>(async () => {
+                    const audio = new Audio("resources/playerDeath.mp3")
+                    audio.play()
+                }) : Cmd.ofSub<Msg>(async () => {})
+                ,  
+            } :
             model.eggnemiesDefeated >= model.eggnemiesToKillBeforeBoss &&
             model.playerEgg.currentNetEggnemyKillsForBoss >= model.eggnemiesToKillBeforeBoss? // Array.isEmptyArray doesnt work for some reason
             spawnBoss(model) :
@@ -349,33 +366,42 @@ const updateBadEggStats = (model: Model) => Model.make({
     newStatIncreaseCount: model.newStatIncreaseCount - 1,
 })
 
-const givePlayerEgghancement = (model: Model, key: string) =>
-    Model.make({
-        ...model,
-        playerEgg: PlayerEgg.make({
-            ...model.playerEgg,
-            currentHp: key === "1"? model.playerEgg.currentHp + model.deltaHp : 
-                        model.playerEgg.currentHp,
-            totalHp: key === "1"? model.playerEgg.totalHp + model.deltaHp : 
-                        model.playerEgg.totalHp,
-            attack: key === "2"? model.playerEgg.attack + model.deltaAttack :
-                        model.playerEgg.attack,
-            speed: key === "3"? model.playerEgg.speed + model.deltaSpeed :
-                        model.playerEgg.speed,
-            currentNetExp: pipe(
-                Array.make("1", "2", "3"),
-                Array.contains(key),
-                (isValidKey) => isValidKey?
-                model.playerEgg.currentNetExp - model.eggxperienceNeededForEgghancement :
-                model.playerEgg.currentNetExp
-            )
-        }),
-        gameState: pipe(
-            Array.make("1", "2", "3"),
-            Array.contains(key),
-            (isValidKey) => isValidKey? "Ongoing" : model.gameState
-        )
-    })
+function givePlayerEgghancement(model: Model, key: string) {
+
+    const isValidKey: boolean = pipe(
+                    Array.make("1", "2", "3"),
+                    (arr) => Array.contains(arr, key)
+                )
+    console.log(isValidKey)
+        return {
+            model: Model.make({
+                ...model,
+                playerEgg: PlayerEgg.make({
+                    ...model.playerEgg,
+                    currentHp: key === "1"? model.playerEgg.currentHp + model.deltaHp : 
+                                model.playerEgg.currentHp,
+                    totalHp: key === "1"? model.playerEgg.totalHp + model.deltaHp : 
+                                model.playerEgg.totalHp,
+                    attack: key === "2"? model.playerEgg.attack + model.deltaAttack :
+                                model.playerEgg.attack,
+                    speed: key === "3"? model.playerEgg.speed + model.deltaSpeed :
+                                model.playerEgg.speed,
+                    currentNetExp: isValidKey?
+                        model.playerEgg.currentNetExp - model.eggxperienceNeededForEgghancement :
+                        model.playerEgg.currentNetExp
+                    }),
+                gameState: isValidKey? "Ongoing" : model.gameState
+                }),
+            cmd: Cmd.ofSub<Msg>(async () => {
+                if (isValidKey) {
+                    console.log('sound  ')
+                    const audio = new Audio("resources/playerLvlUp.mp3")
+                    audio.play()
+                }
+            })
+
+    }
+}
 
 function generalUpdate(model: Model): Model {
     

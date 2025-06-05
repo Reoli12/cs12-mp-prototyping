@@ -53,6 +53,7 @@ export const Model = S.Struct({
     playerSpriteSrc: S.String,
     eggnemySpriteSrc: S.String,
     bossSpriteSrc: S.String,
+    hasPlayedDeathSound: S.Boolean,
     })
 export type Model = typeof Model.Type
 
@@ -116,6 +117,7 @@ export const initModel = Model.make({
         playerSpriteSrc: playerSpriteSrc,
         eggnemySpriteSrc: eggnemySpriteSrc,
         bossSpriteSrc: bossSpriteSrc,
+        hasPlayedDeathSound: false,
     })
 
 export function generateInitialEggnemies(num: number): Eggnemy[] {
