@@ -38,6 +38,7 @@ class Model:
             #game over state
             if player_egg.stats.current_hp <= 0:
                 self._is_game_over: bool = True
+                self._sfx_player_dead: bool = True
 
             if self._is_game_over:
                 return
