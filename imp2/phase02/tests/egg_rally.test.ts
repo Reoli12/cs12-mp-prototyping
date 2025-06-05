@@ -56,6 +56,6 @@ describe('#getTop', () => {
 
 describe('#generateInitialEggnemies', () => {
 	it('returns an array containing a list of eggnemies', () => {
-		expect(Array.length(generateInitialEggnemies(7))).toStrictEqual(7)
+		expect(generateInitialEggnemies(7)).toHaveLength(7)
 	})
 })

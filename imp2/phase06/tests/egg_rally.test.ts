@@ -21,14 +21,32 @@ const PlayerEgg1 = PlayerEgg.make({
 	}),	
 	height: 20,
 	width: 10,
-	totalHp: 30,
-	currentHp: 20,
 	color: "blue",
-	speed: 20,
-	attackRange: 5,
-	frameCountSinceLastDamaged: Option.none(),
-	damage: 4
+    attackRange: 5,
+    frameCountSinceLastDamaged: Option.none(),
+    attack: 4,
+    totalHp: 30,
+    currentHp: 20,
+    speed: 6,
+    eggxperience: 2,
+    currentNetExp: 3,
+    currentNetEggnemyKillsForBoss: 4
 	})
+
+const Eggnemy1 = Eggnemy.make({
+	centerCoords: Point.make({
+		x: 32,
+		y: -4,
+	}),	
+	height: 10,
+    width: 20,
+    color: "green",
+    speed: 5,
+    currentHp: 10,
+    totalHp: 15,
+    attack: 2,
+	})
+
 
 describe('#getLeft', () => {
 	it('works for a combination of positive and negative integers', () => {
@@ -56,6 +74,6 @@ describe('#getTop', () => {
 
 describe('#generateInitialEggnemies', () => {
 	it('returns an array containing a list of eggnemies', () => {
-		expect(Array.length(generateInitialEggnemies(7))).toStrictEqual(7)
+		expect(generateInitialEggnemies(7)).toHaveLength(7)
 	})
 })
