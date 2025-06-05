@@ -167,8 +167,9 @@ function modelDamageToBadEggs(model: Model): Model {
         ...model,
         eggnemies: updatedEggnemies,
         bosses: updatedBosses,
-        didABossDie: (
-            Array.length(updatedBosses) < Array.length(model.bosses)
+        newStatIncreaseCount: Math.max(
+            Array.length(model.bosses) - Array.length(updatedBosses),
+            0
         )
     })
 }
@@ -267,7 +268,7 @@ const isBoss = (egg: Egg): boolean =>
 export const update = (msg: Msg, model: Model): Model => 
     Match.value(msg).pipe(
         Match.tag("Canvas.MsgKeyDown", ({ key }) =>
-            // pipe(console.log(model), () => false)? model :
+            // pipe(console.log(model.newStatIncreaseCount), () => false)? model :
             model.gameState === "ChoosingEgghancement"? 
             givePlayerEgghancement(model, key) :
             model.gameState != "Ongoing" && key == 'r'? Model.make({
@@ -299,13 +300,14 @@ export const update = (msg: Msg, model: Model): Model =>
         ),
         Match.tag('Canvas.MsgTick', () => 
             pipe(
-            console.log(model.didABossDie),
+            model.newStatIncreaseCount > 0? 
+            console.log(model.newStatIncreaseCount) : model,
             () => false
         ) ? model :
             // model.gameState !== "Ongoing"? model :
             model.gameState === "GameOver" ? model: // block input
             model.gameState === "ChoosingEgghancement" ? model :
-            model.didABossDie ? pipe(
+            model.newStatIncreaseCount > 0 ? pipe(
                 console.log('bossDied'),
                 () => updateBadEggStats(model)
             ) :
@@ -344,7 +346,7 @@ const updateBadEggStats = (model: Model) => Model.make({
     bossAttack: model.bossAttack + 1,
     bossHp: model.bossHp * 1.5,
     bossSpeed: model.bossSpeed + 1,
-    didABossDie: false,
+    newStatIncreaseCount: model.newStatIncreaseCount - 1,
 })
 
 const givePlayerEgghancement = (model: Model, key: string) =>

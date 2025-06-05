@@ -45,7 +45,7 @@ export const Model = S.Struct({
     deltaHp: S. Number,
     deltaAttack: S. Number,
     deltaSpeed: S. Number,
-    didABossDie: S.Boolean,
+    newStatIncreaseCount: S.Number,
     })
 export type Model = typeof Model.Type
 
@@ -56,8 +56,8 @@ export const playerEgg = PlayerEgg.make({
         }),
         height: 20,
         width: 10,
-        totalHp: 20,
-        currentHp: 20,
+        totalHp: settings.playerEggHp,
+        currentHp: settings.playerEggHp,
         color: "white",
         speed: settings.playerEggSpeed,
         attackRange: settings.playerEggRange,
@@ -105,7 +105,7 @@ export const initModel = Model.make({
         eggnemyAttack: settings.eggnemyInitialAttack,
         eggnemySpeed: settings.eggnemyInitialSpeed,
         eggnemyHp: settings.eggnemyInitialHp,
-        didABossDie: false,
+        newStatIncreaseCount: 0,
     })
 
 export function generateInitialEggnemies(num: number): Eggnemy[] {

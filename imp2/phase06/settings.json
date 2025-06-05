@@ -6,7 +6,7 @@
   "worldHeight": 400,
   "worldBoundaryWidth": 3,
 
-  "playerEggHp": 20,
+  "playerEggHp": 210000000,
   "playerEggWidth": 10,
   "playerEggHeight": 20,
   "playerEggSpeed": 5,
