@@ -14,17 +14,17 @@ import {
     settings,
 } from "./projectTypes"
 
-const shouldPlayerBeReceivingDamage = (model): boolean => 
+export const shouldPlayerBeReceivingDamage = (model): boolean => 
     inContactWithBoss(model) || inContactWithEggnemy(model)
 
-const inContactWithEggnemy = (model: Model): boolean =>
+export const inContactWithEggnemy = (model: Model): boolean =>
     Array.some(model.eggnemies, (eggnemy) => isInContact(model.playerEgg, eggnemy))
 
-const inContactWithBoss = (model: Model): boolean => 
+export const inContactWithBoss = (model: Model): boolean => 
     Array.some(model.bosses, (boss) => isInContact(model.playerEgg, boss))
     
 
-const spawnBoss = (model: Model) => 
+export const spawnBoss = (model: Model) => 
     Model.make({
         ...model,
         bosses: Array.append(model.bosses, Boss.make({
@@ -50,7 +50,7 @@ const spawnBoss = (model: Model) =>
         })
     })
 
-const randomAddEggnemies = (eggnemies: readonly Eggnemy[], 
+export const randomAddEggnemies = (eggnemies: readonly Eggnemy[], 
                             chance: number, model: Model): readonly Eggnemy[] => {
     if (Math.random() * 100 > chance) {
         return eggnemies
@@ -80,7 +80,7 @@ const randomAddEggnemies = (eggnemies: readonly Eggnemy[],
 }
     
 
-const updateEggnemyKillCount = (model: Model, additionalCount) =>
+export const updateEggnemyKillCount = (model: Model, additionalCount) =>
     Model.make({
         ...model,
         eggnemiesDefeated: model.eggnemiesDefeated + additionalCount,
@@ -119,7 +119,7 @@ const getModelAfterEverythingMoved = (model: Model, key: string, distance: numbe
                 )
             })
 
-const moveEggRelativeToPlayer = (egg: BadEgg, key: string, distance: number) => 
+export const moveEggRelativeToPlayer = (egg: BadEgg, key: string, distance: number) => 
     Match.value(egg).pipe(
         Match.tag('Eggnemy', (eggnemy) => 
             Eggnemy.make({
@@ -144,7 +144,7 @@ const moveEggRelativeToPlayer = (egg: BadEgg, key: string, distance: number) =>
         Match.exhaustive
     )
 
-const moveRelativeToPlayer = (point: Point, key: string, playerSpeed): Point =>
+export const moveRelativeToPlayer = (point: Point, key: string, playerSpeed): Point =>
     key == 'w' || key == "ArrowUp"?     Point.make({...point, y: point.y + playerSpeed}) :
     key == 'a' || key == "ArrowLeft"?   Point.make({...point, x: point.x + playerSpeed}) :
     key == 's' || key == "ArrowDown"?   Point.make({...point, y: point.y - playerSpeed}) :
@@ -174,7 +174,7 @@ function modelDamageToBadEggs(model: Model): Model {
     })
 }
 
-const takeDamageIfInRange = (source: PlayerEgg, victim: BadEgg ) => 
+export const takeDamageIfInRange = (source: PlayerEgg, victim: BadEgg ) => 
     Match.value(victim).pipe(
         Match.tag('Eggnemy', (eggnemy) =>
             Eggnemy.make({
@@ -199,7 +199,7 @@ const takeDamageIfInRange = (source: PlayerEgg, victim: BadEgg ) =>
         ), Match.exhaustive)
 
 
-const withinPlayerRange = (player: PlayerEgg, eggnemy: BadEgg): boolean =>
+export const withinPlayerRange = (player: PlayerEgg, eggnemy: BadEgg): boolean =>
     // no specific definition as to what range was given
     (player.attackRange ** 2) >= 
     (player.centerCoords.x - eggnemy.centerCoords.x) ** 2 + 
@@ -252,7 +252,7 @@ const isPlayerInBounds = (model: Model): boolean =>
     absDifference(model.worldCenter.y, model.playerEgg.centerCoords.y) + 
     model.playerEgg.height / 2 <= model.worldHeight / 2
 
-const isEggnemy = (egg: Egg): boolean =>
+/*const isEggnemy = (egg: Egg): boolean =>
     Match.value(egg).pipe(
         Match.tag('Eggnemy', ()=> true),
         Match.orElse(() => false)
@@ -262,7 +262,7 @@ const isBoss = (egg: Egg): boolean =>
     Match.value(egg).pipe(
         Match.tag("Boss", () => true),
         Match.orElse(() => false)
-    )
+    )*/
 
     
 export const update = (msg: Msg, model: Model): Model => 
@@ -349,7 +349,7 @@ const updateBadEggStats = (model: Model) => Model.make({
     newStatIncreaseCount: model.newStatIncreaseCount - 1,
 })
 
-const givePlayerEgghancement = (model: Model, key: string) =>
+export const givePlayerEgghancement = (model: Model, key: string) =>
     Model.make({
         ...model,
         playerEgg: PlayerEgg.make({

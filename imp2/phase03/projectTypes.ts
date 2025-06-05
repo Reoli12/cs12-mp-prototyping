@@ -109,16 +109,16 @@ const Settings = S.Struct({
 })
 export type Settings = typeof Settings.Type
 
-const getLeft = (egg: Egg) =>
+export const getLeft = (egg: Egg) =>
     egg.centerCoords.x - egg.width / 2
 
-const getRight = (egg: Egg) => 
+export const getRight = (egg: Egg) => 
     egg.centerCoords.x + egg.width / 2
 
-const getTop = (egg: Egg) =>
+export const getTop = (egg: Egg) =>
     egg.centerCoords.y - egg.height / 2
 
-const getBottom = (egg: Egg) => 
+export const getBottom = (egg: Egg) => 
     egg.centerCoords.y + egg.height / 2
 
 export const EggUtils = {
